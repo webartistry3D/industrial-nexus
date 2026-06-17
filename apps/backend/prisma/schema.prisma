@@ -1,0 +1,429 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== CORE ENTITIES ====================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  phoneNumber  String?  @map("phone_number")
+  role         UserRole @default(CLIENT)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  // Relations
+  auditLogs    AuditLog[]
+  refreshTokens RefreshToken[]
+  driver       Driver?
+  orders       Order[]    @relation("ClientOrders")
+  kittingLogs  KittingLog[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String?   @map("user_id")
+  action      AuditAction
+  entityType  String    @map("entity_type")
+  entityId    String?   @map("entity_id")
+  oldValue    Json?     @map("old_value")
+  newValue    Json?     @map("new_value")
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ==================== DRIVER & VEHICLE ====================
+
+model Driver {
+  id            String      @id @default(uuid())
+  userId        String      @unique @map("user_id")
+  licenseNumber String      @map("license_number")
+  kycStatus     KycStatus   @default(PENDING) @map("kyc_status")
+  status        DriverStatus @default(ACTIVE)
+  availability  DriverAvailability @default(AVAILABLE) @map("availability")
+  vehicleId     String?     @map("vehicle_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
+  trips   Trip[]
+
+  @@map("drivers")
+}
+
+model Vehicle {
+  id           String         @id @default(uuid())
+  plateNumber  String         @unique @map("plate_number")
+  category     VehicleCategory
+  capacityKg   Float          @map("capacity_kg")
+  status       VehicleStatus  @default(ACTIVE)
+  isPartitioned Boolean       @default(false) @map("is_partitioned")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  drivers Driver[]
+  trips   Trip[]
+
+  @@map("vehicles")
+}
+
+// ==================== ORDER & KITTING ====================
+
+model Order {
+  id                 String       @id @default(uuid())
+  orderNumber        String       @unique @map("order_number")
+  clientId           String       @map("client_id")
+  status             OrderStatus  @default(DRAFT)
+  totalWeight        Float        @map("total_weight")
+  priority           Priority     @default(NORMAL)
+  pickupLocation     Json         @map("pickup_location")
+  deliveryLocation   Json         @map("delivery_location")
+  cargoDescription   String?      @map("cargo_description")
+  deliveryInstructions String?    @map("delivery_instructions")
+  kittingStatus      KittingStatus @default(PENDING) @map("kitting_status")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+  submittedAt        DateTime?    @map("submitted_at")
+  approvedAt         DateTime?    @map("approved_at")
+  cancelledAt        DateTime?    @map("cancelled_at")
+
+  // Relations
+  client         User         @relation("ClientOrders", fields: [clientId], references: [id])
+  handlingTags   HandlingTag[]
+  kittingLogs    KittingLog[]
+  trip           Trip?
+  weightRecord   WeightRecord?
+
+  @@map("orders")
+}
+
+model HandlingTag {
+  id      String      @id @default(uuid())
+  orderId String      @map("order_id")
+  tag     HandlingTagType
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, tag])
+  @@map("handling_tags")
+}
+
+model KittingLog {
+  id          String       @id @default(uuid())
+  orderId     String       @map("order_id")
+  stage       KittingStage
+  operatorId  String       @map("operator_id")
+  barcodeVerified Boolean  @default(false) @map("barcode_verified")
+  notes       String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  operator  User  @relation(fields: [operatorId], references: [id])
+
+  @@map("kitting_logs")
+}
+
+// ==================== TRIP & TRACKING ====================
+
+model Trip {
+  id          String     @id @default(uuid())
+  orderId     String     @unique @map("order_id")
+  driverId    String     @map("driver_id")
+  vehicleId   String     @map("vehicle_id")
+  status      TripStatus @default(ASSIGNED)
+  startedAt   DateTime?  @map("started_at")
+  completedAt DateTime?  @map("completed_at")
+  eta         DateTime?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  order          Order           @relation(fields: [orderId], references: [id])
+  driver         Driver          @relation(fields: [driverId], references: [id])
+  vehicle        Vehicle         @relation(fields: [vehicleId], references: [id])
+  trackingPoints TrackingPoint[]
+  weightRecords  WeightRecord[]
+  pod            POD?
+  geofenceEvents GeofenceEvent[]
+  assignments    DriverAssignment[]
+
+  @@map("trips")
+}
+
+model DriverAssignment {
+  id          String    @id @default(uuid())
+  tripId      String    @map("trip_id")
+  driverId    String    @map("driver_id")
+  vehicleId   String    @map("vehicle_id")
+  assignedAt  DateTime  @default(now()) @map("assigned_at")
+  assignedBy  String    @map("assigned_by")
+  unassignedAt DateTime? @map("unassigned_at")
+  reason      String?
+
+  trip    Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("driver_assignments")
+}
+
+model TrackingPoint {
+  id          String   @id @default(uuid())
+  tripId      String   @map("trip_id")
+  lat         Float
+  lng         Float
+  accuracy    Float?
+  speed       Float?
+  heading     Float?
+  timestamp   DateTime
+  receivedAt  DateTime @default(now()) @map("received_at")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([timestamp])
+  @@map("tracking_points")
+}
+
+// ==================== WEIGHT WATCH ====================
+
+model WeightRecord {
+  id           String       @id @default(uuid())
+  tripId       String?      @map("trip_id")
+  orderId      String?      @unique @map("order_id")
+  cargoWeight  Float        @map("cargo_weight")
+  vehicleCapacity Float?    @map("vehicle_capacity")
+  utilization  Float
+  status       WeightStatus @default(SAFE)
+  checkedAt    DateTime     @default(now()) @map("checked_at")
+
+  trip  Trip?  @relation(fields: [tripId], references: [id])
+  order Order? @relation(fields: [orderId], references: [id])
+
+  @@map("weight_records")
+}
+
+// ==================== GEOFENCING ====================
+
+model Geofence {
+  id          String        @id @default(uuid())
+  name        String
+  type        GeofenceType
+  centerLat   Float?        @map("center_lat")
+  centerLng   Float?        @map("center_lng")
+  radiusA     Float?        @map("radius_a")
+  radiusB     Float?        @map("radius_b")
+  radiusC     Float?        @map("radius_c")
+  radiusD     Float?        @map("radius_d")
+  polygon     Json?
+  isActive    Boolean       @default(true) @map("is_active")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  events GeofenceEvent[]
+
+  @@map("geofences")
+}
+
+model GeofenceEvent {
+  id          String          @id @default(uuid())
+  tripId      String          @map("trip_id")
+  geofenceId  String          @map("geofence_id")
+  eventType   GeofenceEventType @map("event_type")
+  lat         Float
+  lng         Float
+  triggeredAt DateTime        @map("triggered_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  geofence Geofence @relation(fields: [geofenceId], references: [id])
+
+  @@unique([tripId, geofenceId, eventType, triggeredAt])
+  @@index([tripId])
+  @@index([geofenceId])
+  @@map("geofence_events")
+}
+
+// ==================== POD ====================
+
+model POD {
+  id           String   @id @default(uuid())
+  tripId       String   @unique @map("trip_id")
+  imageUrl     String   @map("image_url")
+  signatureUrl String?  @map("signature_url")
+  receiverName String? @map("receiver_name")
+  receiverPhone String? @map("receiver_phone")
+  notes        String?
+  capturedAt   DateTime @map("captured_at")
+  lat          Float?
+  lng          Float?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("pods")
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  SUPER_ADMIN
+  OPERATIONS
+  CLIENT
+  DRIVER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+  ROLE_CHANGE
+  STATUS_CHANGE
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DriverStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum DriverAvailability {
+  AVAILABLE
+  ON_TRIP
+  OFF_DUTY
+}
+
+enum VehicleCategory {
+  LIGHT
+  MEDIUM
+  HEAVY
+  SPECIALIZED
+}
+
+enum VehicleStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum OrderStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  KITTING
+  DISPATCH_READY
+  ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum HandlingTagType {
+  FRAGILE
+  HEAVY
+  CHEMICAL
+  HAZARDOUS
+  VERTICAL_STORAGE_REQUIRED
+  TEMPERATURE_SENSITIVE
+}
+
+enum KittingStatus {
+  PENDING
+  AGGREGATION
+  TECHNICAL_PACKAGING
+  QUALITY_CHECK
+  DISPATCH_READY
+}
+
+enum KittingStage {
+  AGGREGATION
+  TECHNICAL_PACKAGING
+  QUALITY_CHECK
+  DISPATCH_READY
+}
+
+enum TripStatus {
+  ASSIGNED
+  SOP_CHECKLIST_PENDING
+  SOP_COMPLETED
+  IN_TRANSIT
+  ARRIVED
+  DELIVERED
+  CANCELLED
+}
+
+enum WeightStatus {
+  SAFE
+  WARNING
+  NEAR_CAPACITY
+  OVERLOADED
+}
+
+enum GeofenceType {
+  RADIUS
+  POLYGON
+}
+
+enum GeofenceEventType {
+  RADIUS_A_ENTERED
+  RADIUS_B_ENTERED
+  RADIUS_C_ENTERED
+  RADIUS_D_ENTERED
+  POLYGON_ENTERED
+  POLYGON_EXITED
+  ARRIVAL_CONFIRMED
+}

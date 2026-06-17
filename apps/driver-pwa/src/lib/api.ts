@@ -1,0 +1,129 @@
+import axios, { AxiosInstance, AxiosError } from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+class ApiClient {
+  private client: AxiosInstance;
+
+  constructor() {
+    this.client = axios.create({
+      baseURL: API_URL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Request interceptor to add JWT token
+    this.client.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor to handle token refresh
+    this.client.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        const originalRequest = error.config;
+        
+        if (error.response?.status === 401 && originalRequest) {
+          try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+              const response = await axios.post(`${API_URL}/auth/refresh`, {
+                refreshToken,
+              });
+              
+              const { accessToken } = response.data;
+              localStorage.setItem('accessToken', accessToken);
+              
+              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+              return this.client(originalRequest);
+            }
+          } catch (refreshError) {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/login';
+          }
+        }
+        
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  // Auth
+  async login(email: string, password: string) {
+    const response = await this.client.post('/auth/login', { email, password });
+    return response.data;
+  }
+
+  async logout() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
+
+  async getProfile() {
+    const response = await this.client.get('/users/me');
+    return response.data;
+  }
+
+  // Trips - Driver specific
+  async getMyTrips() {
+    const response = await this.client.get('/trips/my-trips');
+    return response.data;
+  }
+
+  async getTrip(id: string) {
+    const response = await this.client.get(`/trips/${id}`);
+    return response.data;
+  }
+
+  async startTrip(id: string) {
+    const response = await this.client.post(`/trips/${id}/start`);
+    return response.data;
+  }
+
+  async completeTrip(id: string) {
+    const response = await this.client.post(`/trips/${id}/complete`);
+    return response.data;
+  }
+
+  // GPS Tracking
+  async updateLocation(tripId: string, lat: number, lng: number, accuracy: number) {
+    const response = await this.client.post(`/trips/${tripId}/location`, {
+      lat,
+      lng,
+      accuracy,
+    });
+    return response.data;
+  }
+
+  // POD
+  async submitPOD(tripId: string, podData: {
+    photoUrl?: string;
+    signatureUrl?: string;
+    notes?: string;
+  }) {
+    const response = await this.client.post(`/trips/${tripId}/pod`, podData);
+    return response.data;
+  }
+
+  // SOP Checklist
+  async submitChecklist(tripId: string, checklist: {
+    vehicleInspected: boolean;
+    cargoSecured: boolean;
+    handlingTagsVerified: boolean;
+    safetyComplianceConfirmed: boolean;
+  }) {
+    const response = await this.client.post(`/trips/${tripId}/checklist`, checklist);
+    return response.data;
+  }
+}
+
+export const api = new ApiClient();

@@ -1,0 +1,199 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { WeightStatus, HandlingTagType } from '@prisma/client';
+
+export interface WeightValidationResult {
+  canAssign: boolean;
+  reason?: string;
+  utilization: number;
+  status: WeightStatus;
+  cargoCompatibility: 'COMPATIBLE' | 'INCOMPATIBLE';
+  requiresPartitionedVehicle: boolean;
+}
+
+@Injectable()
+export class WeightWatchService {
+  constructor(private prisma: PrismaService) {}
+
+  async validateTripWeight(
+    cargoWeight: number,
+    vehicleId: string,
+    handlingTags: HandlingTagType[],
+  ): Promise<WeightValidationResult> {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+
+    if (!vehicle) {
+      return {
+        canAssign: false,
+        reason: 'Vehicle not found',
+        utilization: 0,
+        status: WeightStatus.OVERLOADED,
+        cargoCompatibility: 'INCOMPATIBLE',
+        requiresPartitionedVehicle: false,
+      };
+    }
+
+    const utilization = cargoWeight / vehicle.capacityKg;
+    let status: WeightStatus;
+
+    if (utilization <= 0.8) {
+      status = WeightStatus.SAFE;
+    } else if (utilization <= 0.95) {
+      status = WeightStatus.WARNING;
+    } else if (utilization <= 1.0) {
+      status = WeightStatus.NEAR_CAPACITY;
+    } else {
+      status = WeightStatus.OVERLOADED;
+    }
+
+    // Check cargo compatibility
+    const compatibilityCheck = this.checkCargoCompatibility(handlingTags);
+
+    // Check if partitioned vehicle required
+    const requiresPartitionedVehicle = this.requiresPartitionedVehicle(handlingTags);
+
+    if (requiresPartitionedVehicle && !vehicle.isPartitioned) {
+      return {
+        canAssign: false,
+        reason: 'This cargo requires a partitioned vehicle for mixed goods',
+        utilization,
+        status,
+        cargoCompatibility: compatibilityCheck.compatibility,
+        requiresPartitionedVehicle: true,
+      };
+    }
+
+    if (!compatibilityCheck.isCompatible) {
+      return {
+        canAssign: false,
+        reason: compatibilityCheck.reason,
+        utilization,
+        status,
+        cargoCompatibility: 'INCOMPATIBLE',
+        requiresPartitionedVehicle,
+      };
+    }
+
+    if (status === WeightStatus.OVERLOADED) {
+      return {
+        canAssign: false,
+        reason: `Cargo weight (${cargoWeight}kg) exceeds vehicle capacity (${vehicle.capacityKg}kg)`,
+        utilization,
+        status,
+        cargoCompatibility: 'COMPATIBLE',
+        requiresPartitionedVehicle,
+      };
+    }
+
+    return {
+      canAssign: true,
+      utilization,
+      status,
+      cargoCompatibility: 'COMPATIBLE',
+      requiresPartitionedVehicle,
+    };
+  }
+
+  async createWeightRecord(
+    tripId: string,
+    orderId: string,
+    cargoWeight: number,
+    vehicleCapacity: number,
+  ) {
+    const utilization = cargoWeight / vehicleCapacity;
+    
+    let status: WeightStatus;
+    if (utilization <= 0.8) status = WeightStatus.SAFE;
+    else if (utilization <= 0.95) status = WeightStatus.WARNING;
+    else if (utilization <= 1.0) status = WeightStatus.NEAR_CAPACITY;
+    else status = WeightStatus.OVERLOADED;
+
+    return this.prisma.weightRecord.create({
+      data: {
+        tripId,
+        orderId,
+        cargoWeight,
+        vehicleCapacity,
+        utilization,
+        status,
+      },
+    });
+  }
+
+  async getWeightAlerts() {
+    return this.prisma.weightRecord.findMany({
+      where: {
+        status: { in: [WeightStatus.WARNING, WeightStatus.NEAR_CAPACITY, WeightStatus.OVERLOADED] },
+      },
+      include: {
+        trip: {
+          include: {
+            order: {
+              select: {
+                orderNumber: true,
+              },
+            },
+            driver: {
+              include: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+            vehicle: true,
+          },
+        },
+      },
+      orderBy: { checkedAt: 'desc' },
+      take: 50,
+    });
+  }
+
+  private checkCargoCompatibility(handlingTags: HandlingTagType[]): { 
+    isCompatible: boolean; 
+    compatibility: 'COMPATIBLE' | 'INCOMPATIBLE';
+    reason?: string 
+  } {
+    const hasFragile = handlingTags.includes(HandlingTagType.FRAGILE);
+    const hasHeavy = handlingTags.includes(HandlingTagType.HEAVY);
+    const hasChemical = handlingTags.includes(HandlingTagType.CHEMICAL);
+    const hasHazardous = handlingTags.includes(HandlingTagType.HAZARDOUS);
+
+    // Heavy + Fragile = Requires partitioned vehicle
+    if (hasHeavy && hasFragile) {
+      return {
+        isCompatible: true,
+        compatibility: 'COMPATIBLE',
+        reason: 'Heavy and fragile cargo requires partitioned vehicle',
+      };
+    }
+
+    // Chemical + Hazardous combinations
+    if (hasChemical && hasHazardous) {
+      return {
+        isCompatible: false,
+        compatibility: 'INCOMPATIBLE',
+        reason: 'Chemical and hazardous materials cannot be transported together',
+      };
+    }
+
+    return {
+      isCompatible: true,
+      compatibility: 'COMPATIBLE',
+    };
+  }
+
+  private requiresPartitionedVehicle(handlingTags: HandlingTagType[]): boolean {
+    const hasFragile = handlingTags.includes(HandlingTagType.FRAGILE);
+    const hasHeavy = handlingTags.includes(HandlingTagType.HEAVY);
+    const hasChemical = handlingTags.includes(HandlingTagType.CHEMICAL);
+
+    // Mixed cargo scenarios requiring partitioning
+    return (hasFragile && hasHeavy) || (hasFragile && hasChemical);
+  }
+}
