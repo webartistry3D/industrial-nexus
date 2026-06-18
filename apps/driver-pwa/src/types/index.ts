@@ -3,8 +3,9 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'DRIVER';
+  role: 'DRIVER' | 'SUPER_ADMIN' | 'OPERATIONS' | 'CLIENT';
   status: 'ACTIVE' | 'INACTIVE';
+  phoneNumber?: string;
 }
 
 export interface Driver {
@@ -52,7 +53,7 @@ export interface Trip {
   driver: Driver;
   vehicleId: string;
   vehicle: Vehicle;
-  status: 'ASSIGNED' | 'IN_TRANSIT' | 'ARRIVED' | 'DELIVERED';
+  status: 'ASSIGNED' | 'SOP_CHECKLIST_PENDING' | 'SOP_COMPLETED' | 'IN_TRANSIT' | 'ARRIVED' | 'DELIVERED' | 'CANCELLED';
   startedAt?: string;
   completedAt?: string;
   eta?: string;

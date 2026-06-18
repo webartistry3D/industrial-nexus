@@ -89,6 +89,11 @@ class ApiClient {
     return response.data;
   }
 
+  async startOrderTrip(orderId: string) {
+    const response = await this.client.post(`/orders/${orderId}/start-trip`);
+    return response.data;
+  }
+
   async completeTrip(id: string) {
     const response = await this.client.post(`/trips/${id}/complete`);
     return response.data;
@@ -122,6 +127,47 @@ class ApiClient {
     safetyComplianceConfirmed: boolean;
   }) {
     const response = await this.client.post(`/trips/${tripId}/checklist`, checklist);
+    return response.data;
+  }
+
+  // Tracking
+  async getTripRoute(tripId: string) {
+    const response = await this.client.get(`/tracking/trips/${tripId}/route`);
+    return response.data;
+  }
+
+  async getTripTrackingHistory(tripId: string, limit?: number) {
+    const response = await this.client.get(`/tracking/trips/${tripId}/history`, {
+      params: { limit },
+    });
+    return response.data;
+  }
+
+  // KYC Documents
+  async getMyKycDocuments() {
+    const response = await this.client.get('/drivers/me/kyc/documents');
+    return response.data;
+  }
+
+  async uploadKycDocument(file: File, documentType: string) {
+    // Get current driver profile to get driver ID
+    const profile = await this.getProfile();
+    const driverId = profile.id;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('documentType', documentType);
+
+    const response = await this.client.post(`/drivers/${driverId}/kyc/documents/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+  async deleteKycDocument(documentId: string) {
+    const response = await this.client.delete(`/drivers/kyc/documents/${documentId}`);
     return response.data;
   }
 }

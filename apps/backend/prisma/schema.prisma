@@ -25,6 +25,8 @@ model User {
   // Relations
   auditLogs    AuditLog[]
   refreshTokens RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  sessions     Session[]
   driver       Driver?
   orders       Order[]    @relation("ClientOrders")
   kittingLogs  KittingLog[]
@@ -43,6 +45,36 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  usedAt    DateTime? @map("used_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  isActive  Boolean  @default(true) @map("is_active")
+  lastActivityAt DateTime @default(now()) @map("last_activity_at")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model AuditLog {
@@ -67,6 +99,32 @@ model AuditLog {
 
 // ==================== DRIVER & VEHICLE ====================
 
+model KycDocument {
+  id              String           @id @default(uuid())
+  driverId        String           @map("driver_id")
+  documentType    KycDocumentType  @map("document_type")
+  fileUrl         String           @map("file_url")
+  fileName        String           @map("file_name")
+  fileSize        Int              @map("file_size")
+  mimeType        String           @map("mime_type")
+  status          KycDocumentStatus @default(PENDING)
+  submittedAt     DateTime         @default(now()) @map("submitted_at")
+  reviewedAt      DateTime?        @map("reviewed_at")
+  reviewedBy      String?          @map("reviewed_by")
+  rejectionReason String?          @map("rejection_reason")
+  expiresAt       DateTime?        @map("expires_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  driver          Driver           @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@map("kyc_documents")
+  @@index([driverId])
+  @@index([status])
+  @@index([documentType])
+}
+
 model Driver {
   id            String      @id @default(uuid())
   userId        String      @unique @map("user_id")
@@ -79,9 +137,10 @@ model Driver {
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
   // Relations
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
-  trips   Trip[]
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle       Vehicle?     @relation(fields: [vehicleId], references: [id])
+  trips         Trip[]
+  kycDocuments  KycDocument[]
 
   @@map("drivers")
 }
@@ -318,6 +377,8 @@ enum AuditAction {
   CREATE
   UPDATE
   DELETE
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET
   ROLE_CHANGE
   STATUS_CHANGE
 }
@@ -326,6 +387,23 @@ enum KycStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+enum KycDocumentType {
+  GOVERNMENT_ID
+  DRIVERS_LICENSE
+  PROOF_OF_ADDRESS
+  VEHICLE_REGISTRATION
+  INSURANCE_CERTIFICATE
+  PROFESSIONAL_CERTIFICATION
+}
+
+enum KycDocumentStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  EXPIRED
 }
 
 enum DriverStatus {
@@ -363,6 +441,7 @@ enum OrderStatus {
   IN_TRANSIT
   DELIVERED
   CANCELLED
+  REJECTED
 }
 
 enum Priority {

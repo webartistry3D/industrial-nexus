@@ -1,0 +1,210 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
+import { GeofencingService } from '../geofencing/geofencing.service';
+import { TripStatus } from '@prisma/client';
+
+@Injectable()
+export class TrackingService {
+  private readonly CACHE_TTL_SECONDS = 60; // 1 minute cache
+
+  constructor(
+    private prisma: PrismaService,
+    private redis: RedisService,
+    private geofencingService: GeofencingService,
+  ) {}
+
+  async getLiveTripLocation(tripId: string) {
+    // Check cache first
+    const cacheKey = `tracking:live:${tripId}`;
+    const cached = await this.redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    // Fetch from database
+    const trackingPoint = await this.prisma.trackingPoint.findFirst({
+      where: { tripId },
+      orderBy: { timestamp: 'desc' },
+    });
+
+    if (!trackingPoint) {
+      return null;
+    }
+
+    const result = {
+      tripId,
+      lat: trackingPoint.lat,
+      lng: trackingPoint.lng,
+      accuracy: trackingPoint.accuracy,
+      timestamp: trackingPoint.timestamp,
+    };
+
+    // Cache the result
+    await this.redis.setex(cacheKey, this.CACHE_TTL_SECONDS, JSON.stringify(result));
+
+    return result;
+  }
+
+  async getTripTrackingHistory(tripId: string, limit: number = 100) {
+    const trackingPoints = await this.prisma.trackingPoint.findMany({
+      where: { tripId },
+      orderBy: { timestamp: 'asc' },
+      take: Number(limit),
+    });
+
+    return trackingPoints.map(point => ({
+      id: point.id,
+      tripId: point.tripId,
+      lat: point.lat,
+      lng: point.lng,
+      accuracy: point.accuracy,
+      timestamp: point.timestamp,
+    }));
+  }
+
+  async getAllActiveTripsLocations() {
+    const activeTrips = await this.prisma.trip.findMany({
+      where: {
+        status: { in: [TripStatus.ASSIGNED, TripStatus.IN_TRANSIT] },
+      },
+      include: {
+        driver: { include: { user: true } },
+        vehicle: true,
+        order: true,
+      },
+    });
+
+    const locations = await Promise.all(
+      activeTrips.map(async (trip) => {
+        const location = await this.getLiveTripLocation(trip.id);
+        return {
+          tripId: trip.id,
+          trip,
+          location,
+        };
+      }),
+    );
+
+    return locations.filter(l => l.location !== null);
+  }
+
+  async calculateRoute(tripId: string) {
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: tripId },
+      include: { order: true },
+    });
+
+    if (!trip || !trip.order) {
+      throw new Error('Trip not found');
+    }
+
+    const pickup = trip.order.pickupLocation as { lat: number; lng: number; address: string };
+    const delivery = trip.order.deliveryLocation as { lat: number; lng: number; address: string };
+
+    // Get tracking history for actual path
+    const trackingHistory = await this.getTripTrackingHistory(tripId, 1000);
+
+    // Calculate straight-line distance
+    const distance = this.calculateDistance(pickup, delivery);
+
+    // For now, return straight-line route. In production, integrate with Google Directions API
+    const route = {
+      polyline: [
+        { lat: pickup.lat, lng: pickup.lng },
+        { lat: delivery.lat, lng: delivery.lng },
+      ],
+      distance: distance,
+      estimatedDuration: Math.round(distance / 30), // Assume 30m/s average speed
+      pickup,
+      delivery,
+      trackingHistory,
+    };
+
+    return route;
+  }
+
+  async getGeofenceZones() {
+    const geofences = await this.prisma.geofence.findMany({
+      where: { isActive: true },
+    });
+
+    return geofences.map(geofence => ({
+      id: geofence.id,
+      name: geofence.name,
+      type: geofence.type,
+      center: geofence.centerLat !== null && geofence.centerLng !== null 
+        ? { lat: geofence.centerLat, lng: geofence.centerLng } 
+        : undefined,
+      radiusA: geofence.radiusA,
+      radiusB: geofence.radiusB,
+      radiusC: geofence.radiusC,
+      radiusD: geofence.radiusD,
+      polygon: geofence.polygon as { lat: number; lng: number }[] | undefined,
+      color: this.getGeofenceColor(geofence.type),
+    }));
+  }
+
+  async processLocationUpdate(tripId: string, lat: number, lng: number, accuracy?: number) {
+    // Store tracking point
+    const trackingPoint = await this.prisma.trackingPoint.create({
+      data: {
+        tripId,
+        lat,
+        lng,
+        accuracy,
+        timestamp: new Date(),
+      },
+    });
+
+    // Invalidate cache
+    await this.redis.del(`tracking:live:${tripId}`);
+
+    // Process geofencing
+    const geofenceResult = await this.geofencingService.processGPSUpdate(tripId, {
+      lat,
+      lng,
+      accuracy,
+    });
+
+    // Publish to Redis for WebSocket
+    await this.redis.publish('tracking:location', JSON.stringify({
+      tripId,
+      lat,
+      lng,
+      accuracy,
+      timestamp: trackingPoint.timestamp,
+      geofenceEvents: geofenceResult.geofenceEvents || [],
+    }));
+
+    return trackingPoint;
+  }
+
+  private calculateDistance(
+    p1: { lat: number; lng: number },
+    p2: { lat: number; lng: number },
+  ): number {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (p1.lat * Math.PI) / 180;
+    const φ2 = (p2.lat * Math.PI) / 180;
+    const Δφ = ((p2.lat - p1.lat) * Math.PI) / 180;
+    const Δλ = ((p2.lng - p1.lng) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  }
+
+  private getGeofenceColor(type: string): string {
+    const colors: Record<string, string> = {
+      RADIUS_A: '#FFA500', // Orange
+      RADIUS_B: '#FF8C00', // Dark orange
+      RADIUS_C: '#00FF00', // Green
+      POLYGON: '#0000FF', // Blue
+    };
+    return colors[type] || '#808080';
+  }
+}

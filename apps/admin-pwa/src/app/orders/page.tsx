@@ -1,22 +1,43 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { Order, PaginatedResponse } from '@/types';
-import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X } from 'lucide-react';
+import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X, Scale } from 'lucide-react';
+
+const CARGO_TYPES = [
+  { value: '', label: 'All Cargo Types' },
+  { value: 'HEAVY', label: 'Heavy' },
+  { value: 'CHEMICAL', label: 'Chemical' },
+  { value: 'HAZARDOUS', label: 'Hazardous' },
+  { value: 'VERTICAL_STORAGE_REQUIRED', label: 'Vertical Storage' },
+  { value: 'TECHNICAL_PACKAGING', label: 'Technical Packaging' },
+  { value: 'FRAGILE', label: 'Fragile' },
+  { value: 'PERISHABLE', label: 'Perishable' },
+];
 
 export default function OrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const cargoTypeParam = searchParams.get('cargoType');
+  const statusParam = searchParams.get('status');
+  
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(statusParam || '');
+  const [cargoTypeFilter, setCargoTypeFilter] = useState(cargoTypeParam || '');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -52,7 +73,12 @@ export default function OrdersPage() {
   const clearFilters = () => {
     setSearch('');
     setStatusFilter('');
+    setCargoTypeFilter('');
     setPage(1);
+    // Clear URL params if present
+    if (cargoTypeParam || statusParam) {
+      router.push('/orders');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -80,16 +106,45 @@ export default function OrdersPage() {
     return colors[priority] || 'text-gray-600';
   };
 
-  const filteredOrders = orders.filter(order =>
-    order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-    order.cargoDescription?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Apply client-side filtering
+  const filteredOrders = useMemo(() => {
+    let result = orders;
+    
+    // Apply cargo type filter
+    if (cargoTypeFilter || cargoTypeParam) {
+      const filterValue = (cargoTypeFilter || cargoTypeParam || '').toUpperCase();
+      result = result.filter(order => {
+        // Check in handlingTags (array of strings or objects)
+        if (order.handlingTags && order.handlingTags.length > 0) {
+          return order.handlingTags.some(tag => {
+            const tagStr = typeof tag === 'string' ? tag : JSON.stringify(tag);
+            return tagStr.toUpperCase().includes(filterValue);
+          });
+        }
+        // Check in cargoDescription as fallback
+        if (order.cargoDescription) {
+          return order.cargoDescription.toUpperCase().includes(filterValue);
+        }
+        return false;
+      });
+    }
+    
+    // Apply search filter
+    if (search) {
+      result = result.filter(order =>
+        order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+        order.cargoDescription?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    return result;
+  }, [orders, cargoTypeFilter, cargoTypeParam, search]);
 
   const userRole = (user?.role?.toLowerCase() as 'admin' | 'client' | 'driver') || 'admin';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <main className="pb-20">
+      <main className="pb-24">
         {/* Header */}
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
           <div className="flex items-center justify-between mb-4">
@@ -98,8 +153,16 @@ export default function OrdersPage() {
                 <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Orders</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Manage industrial orders</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {(cargoTypeFilter || cargoTypeParam) ? `${cargoTypeFilter || cargoTypeParam} Orders` : 
+                   (statusFilter || statusParam) ? `${statusFilter || statusParam} Orders` : 
+                   'Orders'}
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {(cargoTypeFilter || cargoTypeParam) ? `Filtered by cargo type` : 
+                   (statusFilter || statusParam) ? `Filtered by status` : 
+                   'Manage industrial orders'}
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -120,9 +183,10 @@ export default function OrdersPage() {
             </div>
           </div>
 
-          {/* Search & Filter */}
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
+          {/* Search & Filters - Responsive Layout */}
+          <div className="flex flex-col md:flex-row gap-2">
+            {/* Search - Full width on mobile, flex-1 on desktop */}
+            <div className="relative w-full md:flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -132,30 +196,64 @@ export default function OrdersPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="DRAFT">Draft</option>
-              <option value="SUBMITTED">Submitted</option>
-              <option value="APPROVED">Approved</option>
-              <option value="KITTING">Kitting</option>
-              <option value="DISPATCH_READY">Dispatch Ready</option>
-              <option value="ASSIGNED">Assigned</option>
-              <option value="IN_TRANSIT">In Transit</option>
-              <option value="DELIVERED">Delivered</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
+            
+            {/* Filters Row - Side by side on mobile (below search), inline on desktop */}
+            <div className="flex gap-2 w-full md:w-auto">
+              {/* Cargo Type Filter */}
+              <div className="relative flex-1 md:flex-none md:w-auto md:min-w-[160px]">
+                <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <select
+                  value={cargoTypeFilter || cargoTypeParam || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCargoTypeFilter(value);
+                    setPage(1);
+                    // Clear URL param when using dropdown
+                    if (cargoTypeParam && value) {
+                      router.push('/orders');
+                    }
+                  }}
+                  className="w-full md:w-auto md:min-w-[160px] pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                >
+                  {CARGO_TYPES.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setStatusFilter(value);
+                  setPage(1);
+                  // Clear URL param when using dropdown
+                  if (statusParam && value) {
+                    router.push('/orders');
+                  }
+                }}
+                className="flex-1 md:flex-none md:w-auto md:min-w-[140px] px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Status</option>
+                <option value="DRAFT">Draft</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="APPROVED">Approved</option>
+                <option value="KITTING">Kitting</option>
+                <option value="DISPATCH_READY">Dispatch Ready</option>
+                <option value="ASSIGNED">Assigned</option>
+                <option value="IN_TRANSIT">In Transit</option>
+                <option value="DELIVERED">Delivered</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
           </div>
           
           {/* Active Filters */}
-          {(search || statusFilter) && (
-            <div className="flex items-center gap-2 mt-3">
+          {(search || statusFilter || statusParam || cargoTypeFilter || cargoTypeParam) && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
               <span className="text-xs text-gray-500 dark:text-gray-400">Filters:</span>
               {search && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs rounded-full">
@@ -165,10 +263,31 @@ export default function OrdersPage() {
                   </button>
                 </span>
               )}
-              {statusFilter && (
+              {(statusFilter || statusParam) && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs rounded-full">
-                  Status: {statusFilter}
-                  <button onClick={() => setStatusFilter('')} className="hover:text-blue-900">
+                  Status: {statusFilter || statusParam}
+                  <button 
+                    onClick={() => {
+                      setStatusFilter('');
+                      if (statusParam) router.push('/orders');
+                    }} 
+                    className="hover:text-blue-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {(cargoTypeFilter || cargoTypeParam) && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs rounded-full">
+                  <Scale className="w-3 h-3" />
+                  Cargo: {cargoTypeFilter || cargoTypeParam}
+                  <button 
+                    onClick={() => {
+                      setCargoTypeFilter('');
+                      if (cargoTypeParam) router.push('/orders');
+                    }} 
+                    className="hover:text-amber-900"
+                  >
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -248,11 +367,11 @@ export default function OrdersPage() {
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{order.orderNumber}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.firstName} {order.client?.lastName}</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{order.orderNumber || `Order ${String(order.id).slice(0, 8)}`}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.firstName || ''} {order.client?.lastName || ''}</p>
                   </div>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                    {order.status.replace('_', ' ')}
+                    {order.status?.replace('_', ' ')}
                   </span>
                 </div>
 
@@ -278,11 +397,29 @@ export default function OrdersPage() {
 
                 {order.handlingTags && order.handlingTags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {order.handlingTags.map((tag, index) => (
-                      <span key={index} className="px-2 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs rounded">
-                        {typeof tag === 'string' ? tag.replace('_', ' ') : String(tag)}
-                      </span>
-                    ))}
+                    {order.handlingTags.map((tag, index) => {
+                      // Robust tag extraction to prevent [object Object]
+                      let tagText: string;
+                      if (typeof tag === 'string') {
+                        tagText = tag;
+                      } else if (tag && typeof tag === 'object') {
+                        const tagObj = tag as Record<string, unknown>;
+                        const rawValue = tagObj.type || tagObj.name || tagObj.value || tagObj.label || tagObj.handlingTag || tagObj.tag;
+                        if (rawValue !== undefined && rawValue !== null) {
+                          tagText = String(rawValue);
+                        } else {
+                          const firstStringProp = Object.values(tagObj).find(v => typeof v === 'string');
+                          tagText = firstStringProp ? String(firstStringProp) : JSON.stringify(tagObj);
+                        }
+                      } else {
+                        tagText = String(tag);
+                      }
+                      return (
+                        <span key={index} className="px-2 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs rounded">
+                          {tagText.replace(/_/g, ' ')}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -292,21 +429,21 @@ export default function OrdersPage() {
 
         {/* Pagination */}
         {!loading && meta.totalPages > 1 && (
-          <div className="flex justify-center gap-2 p-4">
+          <div className="px-4 py-4 flex items-center justify-between">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded disabled:opacity-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               Page {page} of {meta.totalPages}
             </span>
             <button
               onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
               disabled={page === meta.totalPages}
-              className="px-3 py-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded disabled:opacity-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

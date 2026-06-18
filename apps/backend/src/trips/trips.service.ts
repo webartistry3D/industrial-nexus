@@ -197,6 +197,58 @@ export class TripsService {
     };
   }
 
+  async findDriverTrips(userId: string) {
+    // First get the driver record for this user
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+
+    if (!driver) {
+      return { data: [] };
+    }
+
+    const trips = await this.prisma.trip.findMany({
+      where: { driverId: driver.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        order: {
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            totalWeight: true,
+            pickupLocation: true,
+            deliveryLocation: true,
+            priority: true,
+            cargoDescription: true,
+          },
+        },
+        driver: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                phoneNumber: true,
+              },
+            },
+          },
+        },
+        vehicle: true,
+        weightRecords: {
+          orderBy: { checkedAt: 'desc' },
+          take: 1,
+        },
+        trackingPoints: {
+          orderBy: { timestamp: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    return { data: trips };
+  }
+
   async findOne(id: string) {
     const trip = await this.prisma.trip.findUnique({
       where: { id },
@@ -311,6 +363,87 @@ export class TripsService {
     });
 
     return updatedTrip;
+  }
+
+  async updateLocation(id: string, lat: number, lng: number, accuracy?: number) {
+    // This is a simplified version - in production, use the tracking service
+    // For now, we'll delegate to the tracking service if available
+    // or create a simple tracking point here
+    const trackingPoint = await this.prisma.trackingPoint.create({
+      data: {
+        tripId: id,
+        lat,
+        lng,
+        accuracy,
+        timestamp: new Date(),
+      },
+    });
+
+    return trackingPoint;
+  }
+
+  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; notes?: string }, userId: string) {
+    const trip = await this.findOne(id);
+
+    if (trip.pod) {
+      throw new BadRequestException('POD already submitted for this trip');
+    }
+
+    const pod = await this.prisma.pOD.create({
+      data: {
+        tripId: id,
+        imageUrl: podData.photoUrl,
+        signatureUrl: podData.signatureUrl,
+        notes: podData.notes,
+        capturedAt: new Date(),
+      },
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'CREATE',
+      entityType: 'POD',
+      entityId: pod.id,
+      newValue: { tripId: id, imageUrl: podData.photoUrl },
+    });
+
+    return pod;
+  }
+
+  async submitChecklist(
+    id: string,
+    checklist: {
+      vehicleInspected: boolean;
+      cargoSecured: boolean;
+      handlingTagsVerified: boolean;
+      safetyComplianceConfirmed: boolean;
+    },
+    userId: string
+  ) {
+    const trip = await this.findOne(id);
+
+    // Update trip status to SOP_COMPLETED if all items are checked
+    if (
+      checklist.vehicleInspected &&
+      checklist.cargoSecured &&
+      checklist.handlingTagsVerified &&
+      checklist.safetyComplianceConfirmed
+    ) {
+      await this.prisma.trip.update({
+        where: { id },
+        data: { status: TripStatus.SOP_COMPLETED },
+      });
+    }
+
+    await this.auditService.log({
+      userId,
+      action: 'UPDATE',
+      entityType: 'TRIP',
+      entityId: id,
+      newValue: { checklist, status: TripStatus.SOP_COMPLETED },
+    });
+
+    return { success: true, status: TripStatus.SOP_COMPLETED };
   }
 
   async updateDriverAssignment(id: string, assignDriverDto: AssignDriverDto, userId: string) {

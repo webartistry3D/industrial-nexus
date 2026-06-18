@@ -3,18 +3,26 @@
 import { MobileNav } from './mobile-nav';
 import { TopNav } from './top-nav';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
-export function NavWrapper({ children }: { children: React.ReactNode }) {
+interface NavWrapperProps {
+  children: React.ReactNode;
+}
+
+export function NavWrapper({ children }: NavWrapperProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
   const isLoginPage = pathname === '/login';
+  
+  const role = 'client' as 'admin' | 'client';
 
   return (
     <>
-      <TopNav />
+      <TopNav role={role} />
       <div className={isLoginPage ? '' : 'pt-16'}>
         {children}
       </div>
-      <MobileNav />
+      {!isLoginPage && <MobileNav role={role} />}
     </>
   );
 }

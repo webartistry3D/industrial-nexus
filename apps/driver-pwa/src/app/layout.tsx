@@ -1,5 +1,5 @@
 import { AuthProvider } from '@/hooks/useAuth';
-import { NavWrapper } from '@/components/nav-wrapper';
+import { DriverNavWrapper } from '@/components/driver-nav-wrapper';
 import './globals.css';
 
 export const metadata = {
@@ -16,9 +16,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-100">
         <AuthProvider>
-          <NavWrapper>
+          <DriverNavWrapper>
             {children}
-          </NavWrapper>
+          </DriverNavWrapper>
         </AuthProvider>
       </body>
     </html>

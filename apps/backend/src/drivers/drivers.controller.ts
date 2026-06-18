@@ -10,6 +10,9 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -19,7 +22,12 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { DriverFilterDto } from './dto/driver-filter.dto';
-import { UserRole, DriverAvailability } from '@prisma/client';
+import { CreateKycDocumentDto, UpdateKycDocumentDto, KycDocumentFilterDto } from './dto/kyc-document.dto';
+import { UserRole, DriverAvailability, KycDocumentType } from '@prisma/client';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('drivers')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -82,5 +90,100 @@ export class DriversController {
     @CurrentUser() user: { userId: string },
   ) {
     return this.driversService.deactivate(id, user.userId);
+  }
+
+  // KYC Document Endpoints
+  @Post(':id/kyc/documents/upload')
+  @Roles(UserRole.DRIVER, UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/kyc-docs',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = uuidv4();
+        const ext = extname(file.originalname);
+        cb(null, `${uniqueSuffix}${ext}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+      const ext = extname(file.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only PDF, JPG, and PNG files are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+    },
+  }))
+  @HttpCode(HttpStatus.CREATED)
+  async uploadKycDocument(
+    @Param('id') driverId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('documentType') documentType: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const fileUrl = `/uploads/kyc-docs/${file.filename}`;
+    
+    const createKycDocumentDto: CreateKycDocumentDto = {
+      documentType: documentType as any,
+      fileUrl,
+      fileName: file.originalname,
+      fileSize: file.size,
+      mimeType: file.mimetype,
+    };
+
+    return this.driversService.createKycDocument(driverId, createKycDocumentDto, user.userId);
+  }
+
+  @Post(':id/kyc/documents')
+  @Roles(UserRole.DRIVER, UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @HttpCode(HttpStatus.CREATED)
+  createKycDocument(
+    @Param('id') driverId: string,
+    @Body() createKycDocumentDto: CreateKycDocumentDto,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.driversService.createKycDocument(driverId, createKycDocumentDto, user.userId);
+  }
+
+  @Get(':id/kyc/documents')
+  @Roles(UserRole.DRIVER, UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  findDriverKycDocuments(
+    @Param('id') driverId: string,
+    @Query() filterDto?: KycDocumentFilterDto,
+  ) {
+    return this.driversService.findDriverKycDocuments(driverId, filterDto);
+  }
+
+  @Get('kyc/pending')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  findPendingKycDocuments(@Query() filterDto?: KycDocumentFilterDto) {
+    return this.driversService.findPendingKycDocuments(filterDto);
+  }
+
+  @Patch('kyc/documents/:documentId')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  updateKycDocument(
+    @Param('documentId') documentId: string,
+    @Body() updateKycDocumentDto: UpdateKycDocumentDto,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.driversService.updateKycDocument(documentId, updateKycDocumentDto, user.userId);
+  }
+
+  @Delete('kyc/documents/:documentId')
+  @Roles(UserRole.DRIVER, UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @HttpCode(HttpStatus.OK)
+  deleteKycDocument(
+    @Param('documentId') documentId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.driversService.deleteKycDocument(documentId, user.userId);
   }
 }

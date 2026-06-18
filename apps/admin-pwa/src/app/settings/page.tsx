@@ -1,0 +1,1123 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
+import { RoleGuard } from '@/components/role-guard';
+import { useAuth } from '@/hooks/useAuth';
+import { Settings, Save, Bell, Shield, Database, Globe, Clock, AlertTriangle, Users, Plus, Search, Filter, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+
+interface SystemSettings {
+  general: {
+    companyName: string;
+    timezone: string;
+    dateFormat: string;
+    language: string;
+  };
+  notifications: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    pushNotifications: boolean;
+    orderAlerts: boolean;
+    tripAlerts: boolean;
+    driverAlerts: boolean;
+  };
+  security: {
+    passwordMinLength: number;
+    sessionTimeout: number;
+    twoFactorAuth: boolean;
+    ipWhitelist: string;
+  };
+  operations: {
+    autoAssignDrivers: boolean;
+    requireApproval: boolean;
+    maxActiveTrips: number;
+    weightValidation: boolean;
+    geofenceAlerts: boolean;
+  };
+}
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  role: string;
+  status: string;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export default function SettingsPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'general' | 'users'>('general');
+  
+  // Settings state
+  const [settings, setSettings] = useState<SystemSettings>({
+    general: {
+      companyName: 'Industrial Nexus',
+      timezone: 'Africa/Lagos',
+      dateFormat: 'DD/MM/YYYY',
+      language: 'en',
+    },
+    notifications: {
+      emailNotifications: true,
+      smsNotifications: true,
+      pushNotifications: true,
+      orderAlerts: true,
+      tripAlerts: true,
+      driverAlerts: true,
+    },
+    security: {
+      passwordMinLength: 8,
+      sessionTimeout: 30,
+      twoFactorAuth: false,
+      ipWhitelist: '',
+    },
+    operations: {
+      autoAssignDrivers: false,
+      requireApproval: true,
+      maxActiveTrips: 10,
+      weightValidation: true,
+      geofenceAlerts: true,
+    },
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // User management state
+  const [users, setUsers] = useState<User[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userFormData, setUserFormData] = useState({
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    role: 'CLIENT',
+    status: 'ACTIVE',
+  });
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchUsers();
+    }
+  }, [activeTab, searchTerm, roleFilter, statusFilter]);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const response = await api.getSystemSettings();
+      if (response.data) {
+        setSettings(response.data);
+      } else {
+        console.log('Using default settings');
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch settings:', err);
+      setError('Unable to load settings. Using default values.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setUsersLoading(true);
+      const response = await api.getUsers({
+        search: searchTerm || undefined,
+        role: roleFilter || undefined,
+        status: statusFilter || undefined,
+      });
+      setUsers(response.data || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch users');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.createUser(userFormData);
+      setShowCreateUserModal(false);
+      setUserFormData({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        role: 'CLIENT',
+        status: 'ACTIVE',
+      });
+      fetchUsers();
+    } catch (err: any) {
+      setError(err.message || 'Failed to create user');
+    }
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+    try {
+      await api.updateUser(selectedUser.id, {
+        firstName: userFormData.firstName,
+        lastName: userFormData.lastName,
+        phoneNumber: userFormData.phoneNumber,
+        role: userFormData.role,
+        status: userFormData.status,
+      });
+      setShowEditUserModal(false);
+      setSelectedUser(null);
+      setUserFormData({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        role: 'CLIENT',
+        status: 'ACTIVE',
+      });
+      fetchUsers();
+    } catch (err: any) {
+      setError(err.message || 'Failed to update user');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await api.deleteUser(userId);
+      fetchUsers();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete user');
+    }
+  };
+
+  const openEditUserModal = (user: User) => {
+    setSelectedUser(user);
+    setUserFormData({
+      email: user.email,
+      password: '',
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber || '',
+      role: user.role,
+      status: user.status,
+    });
+    setShowEditUserModal(true);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ACTIVE':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'INACTIVE':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+      case 'SUSPENDED':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'OPERATIONS':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'CLIENT':
+        return 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300';
+      case 'DRIVER':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      await api.updateMultipleSettings(settings);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSectionSave = async (section: keyof SystemSettings) => {
+    try {
+      setSaving(true);
+      setError(null);
+      await api.updateMultipleSettings({ [section]: settings[section] });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <RoleGuard userRole={user?.role}>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
+          <div className="animate-pulse text-blue-600 font-semibold">Loading settings...</div>
+        </div>
+      </RoleGuard>
+    );
+  }
+
+  return (
+    <RoleGuard userRole={user?.role}>
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
+        {/* Header */}
+        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Settings className="w-6 h-6" />
+                Settings
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Configure system settings and manage users
+              </p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('general')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'general'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              General Settings
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'users'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              User Management
+            </button>
+          </div>
+        </div>
+
+        {/* Success Message */}
+        {success && (
+          <div className="mx-4 mt-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-4 text-green-800 dark:text-green-300">
+            Settings saved successfully!
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mx-4 mt-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4 text-red-800 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
+        {/* Tab Content */}
+        {activeTab === 'general' ? (
+          <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+          {/* General Settings */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">General Settings</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Basic system configuration</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Company Name</label>
+                <input
+                  type="text"
+                  value={settings.general.companyName}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    general: { ...settings.general, companyName: e.target.value }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Timezone</label>
+                <select
+                  value={settings.general.timezone}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    general: { ...settings.general, timezone: e.target.value }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Africa/Lagos">Africa/Lagos</option>
+                  <option value="Africa/Abuja">Africa/Abuja</option>
+                  <option value="UTC">UTC</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date Format</label>
+                <select
+                  value={settings.general.dateFormat}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    general: { ...settings.general, dateFormat: e.target.value }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                <select
+                  value={settings.general.language}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    general: { ...settings.general, language: e.target.value }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="en">English</option>
+                  <option value="fr">French</option>
+                  <option value="es">Spanish</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Notification Settings */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Bell className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notification Settings</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Configure system notifications</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email Notifications</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Receive email notifications</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, emailNotifications: !settings.notifications.emailNotifications }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.notifications.emailNotifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.notifications.emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">SMS Notifications</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Receive SMS notifications</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, smsNotifications: !settings.notifications.smsNotifications }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.notifications.smsNotifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.notifications.smsNotifications ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Push Notifications</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Receive push notifications</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, pushNotifications: !settings.notifications.pushNotifications }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.notifications.pushNotifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.notifications.pushNotifications ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Order Alerts</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Alerts for new orders</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, orderAlerts: !settings.notifications.orderAlerts }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.notifications.orderAlerts ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.notifications.orderAlerts ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Trip Alerts</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Alerts for trip updates</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, tripAlerts: !settings.notifications.tripAlerts }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.notifications.tripAlerts ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.notifications.tripAlerts ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Driver Alerts</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Alerts for driver status</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, driverAlerts: !settings.notifications.driverAlerts }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.notifications.driverAlerts ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.notifications.driverAlerts ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Security Settings */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Security Settings</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Configure security policies</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Minimum Password Length</label>
+                <input
+                  type="number"
+                  min="6"
+                  max="20"
+                  value={settings.security.passwordMinLength}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    security: { ...settings.security, passwordMinLength: parseInt(e.target.value) }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Session Timeout (minutes)</label>
+                <input
+                  type="number"
+                  min="5"
+                  max="120"
+                  value={settings.security.sessionTimeout}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    security: { ...settings.security, sessionTimeout: parseInt(e.target.value) }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">IP Whitelist (comma-separated)</label>
+                <input
+                  type="text"
+                  value={settings.security.ipWhitelist}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    security: { ...settings.security, ipWhitelist: e.target.value }
+                  })}
+                  placeholder="192.168.1.1, 10.0.0.1"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Two-Factor Authentication</label>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+              </div>
+              <button
+                onClick={() => setSettings({
+                  ...settings,
+                  security: { ...settings.security, twoFactorAuth: !settings.security.twoFactorAuth }
+                })}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.security.twoFactorAuth ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.security.twoFactorAuth ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Operations Settings */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                <Database className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Operations Settings</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Configure operational parameters</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Maximum Active Trips</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={settings.operations.maxActiveTrips}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    operations: { ...settings.operations, maxActiveTrips: parseInt(e.target.value) }
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="mt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto Assign Drivers</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Automatically assign drivers to trips</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    operations: { ...settings.operations, autoAssignDrivers: !settings.operations.autoAssignDrivers }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.operations.autoAssignDrivers ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.operations.autoAssignDrivers ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Require Approval</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Require approval for new orders</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    operations: { ...settings.operations, requireApproval: !settings.operations.requireApproval }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.operations.requireApproval ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.operations.requireApproval ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Weight Validation</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Enable weight limit validation</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    operations: { ...settings.operations, weightValidation: !settings.operations.weightValidation }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.operations.weightValidation ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.operations.weightValidation ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Geofence Alerts</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Enable geofence violation alerts</p>
+                </div>
+                <button
+                  onClick={() => setSettings({
+                    ...settings,
+                    operations: { ...settings.operations, geofenceAlerts: !settings.operations.geofenceAlerts }
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.operations.geofenceAlerts ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.operations.geofenceAlerts ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Warning Section */}
+          <div className="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">Important Notice</h3>
+                <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                  Changes to system settings may affect all users and operational processes. Review changes carefully before saving.
+                </p>
+              </div>
+            </div>
+          </div>
+          </div>
+        ) : (
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">User Management</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Manage system users and permissions</p>
+                </div>
+                <button
+                  onClick={() => setShowCreateUserModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add User
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Roles</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="OPERATIONS">Operations</option>
+                  <option value="CLIENT">Client</option>
+                  <option value="DRIVER">Driver</option>
+                </select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Status</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                  <option value="SUSPENDED">Suspended</option>
+                </select>
+              </div>
+
+              {/* Users List */}
+              {usersLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-pulse text-blue-600 font-semibold">Loading users...</div>
+                </div>
+              ) : users.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">No users found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-slate-700">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Login</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                      {users.map((user) => (
+                        <tr 
+                          key={user.id} 
+                          onClick={() => {
+                            // Store user data in localStorage for the detail page
+                            localStorage.setItem('selectedUser', JSON.stringify(user));
+                            router.push(`/users/${user.id}`);
+                          }}
+                          className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                        >
+                          <td className="px-6 py-4">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">
+                                {user.firstName} {user.lastName}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                              {user.phoneNumber && (
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{user.phoneNumber}</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getRoleColor(user.role)}`}>
+                              <Shield className="w-3 h-3 mr-1" />
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(user.status)}`}>
+                              {user.status === 'ACTIVE' ? <UserCheck className="w-3 h-3 mr-1" /> : <UserX className="w-3 h-3 mr-1" />}
+                              {user.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                            {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditUserModal(user);
+                                }}
+                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteUser(user.id);
+                                }}
+                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Create User Modal */}
+        {showCreateUserModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCreateUserModal(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Add New User</h2>
+              <form onSubmit={handleCreateUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={userFormData.email}
+                    onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={userFormData.password}
+                    onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={userFormData.firstName}
+                      onChange={(e) => setUserFormData({ ...userFormData, firstName: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={userFormData.lastName}
+                      onChange={(e) => setUserFormData({ ...userFormData, lastName: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                  <input
+                    type="text"
+                    value={userFormData.phoneNumber}
+                    onChange={(e) => setUserFormData({ ...userFormData, phoneNumber: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+                    <select
+                      required
+                      value={userFormData.role}
+                      onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="SUPER_ADMIN">Super Admin</option>
+                      <option value="OPERATIONS">Operations</option>
+                      <option value="CLIENT">Client</option>
+                      <option value="DRIVER">Driver</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                    <select
+                      required
+                      value={userFormData.status}
+                      onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="INACTIVE">Inactive</option>
+                      <option value="SUSPENDED">Suspended</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateUserModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    Create User
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit User Modal */}
+        {showEditUserModal && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditUserModal(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Edit User</h2>
+              <form onSubmit={handleUpdateUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={userFormData.email}
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-100 dark:bg-slate-600 text-gray-900 dark:text-white cursor-not-allowed"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={userFormData.firstName}
+                      onChange={(e) => setUserFormData({ ...userFormData, firstName: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={userFormData.lastName}
+                      onChange={(e) => setUserFormData({ ...userFormData, lastName: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                  <input
+                    type="text"
+                    value={userFormData.phoneNumber}
+                    onChange={(e) => setUserFormData({ ...userFormData, phoneNumber: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+                    <select
+                      required
+                      value={userFormData.role}
+                      onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="SUPER_ADMIN">Super Admin</option>
+                      <option value="OPERATIONS">Operations</option>
+                      <option value="CLIENT">Client</option>
+                      <option value="DRIVER">Driver</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                    <select
+                      required
+                      value={userFormData.status}
+                      onChange={(e) => setUserFormData({ ...userFormData, status: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="INACTIVE">Inactive</option>
+                      <option value="SUSPENDED">Suspended</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditUserModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    Update User
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </RoleGuard>
+  );
+}

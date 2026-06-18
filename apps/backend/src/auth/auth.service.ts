@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -7,6 +7,8 @@ import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TokenResponseDto } from './dto/token-response.dto';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +36,7 @@ export class AuthService {
     return user;
   }
 
-  async login(loginDto: LoginDto, ipAddress?: string, userAgent?: string): Promise<TokenResponseDto> {
+  async login(loginDto: LoginDto, ipAddress?: string, userAgent?: string): Promise<TokenResponseDto & { user: any }> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     
     if (!user) {
@@ -48,6 +50,18 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
+    // Create session record
+    const sessionExpiresIn = 1; // 1 hour
+    await this.prisma.session.create({
+      data: {
+        userId: user.id,
+        token: tokens.accessToken,
+        ipAddress,
+        userAgent,
+        expiresAt: new Date(Date.now() + sessionExpiresIn * 60 * 60 * 1000),
+      },
+    });
+
     await this.auditService.log({
       userId: user.id,
       action: 'LOGIN',
@@ -57,7 +71,18 @@ export class AuthService {
       userAgent,
     });
 
-    return tokens;
+    return {
+      ...tokens,
+      user: {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+        status: user.status,
+      },
+    };
   }
 
   async register(registerDto: RegisterDto): Promise<TokenResponseDto> {
@@ -120,6 +145,18 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
+    // Invalidate all active sessions for this user
+    await this.prisma.session.updateMany({
+      where: { 
+        userId,
+        isActive: true,
+      },
+      data: { 
+        isActive: false,
+        revokedAt: new Date(),
+      },
+    });
+
     await this.auditService.log({
       userId,
       action: 'LOGOUT',
@@ -128,6 +165,160 @@ export class AuthService {
       ipAddress,
       userAgent,
     });
+  }
+
+  async requestPasswordReset(requestPasswordResetDto: RequestPasswordResetDto): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: requestPasswordResetDto.email.toLowerCase() },
+    });
+
+    if (!user) {
+      // Don't reveal if email exists for security
+      return { message: 'If the email exists, a password reset link will be sent' };
+    }
+
+    // Invalidate any existing reset tokens
+    await this.prisma.passwordResetToken.updateMany({
+      where: { userId: user.id, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    // Generate new reset token
+    const resetToken = this.generateRandomToken();
+    const resetExpiresIn = 1; // 1 hour
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        token: resetToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + resetExpiresIn * 60 * 60 * 1000),
+      },
+    });
+
+    await this.auditService.log({
+      userId: user.id,
+      action: 'PASSWORD_RESET_REQUEST',
+      entityType: 'USER',
+      entityId: user.id,
+      newValue: { email: user.email },
+    });
+
+    // TODO: Send email with reset token
+    // For now, return the token in development mode
+    const isDevelopment = this.configService.get<string>('NODE_ENV') === 'development';
+    if (isDevelopment) {
+      return { message: `Password reset token (dev mode): ${resetToken}` };
+    }
+
+    return { message: 'If the email exists, a password reset link will be sent' };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+    const tokenRecord = await this.prisma.passwordResetToken.findUnique({
+      where: { token: resetPasswordDto.token },
+      include: { user: true },
+    });
+
+    if (!tokenRecord) {
+      throw new NotFoundException('Invalid or expired reset token');
+    }
+
+    if (tokenRecord.usedAt) {
+      throw new BadRequestException('Reset token has already been used');
+    }
+
+    if (tokenRecord.expiresAt < new Date()) {
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+
+    // Update user password
+    await this.prisma.user.update({
+      where: { id: tokenRecord.user.id },
+      data: { passwordHash },
+    });
+
+    // Mark token as used
+    await this.prisma.passwordResetToken.update({
+      where: { id: tokenRecord.id },
+      data: { usedAt: new Date() },
+    });
+
+    // Invalidate all refresh tokens for security
+    await this.prisma.refreshToken.updateMany({
+      where: { userId: tokenRecord.user.id },
+      data: { revokedAt: new Date() },
+    });
+
+    await this.auditService.log({
+      userId: tokenRecord.user.id,
+      action: 'PASSWORD_RESET',
+      entityType: 'USER',
+      entityId: tokenRecord.user.id,
+      newValue: { email: tokenRecord.user.email },
+    });
+
+    return { message: 'Password has been reset successfully' };
+  }
+
+  async getActiveSessions(userId: string) {
+    const sessions = await this.prisma.session.findMany({
+      where: {
+        userId,
+        isActive: true,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return sessions.map(session => ({
+      id: session.id,
+      ipAddress: session.ipAddress,
+      userAgent: session.userAgent,
+      createdAt: session.createdAt,
+      lastActivityAt: session.lastActivityAt,
+      expiresAt: session.expiresAt,
+    }));
+  }
+
+  async revokeSession(userId: string, sessionId: string) {
+    const session = await this.prisma.session.findFirst({
+      where: {
+        id: sessionId,
+        userId,
+      },
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    await this.prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        isActive: false,
+        revokedAt: new Date(),
+      },
+    });
+
+    return { message: 'Session revoked successfully' };
+  }
+
+  async revokeAllSessions(userId: string) {
+    await this.prisma.session.updateMany({
+      where: {
+        userId,
+        isActive: true,
+      },
+      data: {
+        isActive: false,
+        revokedAt: new Date(),
+      },
+    });
+
+    return { message: 'All sessions revoked successfully' };
   }
 
   private async generateTokens(userId: string, email: string, role: string): Promise<TokenResponseDto> {

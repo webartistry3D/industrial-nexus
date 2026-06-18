@@ -7,8 +7,8 @@ import { OrderFilterDto } from './dto/order-filter.dto';
 import { OrderStatus, KittingStatus, UserRole, Priority } from '@prisma/client';
 
 const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  [OrderStatus.DRAFT]: [OrderStatus.SUBMITTED, OrderStatus.CANCELLED],
-  [OrderStatus.SUBMITTED]: [OrderStatus.APPROVED, OrderStatus.CANCELLED],
+  [OrderStatus.DRAFT]: [OrderStatus.SUBMITTED, OrderStatus.CANCELLED, OrderStatus.REJECTED],
+  [OrderStatus.SUBMITTED]: [OrderStatus.APPROVED, OrderStatus.CANCELLED, OrderStatus.REJECTED],
   [OrderStatus.APPROVED]: [OrderStatus.KITTING, OrderStatus.CANCELLED],
   [OrderStatus.KITTING]: [OrderStatus.DISPATCH_READY, OrderStatus.CANCELLED],
   [OrderStatus.DISPATCH_READY]: [OrderStatus.ASSIGNED, OrderStatus.CANCELLED],
@@ -16,6 +16,7 @@ const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED],
   [OrderStatus.DELIVERED]: [],
   [OrderStatus.CANCELLED]: [],
+  [OrderStatus.REJECTED]: [],
 };
 
 @Injectable()
@@ -302,6 +303,57 @@ export class OrdersService {
 
   async cancel(id: string, userId: string, userRole: UserRole, reason?: string) {
     return this.changeStatus(id, OrderStatus.CANCELLED, userId, userRole, reason);
+  }
+
+  async assignDriver(id: string, driverId: string, userId: string, userRole: UserRole) {
+    const order = await this.findOne(id, userId, userRole);
+
+    if (order.status !== OrderStatus.DISPATCH_READY) {
+      throw new BadRequestException(`Cannot assign driver to order in ${order.status} status`);
+    }
+
+    // Check if driver exists and is active
+    const driver = await this.prisma.driver.findUnique({
+      where: { id: driverId },
+      include: { user: true },
+    });
+
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+
+    if (driver.status !== 'ACTIVE') {
+      throw new BadRequestException('Driver is not active');
+    }
+
+    // Update order status and create trip
+    const updatedOrder = await this.prisma.order.update({
+      where: { id },
+      data: {
+        status: OrderStatus.ASSIGNED,
+      },
+    });
+
+    // Create trip
+    await this.prisma.trip.create({
+      data: {
+        orderId: id,
+        driverId,
+        vehicleId: driver.vehicleId || '', // Use driver's default vehicle if available
+        status: 'ASSIGNED',
+      },
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'STATUS_CHANGE',
+      entityType: 'ORDER',
+      entityId: id,
+      oldValue: { status: order.status },
+      newValue: { status: OrderStatus.ASSIGNED, driverId },
+    });
+
+    return this.findOne(id);
   }
 
   private async generateOrderNumber(): Promise<string> {

@@ -44,6 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      // Redirect to login on auth failure
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +59,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
 
-    const { accessToken, refreshToken } = response.data;
+    const { accessToken, refreshToken, user: userData } = response.data;
+    
+    // Check if user has required role (SUPER_ADMIN or OPERATOR)
+    if (userData.role !== 'SUPER_ADMIN' && userData.role !== 'OPERATIONS') {
+      throw new Error('Access denied. Only administrators can access this application.');
+    }
+
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
 

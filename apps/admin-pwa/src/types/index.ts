@@ -12,7 +12,7 @@ export interface Order {
   orderNumber: string;
   clientId: string;
   client?: User;
-  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'KITTING' | 'DISPATCH_READY' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'KITTING' | 'DISPATCH_READY' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED' | 'REJECTED';
   kittingStatus: 'PENDING' | 'AGGREGATION' | 'TECHNICAL_PACKAGING' | 'QUALITY_CHECK' | 'DISPATCH_READY';
   totalWeight: number;
   priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
@@ -108,6 +108,28 @@ export interface DashboardStats {
   geofenceEvents: number;
   fleetUtilization: number;
   onTimeDelivery: number;
+}
+
+export interface GeofenceZone {
+  id: string;
+  name: string;
+  type: 'RADIUS' | 'POLYGON';
+  center?: { lat: number; lng: number };
+  radiusA?: number;
+  radiusB?: number;
+  radiusC?: number;
+  radiusD?: number;
+  polygon?: { lat: number; lng: number }[];
+  color: string;
+}
+
+export interface RouteData {
+  polyline: { lat: number; lng: number }[];
+  distance: number;
+  estimatedDuration: number;
+  pickup: { lat: number; lng: number; address: string };
+  delivery: { lat: number; lng: number; address: string };
+  trackingHistory: TrackingPoint[];
 }
 
 export interface PaginatedResponse<T> {

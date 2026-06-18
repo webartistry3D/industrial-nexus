@@ -33,6 +33,7 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
+    console.log('Received order data:', JSON.stringify(createOrderDto, null, 2));
     return this.ordersService.create(createOrderDto, user.userId, user.role);
   }
 
@@ -104,5 +105,64 @@ export class OrdersController {
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
     return this.ordersService.changeStatus(id, 'APPROVED', user.userId, user.role);
+  }
+
+  @Post(':id/reject')
+  @HttpCode(HttpStatus.OK)
+  reject(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.changeStatus(id, 'REJECTED', user.userId, user.role, reason);
+  }
+
+  @Post(':id/start-kitting')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @HttpCode(HttpStatus.OK)
+  startKitting(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.changeStatus(id, 'KITTING', user.userId, user.role);
+  }
+
+  @Post(':id/finish-kitting')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @HttpCode(HttpStatus.OK)
+  finishKitting(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.changeStatus(id, 'DISPATCH_READY', user.userId, user.role);
+  }
+
+  @Post(':id/assign-driver')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @HttpCode(HttpStatus.OK)
+  assignDriver(
+    @Param('id') id: string,
+    @Body('driverId') driverId: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.assignDriver(id, driverId, user.userId, user.role);
+  }
+
+  @Post(':id/start-trip')
+  @HttpCode(HttpStatus.OK)
+  startTrip(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.changeStatus(id, 'IN_TRANSIT', user.userId, user.role);
+  }
+
+  @Post(':id/confirm-delivery')
+  @HttpCode(HttpStatus.OK)
+  confirmDelivery(
+    @Param('id') id: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.changeStatus(id, 'DELIVERED', user.userId, user.role);
   }
 }

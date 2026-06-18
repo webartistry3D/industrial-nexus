@@ -13,6 +13,8 @@ import { WeightWatchModule } from './weight-watch/weight-watch.module';
 import { GeofencingModule } from './geofencing/geofencing.module';
 import { RedisModule } from './redis/redis.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { TrackingModule } from './tracking/tracking.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
     WeightWatchModule,
     GeofencingModule,
     AnalyticsModule,
+    TrackingModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

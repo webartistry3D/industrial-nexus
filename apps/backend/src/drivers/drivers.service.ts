@@ -4,7 +4,8 @@ import { AuditService } from '../audit/audit.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { DriverFilterDto } from './dto/driver-filter.dto';
-import { DriverAvailability, DriverStatus, KycStatus } from '@prisma/client';
+import { CreateKycDocumentDto, UpdateKycDocumentDto, KycDocumentFilterDto } from './dto/kyc-document.dto';
+import { DriverAvailability, DriverStatus, KycStatus, KycDocumentStatus } from '@prisma/client';
 
 @Injectable()
 export class DriversService {
@@ -226,5 +227,195 @@ export class DriversService {
     }
     
     return this.update(id, { status: DriverStatus.INACTIVE, availability: DriverAvailability.OFF_DUTY }, userId);
+  }
+
+  // KYC Document Methods
+  async createKycDocument(driverId: string, createKycDocumentDto: CreateKycDocumentDto, userId: string) {
+    const driver = await this.prisma.driver.findUnique({
+      where: { id: driverId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+
+    // Check if document type already exists and is not rejected
+    const existingDocument = await this.prisma.kycDocument.findFirst({
+      where: {
+        driverId,
+        documentType: createKycDocumentDto.documentType,
+        status: { in: [KycDocumentStatus.PENDING, KycDocumentStatus.UNDER_REVIEW, KycDocumentStatus.VERIFIED] },
+      },
+    });
+
+    if (existingDocument) {
+      throw new ConflictException(`Document of type ${createKycDocumentDto.documentType} already exists and is ${existingDocument.status}`);
+    }
+
+    const kycDocument = await this.prisma.kycDocument.create({
+      data: {
+        driverId,
+        documentType: createKycDocumentDto.documentType,
+        fileUrl: createKycDocumentDto.fileUrl,
+        fileName: createKycDocumentDto.fileName,
+        fileSize: createKycDocumentDto.fileSize,
+        mimeType: createKycDocumentDto.mimeType,
+        status: KycDocumentStatus.PENDING,
+        expiresAt: createKycDocumentDto.expiresAt,
+      },
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'CREATE',
+      entityType: 'KYC_DOCUMENT',
+      entityId: kycDocument.id,
+      newValue: { documentType: kycDocument.documentType, driverId },
+    });
+
+    return kycDocument;
+  }
+
+  async findDriverKycDocuments(driverId: string, filterDto?: KycDocumentFilterDto) {
+    const where: any = { driverId };
+    
+    if (filterDto?.status) where.status = filterDto.status;
+    if (filterDto?.documentType) where.documentType = filterDto.documentType;
+
+    const documents = await this.prisma.kycDocument.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return documents;
+  }
+
+  async findPendingKycDocuments(filterDto?: KycDocumentFilterDto) {
+    const where: any = { status: KycDocumentStatus.PENDING };
+    
+    if (filterDto?.documentType) where.documentType = filterDto.documentType;
+    if (filterDto?.driverId) where.driverId = filterDto.driverId;
+
+    const documents = await this.prisma.kycDocument.findMany({
+      where,
+      include: {
+        driver: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return documents;
+  }
+
+  async updateKycDocument(documentId: string, updateKycDocumentDto: UpdateKycDocumentDto, userId: string) {
+    const document = await this.prisma.kycDocument.findUnique({
+      where: { id: documentId },
+      include: { driver: true },
+    });
+
+    if (!document) {
+      throw new NotFoundException('KYC document not found');
+    }
+
+    const updateData: any = {};
+    if (updateKycDocumentDto.status !== undefined) {
+      updateData.status = updateKycDocumentDto.status;
+      updateData.reviewedAt = new Date();
+      updateData.reviewedBy = userId;
+    }
+    if (updateKycDocumentDto.rejectionReason !== undefined) {
+      updateData.rejectionReason = updateKycDocumentDto.rejectionReason;
+    }
+    if (updateKycDocumentDto.expiresAt !== undefined) {
+      updateData.expiresAt = updateKycDocumentDto.expiresAt;
+    }
+
+    const updatedDocument = await this.prisma.kycDocument.update({
+      where: { id: documentId },
+      data: updateData,
+    });
+
+    // Update driver KYC status based on document reviews
+    await this.updateDriverKycStatus(document.driverId);
+
+    await this.auditService.log({
+      userId,
+      action: 'UPDATE',
+      entityType: 'KYC_DOCUMENT',
+      entityId: documentId,
+      oldValue: { ...document },
+      newValue: updateData,
+    });
+
+    return updatedDocument;
+  }
+
+  private async updateDriverKycStatus(driverId: string) {
+    const documents = await this.prisma.kycDocument.findMany({
+      where: { driverId },
+    });
+
+    if (documents.length === 0) {
+      return;
+    }
+
+    const hasRejected = documents.some(d => d.status === KycDocumentStatus.REJECTED);
+    const hasPending = documents.some(d => d.status === KycDocumentStatus.PENDING || d.status === KycDocumentStatus.UNDER_REVIEW);
+    const allVerified = documents.every(d => d.status === KycDocumentStatus.VERIFIED);
+
+    let newKycStatus: KycStatus;
+    if (hasRejected) {
+      newKycStatus = KycStatus.REJECTED;
+    } else if (hasPending) {
+      newKycStatus = KycStatus.PENDING;
+    } else if (allVerified) {
+      newKycStatus = KycStatus.VERIFIED;
+    } else {
+      newKycStatus = KycStatus.PENDING;
+    }
+
+    await this.prisma.driver.update({
+      where: { id: driverId },
+      data: { kycStatus: newKycStatus },
+    });
+  }
+
+  async deleteKycDocument(documentId: string, userId: string) {
+    const document = await this.prisma.kycDocument.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new NotFoundException('KYC document not found');
+    }
+
+    if (document.status === KycDocumentStatus.VERIFIED) {
+      throw new BadRequestException('Cannot delete verified documents');
+    }
+
+    await this.prisma.kycDocument.delete({
+      where: { id: documentId },
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'DELETE',
+      entityType: 'KYC_DOCUMENT',
+      entityId: documentId,
+      oldValue: { documentType: document.documentType, driverId: document.driverId },
+    });
+
+    return { message: 'Document deleted successfully' };
   }
 }

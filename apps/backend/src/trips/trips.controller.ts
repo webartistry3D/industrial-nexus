@@ -41,8 +41,14 @@ export class TripsController {
     return this.tripsService.findAll(filterDto);
   }
 
+  @Get('my-trips')
+  @Roles(UserRole.DRIVER)
+  getMyTrips(@CurrentUser() user: { userId: string }) {
+    return this.tripsService.findDriverTrips(user.userId);
+  }
+
   @Get(':id')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
   findOne(@Param('id') id: string) {
     return this.tripsService.findOne(id);
   }
@@ -65,6 +71,43 @@ export class TripsController {
     @CurrentUser() user: { userId: string },
   ) {
     return this.tripsService.completeTrip(id, user.userId);
+  }
+
+  @Post(':id/location')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  @HttpCode(HttpStatus.OK)
+  updateLocation(
+    @Param('id') id: string,
+    @Body() locationData: { lat: number; lng: number; accuracy?: number },
+  ) {
+    return this.tripsService.updateLocation(id, locationData.lat, locationData.lng, locationData.accuracy);
+  }
+
+  @Post(':id/pod')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  @HttpCode(HttpStatus.OK)
+  submitPOD(
+    @Param('id') id: string,
+    @Body() podData: { photoUrl?: string; signatureUrl?: string; notes?: string },
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.tripsService.submitPOD(id, podData, user.userId);
+  }
+
+  @Post(':id/checklist')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  @HttpCode(HttpStatus.OK)
+  submitChecklist(
+    @Param('id') id: string,
+    @Body() checklist: {
+      vehicleInspected: boolean;
+      cargoSecured: boolean;
+      handlingTagsVerified: boolean;
+      safetyComplianceConfirmed: boolean;
+    },
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.tripsService.submitChecklist(id, checklist, user.userId);
   }
 
   @Post(':id/reassign')

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 import { api } from '@/lib/api';
 import { DashboardStats, Trip, WeightAlert, Order } from '@/types';
 import { 
@@ -16,6 +17,7 @@ import { TripsOverview } from '@/components/trips-overview';
 
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
+  const { isConnected, subscribe, unsubscribe } = useTrackingWebSocket();
   const router = useRouter();
   
   // Data states
@@ -23,8 +25,15 @@ export default function Dashboard() {
   const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
   const [alerts, setAlerts] = useState<WeightAlert[]>([]);
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+  const [heavyOrdersCount, setHeavyOrdersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [liveLocations, setLiveLocations] = useState<Map<string, { lat: number; lng: number; speed?: number }>>(new Map());
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -38,23 +47,73 @@ export default function Dashboard() {
     }
   }, [user, authLoading, router]);
 
+  // Subscribe to WebSocket for live location updates
+  useEffect(() => {
+    if (isConnected) {
+      subscribe('location:update', handleLocationUpdate);
+    }
+    return () => {
+      if (isConnected) {
+        unsubscribe('location:update');
+      }
+    };
+  }, [isConnected]);
+
+  const handleLocationUpdate = (data: any) => {
+    setLiveLocations((prev) => {
+      const updated = new Map(prev);
+      updated.set(data.tripId, {
+        lat: data.lat,
+        lng: data.lng,
+        speed: data.speed,
+      });
+      return updated;
+    });
+  };
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
       
       // Parallel data fetching
-      const [statsData, tripsData, alertsData, ordersData] = await Promise.all([
+      const [statsData, tripsData, alertsData, ordersData, allOrdersData] = await Promise.all([
         api.getDashboardStats().catch(() => null),
         api.getTrips({ status: 'IN_TRANSIT', limit: 5 }).catch(() => ({ data: [] })),
         api.getWeightAlerts().catch(() => []),
-        api.getOrders({ status: 'SUBMITTED', limit: 5 }).catch(() => ({ data: [] }))
+        api.getOrders({ status: 'SUBMITTED', limit: 5 }).catch(() => ({ data: [] })),
+        api.getOrders({ limit: 100 }).catch(() => ({ data: [] }))
       ]);
+      
+      const allOrders = allOrdersData.data || [];
       
       setStats(statsData);
       setActiveTrips(tripsData.data || []);
       setAlerts(alertsData || []);
       setPendingOrders(ordersData.data || []);
+      setHeavyOrdersCount(allOrders.filter((o: Order) => 
+        o.handlingTags?.some((tag: string | object) => {
+          const tagStr = typeof tag === 'string' ? tag : JSON.stringify(tag);
+          return tagStr.toUpperCase().includes('HEAVY');
+        }) || 
+        o.cargoDescription?.toUpperCase().includes('HEAVY')
+      ).length);
+      
+      // Fetch initial live locations for active trips
+      const fleetLocations = await api.getActiveFleetLocations('IN_TRANSIT').catch(() => []);
+      if (Array.isArray(fleetLocations)) {
+        const locationsMap = new Map<string, { lat: number; lng: number; speed?: number }>();
+        fleetLocations.forEach((item: any) => {
+          if (item.location) {
+            locationsMap.set(item.tripId, {
+              lat: item.location.lat,
+              lng: item.location.lng,
+              speed: item.location.speed,
+            });
+          }
+        });
+        setLiveLocations(locationsMap);
+      }
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
       setError('Failed to load dashboard data');
@@ -69,19 +128,32 @@ export default function Dashboard() {
   const handleTrackFleet = () => router.push('/trips');
   const handleManageDrivers = () => router.push('/drivers');
   const handleViewAllOrders = () => router.push('/orders');
-  const handleViewAllTrips = () => router.push('/trips');
-  const handleTripClick = (tripId: string) => router.push(`/trips/${tripId}`);
-  const handleAlertClick = (tripId: string) => router.push(`/trips/${tripId}`);
+  const handleTripClick = (tripId: string) => {
+    if (tripId && tripId !== 'null' && tripId !== 'undefined') {
+      router.push(`/trips/${tripId}`);
+    }
+  };
+  const handleAlertClick = (tripId: string) => {
+    if (tripId && tripId !== 'null' && tripId !== 'undefined') {
+      router.push(`/trips/${tripId}`);
+    }
+  };
 
   // Calculate derived stats
   const activeTripsCount = activeTrips.length;
+  // Delayed = IN_TRANSIT trips where ETA has passed
   const delayedTripsCount = activeTrips.filter(t => {
-    if (!t.startedAt) return false;
-    const hoursElapsed = (Date.now() - new Date(t.startedAt).getTime()) / (1000 * 60 * 60);
-    return hoursElapsed > 11; // SLA breach imminent after 11 hours
+    if (!t.eta || t.status !== 'IN_TRANSIT') return false;
+    return new Date(t.eta) < new Date();
   }).length;
-  const weightAlertsCount = alerts.filter(a => a.status === 'WARNING' || a.status === 'OVERLOADED').length;
   const pendingOrdersCount = pendingOrders.length;
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   if (authLoading || (!user && !error)) {
     return (
@@ -93,21 +165,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pb-20 bg-gray-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="bg-slate-900 text-white p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-6 h-6" />
-            <h1 className="text-lg font-semibold">Control Tower</h1>
-          </div>
-          <div className="text-sm text-gray-300">
-            {user?.firstName} {user?.lastName}
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="p-4 space-y-4">
+      <main className="p-4 pb-24 space-y-4">
+        {/* Greeting */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {getGreeting()}, {user?.firstName}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            {user?.role === 'OPERATIONS' ? 'Control Tower' : 'Admin Dashboard'}
+          </p>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           <StatCard
@@ -116,7 +185,7 @@ export default function Dashboard() {
             value={loading ? '...' : activeTripsCount.toString()}
             trend={stats ? `${stats.onTimeDelivery}% on time` : undefined}
             color="blue"
-            onClick={handleViewAllTrips}
+            onClick={() => router.push('/trips?status=IN_TRANSIT')}
           />
           <StatCard
             icon={AlertTriangle}
@@ -124,13 +193,15 @@ export default function Dashboard() {
             value={loading ? '...' : delayedTripsCount.toString()}
             trend={delayedTripsCount > 0 ? 'SLA at risk' : 'All on track'}
             color={delayedTripsCount > 0 ? 'red' : 'green'}
+            onClick={() => router.push('/trips?status=DELAYED')}
           />
           <StatCard
             icon={Scale}
             label="Weight Alerts"
-            value={loading ? '...' : weightAlertsCount.toString()}
-            trend={weightAlertsCount > 0 ? 'Requires attention' : 'All clear'}
-            color={weightAlertsCount > 0 ? 'yellow' : 'green'}
+            value={loading ? '...' : heavyOrdersCount.toString()}
+            trend={heavyOrdersCount > 0 ? 'Requires attention' : 'All clear'}
+            color={heavyOrdersCount > 0 ? 'yellow' : 'green'}
+            onClick={() => router.push('/orders?cargoType=HEAVY')}
           />
           <StatCard
             icon={Package}
@@ -138,7 +209,7 @@ export default function Dashboard() {
             value={loading ? '...' : pendingOrdersCount.toString()}
             trend={pendingOrdersCount > 0 ? 'Awaiting dispatch' : 'No pending'}
             color="purple"
-            onClick={handleViewAllOrders}
+            onClick={() => router.push('/orders?status=DRAFT')}
           />
         </div>
 
@@ -185,7 +256,7 @@ export default function Dashboard() {
         </div>
 
         {/* Active Trips */}
-        <TripsOverview trips={activeTrips} loading={loading} onTripClick={handleTripClick} />
+        <TripsOverview trips={activeTrips} loading={loading} onTripClick={handleTripClick} liveLocations={liveLocations} />
 
         {/* Weight Watch Alerts */}
         <AlertsPanel alerts={alerts} loading={loading} onAlertClick={handleAlertClick} />

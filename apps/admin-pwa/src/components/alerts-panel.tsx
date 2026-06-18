@@ -65,16 +65,18 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
         </div>
       ) : (
         <div className="space-y-3">
-          {activeAlerts.map((alert) => (
-          <div
-              key={alert.id}
-              onClick={() => onAlertClick?.(alert.tripId)}
-              className={`p-3 rounded-lg border cursor-pointer hover:shadow-md transition-shadow ${
-                getAlertSeverity(alert.status) === 'critical'
-                  ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                  : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-              }`}
-            >
+          {activeAlerts.map((alert) => {
+            const hasValidTripId = alert.tripId && alert.tripId !== 'null' && alert.tripId !== 'undefined';
+            return (
+            <div
+                key={alert.id}
+                onClick={() => hasValidTripId && onAlertClick?.(alert.tripId)}
+                className={`p-3 rounded-lg border transition-shadow ${
+                  getAlertSeverity(alert.status) === 'critical'
+                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                    : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                } ${hasValidTripId ? 'cursor-pointer hover:shadow-md' : 'cursor-default opacity-80'}`}
+              >
               <div className="flex items-start gap-3">
                 {alert.status === 'OVERLOADED' ? (
                   <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
@@ -83,7 +85,7 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-800 dark:text-white">
-                    {alert.trip?.order?.orderNumber || alert.tripId} • {alert.utilization.toFixed(1)}% capacity
+                    {alert.trip?.order?.orderNumber || String(alert.tripId)} • {alert.utilization?.toFixed ? alert.utilization.toFixed(1) : alert.utilization}% capacity
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {alert.status} • {formatTimeAgo(alert.checkedAt)}
@@ -91,7 +93,8 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

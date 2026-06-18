@@ -55,7 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
 
-    const { accessToken, refreshToken } = response.data;
+    const { accessToken, refreshToken, user: userData } = response.data;
+    
+    // Check if user has required role (DRIVER only)
+    if (userData.role !== 'DRIVER') {
+      throw new Error('Access denied. Only drivers can access this application.');
+    }
+
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
 
