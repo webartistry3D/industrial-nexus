@@ -18,7 +18,16 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGIN
-        value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com
+        value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com,https://industrial-nexus.onrender.com
+
+  - type: web
+    name: industrial-nexus
+    env: node
+    buildCommand: npm install && cd apps/landing-page && npm install && rm -rf dist && npm run build
+    startCommand: cd apps/landing-page && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
 
   - type: web
     name: industrial-nexus-admin
