@@ -25,8 +25,9 @@ interface Order {
     eta?: string;
     driver?: {
       user: { firstName: string; lastName: string };
-      vehicle: { plateNumber: string };
+      vehicle?: { plateNumber: string } | null;
     };
+    vehicle?: { plateNumber: string } | null;
   };
   createdAt: string;
 }
@@ -232,7 +233,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                         {order.trip.driver.user.firstName} {order.trip.driver.user.lastName}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Vehicle: {order.trip.driver.vehicle.plateNumber}
+                        Vehicle: {(order.trip.vehicle ?? order.trip.driver.vehicle)?.plateNumber || 'N/A'}
                       </p>
                     </div>
                   )}

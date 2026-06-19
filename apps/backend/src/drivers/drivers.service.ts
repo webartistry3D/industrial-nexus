@@ -198,6 +198,17 @@ export class DriversService {
       },
     });
 
+    // Propagate vehicleId change to active trips so clients see the correct vehicle
+    if (updateDriverDto.vehicleId !== undefined) {
+      await this.prisma.trip.updateMany({
+        where: {
+          driverId: id,
+          status: { notIn: ['DELIVERED', 'CANCELLED'] },
+        },
+        data: { vehicleId: updateDriverDto.vehicleId },
+      });
+    }
+
     await this.auditService.log({
       userId,
       action: 'UPDATE',

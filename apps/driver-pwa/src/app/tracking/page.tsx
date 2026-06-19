@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -10,6 +10,7 @@ import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { ArrowLeft, MapPin, Navigation, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
+import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 
 export default function TrackingPage() {
   const router = useRouter();
@@ -17,18 +18,47 @@ export default function TrackingPage() {
   const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [trackingHistory, setTrackingHistory] = useState<any[]>([]);
+  const [geofenceEvents, setGeofenceEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const currentTripRef = useRef<Trip | null>(null);
+  const { subscribe, isConnected } = useTrackingWebSocket();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
+    currentTripRef.current = currentTrip;
+  }, [currentTrip]);
+
+  // Subscribe to WebSocket room when trip is loaded
+  useEffect(() => {
+    if (currentTrip?.id && isConnected) {
+      subscribe(`trip:${currentTrip.id}`, () => {});
+    }
+  }, [currentTrip?.id, isConnected, subscribe]);
+
+  // Listen for real-time location and geofence events from WebSocket
+  useEffect(() => {
+    subscribe('location:update', (data: any) => {
+      if (data.tripId === currentTripRef.current?.id) {
+        setCurrentLocation({ lat: data.lat, lng: data.lng });
+        setTrackingHistory(prev => [...prev, { lat: data.lat, lng: data.lng, timestamp: data.timestamp }]);
+      }
+    });
+    subscribe('geofence:event', (data: any) => {
+      if (data.tripId === currentTripRef.current?.id) {
+        setGeofenceEvents(prev => [data, ...prev].slice(0, 10));
+      }
+    });
+  }, [subscribe]);
+
+  useEffect(() => {
     if (user) {
       fetchActiveTrip();
-      // Get current location
+      // Watch for location updates and send to backend
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -40,24 +70,20 @@ export default function TrackingPage() {
           (err) => console.error('Geolocation error:', err)
         );
         
-        // Watch for location updates
         const watchId = navigator.geolocation.watchPosition(
           (position) => {
-            setCurrentLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-            // Update location to server if on active trip
-            if (currentTrip?.status === 'IN_TRANSIT') {
+            const trip = currentTripRef.current;
+            if (trip?.status === 'IN_TRANSIT') {
               api.updateLocation(
-                currentTrip.id,
+                trip.id,
                 position.coords.latitude,
                 position.coords.longitude,
                 position.coords.accuracy
               );
             }
           },
-          (err) => console.error('Geolocation watch error:', err)
+          (err) => console.error('Geolocation watch error:', err),
+          { enableHighAccuracy: true, maximumAge: 10000 }
         );
 
         return () => navigator.geolocation.clearWatch(watchId);
@@ -98,11 +124,10 @@ export default function TrackingPage() {
     setRefreshing(false);
   };
 
-  const mapCenter = currentLocation || currentTrip?.order?.deliveryLocation
-    ? { 
-        lat: currentLocation?.lat || currentTrip.order.deliveryLocation.lat, 
-        lng: currentLocation?.lng || currentTrip.order.deliveryLocation.lng 
-      }
+  const mapCenter = currentLocation
+    ? { lat: currentLocation.lat, lng: currentLocation.lng }
+    : currentTrip?.order?.deliveryLocation
+    ? { lat: currentTrip.order.deliveryLocation.lat, lng: currentTrip.order.deliveryLocation.lng }
     : { lat: 6.5244, lng: 3.3792 };
 
   const polyline = trackingHistory.length > 0
@@ -204,18 +229,49 @@ export default function TrackingPage() {
               </div>
             </div>
 
-            {/* GPS Status */}
+            {/* GPS & WebSocket Status */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${currentLocation ? 'bg-green-500' : 'bg-red-500'}`} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">GPS Status</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {currentLocation ? 'Active' : 'Not Available'}
-                  </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${currentLocation ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">GPS Status</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {currentLocation ? 'Active' : 'Not Available'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{isConnected ? 'Live' : 'Connecting...'}</p>
                 </div>
               </div>
             </div>
+
+            {/* Geofence Events */}
+            {geofenceEvents.length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+                <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm">Geofence Events</h3>
+                <div className="space-y-2">
+                  {geofenceEvents.map((evt, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm">
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        evt.eventType === 'RADIUS_C_ENTERED' ? 'bg-green-500' :
+                        evt.eventType === 'RADIUS_B_ENTERED' ? 'bg-orange-500' :
+                        evt.eventType === 'RADIUS_A_ENTERED' ? 'bg-yellow-500' :
+                        'bg-blue-500'
+                      }`} />
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">
+                        {evt.eventType.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-gray-400 dark:text-gray-500 ml-auto text-xs">
+                        {evt.distance ? `${Math.round(evt.distance)}m` : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

@@ -101,7 +101,7 @@ class ApiClient {
 
   // GPS Tracking
   async updateLocation(tripId: string, lat: number, lng: number, accuracy: number) {
-    const response = await this.client.post(`/trips/${tripId}/location`, {
+    const response = await this.client.post(`/tracking/trips/${tripId}/location`, {
       lat,
       lng,
       accuracy,

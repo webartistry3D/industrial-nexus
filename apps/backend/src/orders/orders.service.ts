@@ -72,7 +72,7 @@ export class OrdersService {
   }
 
   async findAll(filterDto: OrderFilterDto, userId: string, userRole: UserRole) {
-    const { page = 1, limit = 10, status, priority, search, clientId } = filterDto;
+    const { page = 1, limit = 10, status, priority, search, clientId, kittingStatus } = filterDto;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -86,6 +86,7 @@ export class OrdersService {
 
     if (status) where.status = status;
     if (priority) where.priority = priority;
+    if (kittingStatus) where.kittingStatus = kittingStatus;
     if (search) {
       where.OR = [
         { orderNumber: { contains: search, mode: 'insensitive' } },
@@ -120,6 +121,12 @@ export class OrdersService {
                     select: {
                       firstName: true,
                       lastName: true,
+                    },
+                  },
+                  vehicle: {
+                    select: {
+                      id: true,
+                      plateNumber: true,
                     },
                   },
                 },
@@ -187,6 +194,7 @@ export class OrdersService {
                     phoneNumber: true,
                   },
                 },
+                vehicle: true,
               },
             },
             vehicle: true,
@@ -261,7 +269,7 @@ export class OrdersService {
     return this.findOne(id);
   }
 
-  async changeStatus(id: string, newStatus: OrderStatus, userId: string, userRole: UserRole, notes?: string) {
+  async changeStatus(id: string, newStatus: OrderStatus, userId: string, userRole: UserRole, notes?: string, driverId?: string) {
     const order = await this.findOne(id, userId, userRole);
     const currentStatus = order.status;
 
@@ -284,6 +292,32 @@ export class OrdersService {
     if (newStatus === OrderStatus.APPROVED) updateData.approvedAt = new Date();
     if (newStatus === OrderStatus.CANCELLED) updateData.cancelledAt = new Date();
 
+    // Handle driver assignment for ASSIGNED status
+    if (newStatus === OrderStatus.ASSIGNED && driverId) {
+      // Check if driver exists and is active - look up by userId since frontend passes user IDs
+      const driver = await this.prisma.driver.findFirst({
+        where: { userId: driverId },
+      });
+
+      if (!driver) {
+        throw new NotFoundException('Driver not found');
+      }
+
+      if (driver.status !== 'ACTIVE') {
+        throw new BadRequestException('Driver is not active');
+      }
+
+      // Create trip when assigning driver
+      await this.prisma.trip.create({
+        data: {
+          orderId: id,
+          driverId: driver.id,
+          vehicleId: driver.vehicleId || null,
+          status: 'ASSIGNED',
+        },
+      });
+    }
+
     const updatedOrder = await this.prisma.order.update({
       where: { id },
       data: updateData,
@@ -295,7 +329,7 @@ export class OrdersService {
       entityType: 'ORDER',
       entityId: id,
       oldValue: { status: currentStatus },
-      newValue: { status: newStatus, notes },
+      newValue: { status: newStatus, notes, driverId },
     });
 
     return updatedOrder;
@@ -313,8 +347,8 @@ export class OrdersService {
     }
 
     // Check if driver exists and is active
-    const driver = await this.prisma.driver.findUnique({
-      where: { id: driverId },
+    const driver = await this.prisma.driver.findFirst({
+      where: { userId: driverId },
       include: { user: true },
     });
 
@@ -338,8 +372,8 @@ export class OrdersService {
     await this.prisma.trip.create({
       data: {
         orderId: id,
-        driverId,
-        vehicleId: driver.vehicleId || '', // Use driver's default vehicle if available
+        driverId: driver.id,
+        vehicleId: driver.vehicleId || null,
         status: 'ASSIGNED',
       },
     });

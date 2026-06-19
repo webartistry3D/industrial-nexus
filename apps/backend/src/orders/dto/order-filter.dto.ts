@@ -1,6 +1,6 @@
 import { IsOptional, IsEnum, IsString, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrderStatus, Priority } from '@prisma/client';
+import { OrderStatus, Priority, KittingStatus } from '@prisma/client';
 
 export class OrderFilterDto {
   @IsOptional()
@@ -22,6 +22,10 @@ export class OrderFilterDto {
   @IsOptional()
   @IsEnum(Priority)
   priority?: Priority;
+
+  @IsOptional()
+  @IsEnum(KittingStatus)
+  kittingStatus?: KittingStatus;
 
   @IsOptional()
   @IsString()

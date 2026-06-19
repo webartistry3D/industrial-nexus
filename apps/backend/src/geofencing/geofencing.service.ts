@@ -44,8 +44,7 @@ export class GeofencingService {
       }
     }
 
-    // Store GPS point
-    await this.storeGPSPoint(tripId, point);
+    // GPS point is already stored by TrackingService - no need to duplicate here
 
     // Check geofences
     const geofenceResults = await this.checkGeofences(tripId, point);
@@ -53,7 +52,7 @@ export class GeofencingService {
     // Emit events
     for (const result of geofenceResults) {
       if (result.eventType) {
-        await this.emitGeofenceEvent(tripId, result);
+        await this.emitGeofenceEvent(tripId, result, point);
       }
     }
 
@@ -129,7 +128,7 @@ export class GeofencingService {
     return results;
   }
 
-  private async emitGeofenceEvent(tripId: string, result: GeofenceCheckResult) {
+  private async emitGeofenceEvent(tripId: string, result: GeofenceCheckResult, point: GPSPoint) {
     if (!result.eventType) return;
 
     const cooldownKey = `geofence:${tripId}:${result.eventType}`;
@@ -142,19 +141,35 @@ export class GeofencingService {
     // Set cooldown
     await this.redis.setex(cooldownKey, this.COOLDOWN_SECONDS, '1');
 
-    // Store event
-    if (result.geofenceId) {
-      await this.prisma.geofenceEvent.create({
-        data: {
-          tripId,
-          geofenceId: result.geofenceId,
-          eventType: result.eventType,
-          lat: 0, // Would come from actual GPS point
-          lng: 0,
-          triggeredAt: new Date(),
-        },
+    // Store event — radius events use a synthetic system geofence record if no geofenceId
+    let geofenceId = result.geofenceId;
+    if (!geofenceId) {
+      const systemName = `system:${result.eventType}`;
+      let systemGeofence = await this.prisma.geofence.findFirst({
+        where: { name: systemName },
       });
+      if (!systemGeofence) {
+        systemGeofence = await this.prisma.geofence.create({
+          data: {
+            name: systemName,
+            type: 'RADIUS_A' as any,
+            isActive: true,
+          },
+        });
+      }
+      geofenceId = systemGeofence.id;
     }
+
+    await this.prisma.geofenceEvent.create({
+      data: {
+        tripId,
+        geofenceId,
+        eventType: result.eventType,
+        lat: point.lat,
+        lng: point.lng,
+        triggeredAt: new Date(),
+      },
+    });
 
     // Special handling for arrival
     if (result.eventType === GeofenceEventType.RADIUS_C_ENTERED) {
@@ -164,11 +179,14 @@ export class GeofencingService {
       });
     }
 
-    // Publish to Redis for real-time updates
-    await this.redis.publish(`trip:${tripId}:geofence`, JSON.stringify({
+    // Publish to 'geofence:event' — the channel the TrackingGateway subscribes to
+    await this.redis.publish('geofence:event', JSON.stringify({
+      tripId,
       eventType: result.eventType,
       timestamp: new Date().toISOString(),
       distance: result.distance,
+      lat: point.lat,
+      lng: point.lng,
     }));
   }
 
@@ -178,18 +196,6 @@ export class GeofencingService {
       orderBy: { timestamp: 'desc' },
     });
     return point;
-  }
-
-  private async storeGPSPoint(tripId: string, point: GPSPoint) {
-    await this.prisma.trackingPoint.create({
-      data: {
-        tripId,
-        lat: point.lat,
-        lng: point.lng,
-        accuracy: point.accuracy,
-        timestamp: new Date(),
-      },
-    });
   }
 
   private calculateDistance(p1: GPSPoint, p2: GPSPoint): number {

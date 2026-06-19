@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { Truck, Package, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 
 interface Shipment {
   id: string;
@@ -19,8 +20,9 @@ interface Shipment {
     status: string;
     driver?: {
       user: { firstName: string; lastName: string };
-      vehicle: { plateNumber: string };
+      vehicle?: { plateNumber: string } | null;
     };
+    vehicle?: { plateNumber: string } | null;
   };
 }
 
@@ -31,6 +33,10 @@ export default function TrackingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [trackingData, setTrackingData] = useState<any>(null);
+  const [liveLocation, setLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [geofenceEvents, setGeofenceEvents] = useState<any[]>([]);
+  const selectedShipmentRef = useRef<Shipment | null>(null);
+  const { subscribe, isConnected } = useTrackingWebSocket();
 
   // Scroll to top on page load
   useEffect(() => {
@@ -41,18 +47,45 @@ export default function TrackingPage() {
     fetchShipments();
   }, []);
 
+  // Keep ref in sync to avoid stale closures in WS handlers
+  useEffect(() => {
+    selectedShipmentRef.current = selectedShipment;
+  }, [selectedShipment]);
+
   useEffect(() => {
     if (selectedShipment?.trip?.id) {
+      setLiveLocation(null);
+      setGeofenceEvents([]);
       fetchTrackingData(selectedShipment.trip.id);
-      // Poll every 30 seconds for updates
+
+      // Subscribe to trip-specific WebSocket room
+      subscribe(`trip:${selectedShipment.trip.id}`, () => {});
+
+      // Poll every 30 seconds as fallback
       const interval = setInterval(() => {
-        if (selectedShipment?.trip?.id) {
-          fetchTrackingData(selectedShipment.trip.id);
+        if (selectedShipmentRef.current?.trip?.id) {
+          fetchTrackingData(selectedShipmentRef.current.trip.id);
         }
       }, 30000);
       return () => clearInterval(interval);
     }
   }, [selectedShipment]);
+
+  // WebSocket handlers for live location and geofence events
+  useEffect(() => {
+    subscribe('location:update', (data: any) => {
+      const sel = selectedShipmentRef.current;
+      if (sel?.trip?.id === data.tripId) {
+        setLiveLocation({ lat: data.lat, lng: data.lng });
+      }
+    });
+    subscribe('geofence:event', (data: any) => {
+      const sel = selectedShipmentRef.current;
+      if (sel?.trip?.id === data.tripId) {
+        setGeofenceEvents(prev => [data, ...prev].slice(0, 10));
+      }
+    });
+  }, [subscribe]);
 
   const fetchShipments = async () => {
     try {
@@ -81,9 +114,11 @@ export default function TrackingPage() {
   };
 
   const activeShipments = shipments.filter(s => s.trip?.status === 'IN_TRANSIT').length;
-  const mapCenter = trackingData?.location
+  // Prefer live WebSocket location; fall back to last HTTP-polled location
+  const vehiclePosition = liveLocation || (trackingData?.location
     ? { lat: trackingData.location.lat, lng: trackingData.location.lng }
-    : { lat: 6.5244, lng: 3.3792 };
+    : null);
+  const mapCenter = vehiclePosition || { lat: 6.5244, lng: 3.3792 };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -182,15 +217,15 @@ export default function TrackingPage() {
                 {/* Map */}
                 <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                   <div className="h-[400px]">
-                    {trackingData ? (
+                    {trackingData || vehiclePosition ? (
                       <GoogleMapWrapper center={mapCenter} zoom={12}>
-                        {trackingData.location && (
+                        {vehiclePosition && (
                           <MapMarker
-                            position={{ lat: trackingData.location.lat, lng: trackingData.location.lng }}
+                            position={vehiclePosition}
                             type="vehicle"
                           />
                         )}
-                        {trackingData.route?.polyline && (
+                        {trackingData?.route?.polyline && (
                           <MapPolyline path={trackingData.route.polyline} />
                         )}
                         <MapMarker
@@ -258,18 +293,44 @@ export default function TrackingPage() {
                               {selectedShipment.trip.driver.user.firstName} {selectedShipment.trip.driver.user.lastName}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {selectedShipment.trip.driver.vehicle?.plateNumber || 'N/A'}
+                              Vehicle: {(selectedShipment.trip.vehicle ?? selectedShipment.trip.driver.vehicle)?.plateNumber || 'N/A'}
                             </p>
                           </div>
                         </div>
                       </div>
                     )}
 
-                    {trackingData?.location && (
+                    {(trackingData?.location || liveLocation) && (
                       <div className="pt-4 border-t border-gray-200 dark:border-slate-700">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <Clock className="w-4 h-4" />
-                          Last updated: {new Date(trackingData.location.timestamp).toLocaleString()}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Clock className="w-4 h-4" />
+                            {liveLocation ? 'Live tracking active' : `Last updated: ${new Date(trackingData.location.timestamp).toLocaleString()}`}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{isConnected ? 'Live' : 'Polling'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {geofenceEvents.length > 0 && (
+                      <div className="pt-4 border-t border-gray-200 dark:border-slate-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Geofence Events</p>
+                        <div className="space-y-1">
+                          {geofenceEvents.map((evt, i) => (
+                            <div key={i} className="flex items-center gap-2 text-sm">
+                              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                evt.eventType === 'RADIUS_C_ENTERED' ? 'bg-green-500' :
+                                evt.eventType === 'RADIUS_B_ENTERED' ? 'bg-orange-500' :
+                                evt.eventType === 'RADIUS_A_ENTERED' ? 'bg-yellow-500' :
+                                'bg-blue-500'
+                              }`} />
+                              <span className="text-gray-700 dark:text-gray-300">{evt.eventType.replace(/_/g, ' ')}</span>
+                              {evt.distance > 0 && <span className="text-gray-400 ml-auto text-xs">{Math.round(evt.distance)}m away</span>}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
