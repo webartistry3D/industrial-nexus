@@ -53,4 +53,4 @@ services:
 
 databases:
   - name: industrial-nexus-db
-    plan: starter
+    plan: free
