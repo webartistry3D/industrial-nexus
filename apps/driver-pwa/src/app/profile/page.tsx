@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { User, Driver, KycDocument, KycDocumentType, KycDocumentStatus } from '@/types';
+import { User, Driver, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
 import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 
@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [showKycSection, setShowKycSection] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedDocType, setSelectedDocType] = useState<KycDocumentType>(KycDocumentType.GOVERNMENT_ID);
+  const [selectedDocType, setSelectedDocType] = useState<KycDocumentTypeValue>(KycDocumentType.GOVERNMENT_ID);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function ProfilePage() {
     }
   };
 
-  const getDocumentStatusIcon = (status: KycDocumentStatus) => {
+  const getDocumentStatusIcon = (status: KycDocumentStatusValue) => {
     switch (status) {
       case KycDocumentStatus.VERIFIED:
         return <CheckCircle className="w-5 h-5 text-green-500" />;
@@ -115,7 +115,7 @@ export default function ProfilePage() {
     }
   };
 
-  const getDocumentTypeLabel = (type: KycDocumentType) => {
+  const getDocumentTypeLabel = (type: KycDocumentTypeValue) => {
     switch (type) {
       case KycDocumentType.GOVERNMENT_ID:
         return 'Government ID';
@@ -125,7 +125,7 @@ export default function ProfilePage() {
         return 'Proof of Address';
       case KycDocumentType.VEHICLE_REGISTRATION:
         return 'Vehicle Registration';
-      case KycDocumentType.INSURANCE_CERTIFICATE:
+      case KycDocumentType.VEHICLE_INSURANCE:
         return 'Insurance Certificate';
       case KycDocumentType.PROFESSIONAL_CERTIFICATION:
         return 'Professional Certification';
@@ -263,14 +263,14 @@ export default function ProfilePage() {
                 </label>
                 <select
                   value={selectedDocType}
-                  onChange={(e) => setSelectedDocType(e.target.value as KycDocumentType)}
+                  onChange={(e) => setSelectedDocType(e.target.value as KycDocumentTypeValue)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value={KycDocumentType.GOVERNMENT_ID}>Government ID</option>
                   <option value={KycDocumentType.DRIVERS_LICENSE}>Driver's License</option>
                   <option value={KycDocumentType.PROOF_OF_ADDRESS}>Proof of Address</option>
                   <option value={KycDocumentType.VEHICLE_REGISTRATION}>Vehicle Registration</option>
-                  <option value={KycDocumentType.INSURANCE_CERTIFICATE}>Insurance Certificate</option>
+                  <option value={KycDocumentType.VEHICLE_INSURANCE}>Insurance Certificate</option>
                   <option value={KycDocumentType.PROFESSIONAL_CERTIFICATION}>Professional Certification</option>
                 </select>
               </div>
