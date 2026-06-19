@@ -5,6 +5,8 @@ services:
     buildCommand: npm install && cd apps/backend && npm install && npx prisma generate && npm run build
     startCommand: cd apps/backend && node dist/src/main
     envVars:
+      - key: RENDER_DATABASE_URL
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: REDIS_ENABLED
