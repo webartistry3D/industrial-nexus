@@ -6,9 +6,7 @@ services:
     startCommand: cd apps/backend && node dist/src/main
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: industrial-nexus-db
-          property: connectionString
+        sync: false
       - key: REDIS_ENABLED
         value: "false"
       - key: JWT_SECRET
@@ -50,7 +48,3 @@ services:
         value: https://industrial-nexus-api.onrender.com
       - key: NEXT_PUBLIC_WS_URL
         value: https://industrial-nexus-api.onrender.com
-
-databases:
-  - name: industrial-nexus-db
-    plan: free
