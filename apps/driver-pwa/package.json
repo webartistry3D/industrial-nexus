@@ -10,12 +10,14 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
     "axios": "^1.6.7",
     "idb": "^8.0.0",
     "lucide-react": "^0.344.0",
     "next": "^14.2.29",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.0",

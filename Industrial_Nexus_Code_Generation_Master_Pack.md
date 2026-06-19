@@ -1,12 +1,12 @@
 # INDUSTRIAL NEXUS LITE — CODE GENERATION MASTER PACK v2.0
 ## (Implementation-Grade Engineering Blueprint)
-## 6-Week Claude Code Production Campaign
+## 6-Week Production Campaign
 
 ---
 
 # 0. SYSTEM OVERVIEW
 
-Industrial Nexus Lite is a production-grade B2B logistics execution system built for the Lagos–Ogun industrial corridor.
+Industrial Nexus is a production-grade B2B logistics execution system built for the Lagos–Ogun industrial corridor.
 
 ## Core Philosophy
 Transform logistics from:
