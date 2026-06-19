@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -27,7 +27,7 @@ const KITTING_STATUS_OPTIONS = [
   { value: 'DISPATCH_READY', label: 'Dispatch Ready' },
 ];
 
-export default function OrdersPage() {
+function OrdersPageContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -505,5 +505,13 @@ export default function OrdersPage() {
         <Plus className="w-6 h-6" />
       </button>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }
