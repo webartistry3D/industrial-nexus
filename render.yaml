@@ -1,9 +1,11 @@
 services:
+  # ─── NestJS Backend ───────────────────────────────────────────────────────
   - type: web
     name: industrial-nexus-api
     env: node
-    buildCommand: cd apps/backend && npm install && npm run build
-    startCommand: cd apps/backend && npm start
+    rootDir: apps/backend
+    buildCommand: npm install && npm run build && npx prisma generate
+    startCommand: npm run start:prod
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -20,24 +22,53 @@ services:
         generateValue: true
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
 
+  # ─── Admin PWA ────────────────────────────────────────────────────────────
   - type: web
     name: industrial-nexus-admin
-    env: static
-    buildCommand: cd apps/admin-pwa && npm install && npm run build
-    staticPublishPath: apps/admin-pwa/dist
+    env: node
+    rootDir: apps/admin-pwa
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://industrial-nexus-api.onrender.com
+      - key: NEXT_PUBLIC_WS_URL
+        value: https://industrial-nexus-api.onrender.com
+      - key: PORT
+        value: 10000
 
+  # ─── Client PWA ───────────────────────────────────────────────────────────
+  - type: web
+    name: industrial-nexus-client
+    env: node
+    rootDir: apps/client-pwa
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://industrial-nexus-api.onrender.com
+      - key: NEXT_PUBLIC_WS_URL
+        value: https://industrial-nexus-api.onrender.com
+      - key: PORT
+        value: 10000
+
+  # ─── Driver PWA ───────────────────────────────────────────────────────────
   - type: web
     name: industrial-nexus-driver
-    env: static
-    buildCommand: cd apps/driver-pwa && npm install && npm run build
-    staticPublishPath: apps/driver-pwa/dist
+    env: node
+    rootDir: apps/driver-pwa
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://industrial-nexus-api.onrender.com
+      - key: NEXT_PUBLIC_WS_URL
+        value: https://industrial-nexus-api.onrender.com
+      - key: PORT
+        value: 10000
 
 databases:
   - name: industrial-nexus-db
