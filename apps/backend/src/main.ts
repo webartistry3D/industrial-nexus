@@ -13,9 +13,14 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true,
   }));
-  
+
+  const configService = app.get(ConfigService);
+
+  const corsOrigins = configService.get<string>('CORS_ORIGIN', '')
+    ? configService.get<string>('CORS_ORIGIN', '').split(',')
+    : true;
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3003'],
+    origin: corsOrigins,
     credentials: true,
   });
 
@@ -24,7 +29,6 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3001);
   
   await app.listen(port);

@@ -2,7 +2,7 @@ services:
   - type: web
     name: industrial-nexus-api
     env: node
-    buildCommand: cd apps/backend && npm install && npm run build && npx prisma generate
+    buildCommand: npm install && cd apps/backend && npx nest build && npx prisma generate
     startCommand: cd apps/backend && node dist/src/main
     envVars:
       - key: DATABASE_URL
@@ -15,11 +15,13 @@ services:
         generateValue: true
       - key: NODE_ENV
         value: production
+      - key: CORS_ORIGIN
+        value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com
 
   - type: web
     name: industrial-nexus-admin
     env: node
-    buildCommand: cd apps/admin-pwa && npm install && npm run build
+    buildCommand: npm install && cd apps/admin-pwa && npm run build
     startCommand: cd apps/admin-pwa && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
@@ -30,7 +32,7 @@ services:
   - type: web
     name: industrial-nexus-client
     env: node
-    buildCommand: cd apps/client-pwa && npm install && npm run build
+    buildCommand: npm install && cd apps/client-pwa && npm run build
     startCommand: cd apps/client-pwa && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
@@ -41,7 +43,7 @@ services:
   - type: web
     name: industrial-nexus-driver
     env: node
-    buildCommand: cd apps/driver-pwa && npm install && npm run build
+    buildCommand: npm install && cd apps/driver-pwa && npm run build
     startCommand: cd apps/driver-pwa && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
