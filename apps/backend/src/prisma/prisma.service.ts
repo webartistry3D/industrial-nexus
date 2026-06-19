@@ -9,10 +9,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private usingFallback = false;
 
   constructor() {
+    const renderUrl = process.env.RENDER_DATABASE_URL || process.env.DATABASE_URL;
     super({
       datasources: {
         db: {
-          url: this.renderDatabaseUrl,
+          url: renderUrl,
         },
       },
     });
