@@ -10,10 +10,7 @@ services:
           name: industrial-nexus-db
           property: connectionString
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: industrial-nexus-redis
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
@@ -56,8 +53,4 @@ services:
 
 databases:
   - name: industrial-nexus-db
-    plan: starter
-
-redis:
-  - name: industrial-nexus-redis
     plan: starter
