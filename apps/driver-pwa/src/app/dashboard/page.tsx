@@ -23,6 +23,13 @@ export default function Dashboard() {
   const [thisWeekCompleted, setThisWeekCompleted] = useState(0);
   const [onTimeRate, setOnTimeRate] = useState(0);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -114,6 +121,16 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="p-4 space-y-4">
+        {/* Greeting */}
+        <div className="p-4">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            {getGreeting()}, {user?.firstName || 'Driver'}
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Here's your performance overview for today
+          </p>
+        </div>
+
         {/* Top Row: Clock & Weather */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">

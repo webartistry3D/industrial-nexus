@@ -34,6 +34,39 @@ export interface Location {
 
 export type HandlingTag = 'FRAGILE' | 'HEAVY' | 'CHEMICAL' | 'HAZARDOUS' | 'TEMPERATURE_SENSITIVE' | 'VERTICAL_STORAGE';
 
+export const KycDocumentType = {
+  GOVERNMENT_ID: 'GOVERNMENT_ID',
+  DRIVERS_LICENSE: 'DRIVERS_LICENSE',
+  PROOF_OF_ADDRESS: 'PROOF_OF_ADDRESS',
+  VEHICLE_REGISTRATION: 'VEHICLE_REGISTRATION',
+  INSURANCE_CERTIFICATE: 'INSURANCE_CERTIFICATE',
+  PROFESSIONAL_CERTIFICATION: 'PROFESSIONAL_CERTIFICATION',
+} as const;
+
+export type KycDocumentTypeValue = typeof KycDocumentType[keyof typeof KycDocumentType];
+
+export const KycDocumentStatus = {
+  PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type KycDocumentStatusValue = typeof KycDocumentStatus[keyof typeof KycDocumentStatus];
+
+export interface KycDocument {
+  id: string;
+  driverId: string;
+  documentType: KycDocumentTypeValue;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  status: KycDocumentStatusValue;
+  rejectionReason?: string;
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
 export interface Trip {
   id: string;
   orderId: string;

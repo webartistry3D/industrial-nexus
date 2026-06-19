@@ -99,11 +99,13 @@ export default function DriverDetailPage() {
   const handleVehicleAssign = async (vehicleId: string | null) => {
     try {
       setUpdating(true);
+      console.log('[Vehicle Assignment] Assigning vehicle:', vehicleId, 'to driver:', driverId);
       await api.updateDriver(driverId, { vehicleId });
       fetchDriver();
-    } catch (err) {
-      console.error('Failed to assign vehicle:', err);
-      alert('Failed to assign vehicle');
+    } catch (err: any) {
+      console.error('[Vehicle Assignment] Failed to assign vehicle:', err);
+      const message = err.response?.data?.message || err.message || 'Failed to assign vehicle';
+      alert(message);
     } finally {
       setUpdating(false);
     }

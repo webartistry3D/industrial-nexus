@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Sun, Moon, User, LogOut, LogOut as LogOutIcon, Wifi, WifiOff } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PageHeaderProps {
   title?: string;
@@ -17,11 +17,18 @@ export function PageHeader({ title, subtitle, showOnlineStatus = false, isOnline
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  
-  const isDark = document.documentElement.classList.contains('dark');
-  
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
+
   const toggleTheme = () => {
+    const newIsDark = !document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark');
+    setIsDark(newIsDark);
   };
 
   const handleLogout = () => {

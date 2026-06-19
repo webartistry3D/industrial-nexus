@@ -110,7 +110,7 @@ class ApiClient {
   }
 
   // Orders
-  async getOrders(params?: { status?: string; page?: number; limit?: number }) {
+  async getOrders(params?: { status?: string; kittingStatus?: string; page?: number; limit?: number }) {
     const response = await this.client.get('/orders', { params });
     return response.data;
   }
@@ -162,8 +162,18 @@ class ApiClient {
   }
 
   async assignDriver(id: string, driverId: string) {
-    const response = await this.client.post(`/orders/${id}/assign-driver`, { driverId });
-    return response.data;
+    const url = `/orders/${id}/status`;
+    console.log('[API] Assign Driver - URL:', url);
+    console.log('[API] Assign Driver - Payload:', { status: 'ASSIGNED', driverId });
+    try {
+      const response = await this.client.post(url, { status: 'ASSIGNED', driverId });
+      console.log('[API] Assign Driver - Response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('[API] Assign Driver - Error:', error);
+      console.error('[API] Assign Driver - Error Response:', error.response);
+      throw error;
+    }
   }
 
   async startOrderTrip(id: string) {
@@ -335,6 +345,26 @@ class ApiClient {
 
   async getVehicle(id: string) {
     const response = await this.client.get(`/vehicles/${id}`);
+    return response.data;
+  }
+
+  async createVehicle(data: { plateNumber: string; category: string; capacityKg: number; isPartitioned: boolean }) {
+    const response = await this.client.post('/vehicles', data);
+    return response.data;
+  }
+
+  async updateVehicle(id: string, data: { plateNumber?: string; category?: string; capacityKg?: number; status?: string; isPartitioned?: boolean }) {
+    const response = await this.client.patch(`/vehicles/${id}`, data);
+    return response.data;
+  }
+
+  async deactivateVehicle(id: string) {
+    const response = await this.client.delete(`/vehicles/${id}`);
+    return response.data;
+  }
+
+  async getAuditLogs(params?: { entityType?: string; limit?: number }) {
+    const response = await this.client.get('/audit', { params });
     return response.data;
   }
 

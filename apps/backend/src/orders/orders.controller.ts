@@ -62,22 +62,6 @@ export class OrdersController {
     return this.ordersService.update(id, updateOrderDto, user.userId, user.role);
   }
 
-  @Post(':id/status')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
-  changeStatus(
-    @Param('id') id: string,
-    @Body() changeStatusDto: ChangeStatusDto,
-    @CurrentUser() user: { userId: string; role: UserRole },
-  ) {
-    return this.ordersService.changeStatus(
-      id,
-      changeStatusDto.status,
-      user.userId,
-      user.role,
-      changeStatusDto.notes,
-    );
-  }
-
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   cancel(
@@ -137,12 +121,12 @@ export class OrdersController {
     return this.ordersService.changeStatus(id, 'DISPATCH_READY', user.userId, user.role);
   }
 
-  @Post(':id/assign-driver')
+  @Post(':id/assignDriver')
   @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
   @HttpCode(HttpStatus.OK)
   assignDriver(
     @Param('id') id: string,
-    @Body('driverId') driverId: string,
+    @Query('driverId') driverId: string,
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
     return this.ordersService.assignDriver(id, driverId, user.userId, user.role);
@@ -164,5 +148,22 @@ export class OrdersController {
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
     return this.ordersService.changeStatus(id, 'DELIVERED', user.userId, user.role);
+  }
+
+  @Post(':id/status')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  changeStatus(
+    @Param('id') id: string,
+    @Body() changeStatusDto: ChangeStatusDto,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.ordersService.changeStatus(
+      id,
+      changeStatusDto.status,
+      user.userId,
+      user.role,
+      changeStatusDto.notes,
+      changeStatusDto.driverId,
+    );
   }
 }

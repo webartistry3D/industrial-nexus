@@ -1,7 +1,13 @@
 import { PrismaClient, UserRole, UserStatus, DriverStatus, KycStatus, DriverAvailability, VehicleCategory, VehicleStatus, OrderStatus, Priority, KittingStatus, TripStatus, HandlingTagType, WeightStatus, GeofenceType, GeofenceEventType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { v5 as uuidv5 } from 'uuid';
 
 const prisma = new PrismaClient();
+
+// Deterministic UUID generation namespace for seed data
+// This ensures the same seed always produces the same UUIDs, maintaining stable relationships
+const SEED_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+const id = (seed: string): string => uuidv5(seed, SEED_NAMESPACE);
 
 // Realistic Nigerian locations (Lagos and surrounding areas)
 const locations = {
@@ -50,7 +56,7 @@ async function main() {
   // Admin Users
   const adminUsers = [
     {
-      id: 'admin-1',
+      id: id('admin-1'),
       email: 'admin@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Adebayo',
@@ -61,7 +67,7 @@ async function main() {
       lastLoginAt: new Date(),
     },
     {
-      id: 'admin-2',
+      id: id('admin-2'),
       email: 'operations@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Chinedu',
@@ -72,7 +78,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 3600000),
     },
     {
-      id: 'admin-3',
+      id: id('admin-3'),
       email: 'supervisor@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Fatima',
@@ -91,7 +97,7 @@ async function main() {
   // Client Users
   const clientUsers = [
     {
-      id: 'client-1',
+      id: id('client-1'),
       email: 'client1@company.com',
       passwordHash: hashedPassword,
       firstName: 'Emeka',
@@ -102,7 +108,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 7200000),
     },
     {
-      id: 'client-2',
+      id: id('client-2'),
       email: 'client2@logistics.ng',
       passwordHash: hashedPassword,
       firstName: 'Aisha',
@@ -113,7 +119,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 86400000),
     },
     {
-      id: 'client-3',
+      id: id('client-3'),
       email: 'client3@manufacturing.com',
       passwordHash: hashedPassword,
       firstName: 'Oluwaseun',
@@ -124,7 +130,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 172800000),
     },
     {
-      id: 'client-4',
+      id: id('client-4'),
       email: 'client4@construction.ng',
       passwordHash: hashedPassword,
       firstName: 'Chukwudi',
@@ -143,7 +149,7 @@ async function main() {
   // Driver Users - Active
   const activeDriverUsers = [
     {
-      id: 'driver-1',
+      id: id('driver-1'),
       email: 'driver1@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Ibrahim',
@@ -154,7 +160,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 1800000),
     },
     {
-      id: 'driver-2',
+      id: id('driver-2'),
       email: 'driver2@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Chukwuemeka',
@@ -165,7 +171,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 5400000),
     },
     {
-      id: 'driver-3',
+      id: id('driver-3'),
       email: 'driver3@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Aishat',
@@ -176,7 +182,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 10800000),
     },
     {
-      id: 'driver-4',
+      id: id('driver-4'),
       email: 'driver4@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Olanrewaju',
@@ -187,7 +193,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 21600000),
     },
     {
-      id: 'driver-5',
+      id: id('driver-5'),
       email: 'driver5@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Grace',
@@ -206,7 +212,7 @@ async function main() {
   // Driver Users - Inactive
   const inactiveDriverUsers = [
     {
-      id: 'driver-6',
+      id: id('driver-6'),
       email: 'driver6@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Kehinde',
@@ -217,7 +223,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 2592000000), // 30 days ago
     },
     {
-      id: 'driver-7',
+      id: id('driver-7'),
       email: 'driver7@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Nnamdi',
@@ -228,7 +234,7 @@ async function main() {
       lastLoginAt: new Date(Date.now() - 5184000000), // 60 days ago
     },
     {
-      id: 'driver-8',
+      id: id('driver-8'),
       email: 'driver8@industrialnexus.com',
       passwordHash: hashedPassword,
       firstName: 'Zainab',
@@ -251,7 +257,7 @@ async function main() {
 
   const vehicles = [
     {
-      id: 'vehicle-1',
+      id: id('vehicle-1'),
       plateNumber: 'ABC-123-NG',
       category: VehicleCategory.MEDIUM,
       capacityKg: 5000,
@@ -259,7 +265,7 @@ async function main() {
       isPartitioned: true,
     },
     {
-      id: 'vehicle-2',
+      id: id('vehicle-2'),
       plateNumber: 'DEF-456-NG',
       category: VehicleCategory.HEAVY,
       capacityKg: 10000,
@@ -267,7 +273,7 @@ async function main() {
       isPartitioned: true,
     },
     {
-      id: 'vehicle-3',
+      id: id('vehicle-3'),
       plateNumber: 'GHI-789-NG',
       category: VehicleCategory.LIGHT,
       capacityKg: 2000,
@@ -275,7 +281,7 @@ async function main() {
       isPartitioned: false,
     },
     {
-      id: 'vehicle-4',
+      id: id('vehicle-4'),
       plateNumber: 'JKL-012-NG',
       category: VehicleCategory.HEAVY,
       capacityKg: 15000,
@@ -283,7 +289,7 @@ async function main() {
       isPartitioned: true,
     },
     {
-      id: 'vehicle-5',
+      id: id('vehicle-5'),
       plateNumber: 'MNO-345-NG',
       category: VehicleCategory.MEDIUM,
       capacityKg: 6000,
@@ -291,7 +297,7 @@ async function main() {
       isPartitioned: true,
     },
     {
-      id: 'vehicle-6',
+      id: id('vehicle-6'),
       plateNumber: 'PQR-678-NG',
       category: VehicleCategory.LIGHT,
       capacityKg: 2500,
@@ -299,7 +305,7 @@ async function main() {
       isPartitioned: false,
     },
     {
-      id: 'vehicle-7',
+      id: id('vehicle-7'),
       plateNumber: 'STU-901-NG',
       category: VehicleCategory.SPECIALIZED,
       capacityKg: 8000,
@@ -320,49 +326,49 @@ async function main() {
   // Active drivers
   const activeDrivers = [
     {
-      id: 'driver-profile-1',
-      userId: 'driver-1',
+      id: id('driver-profile-1'),
+      userId: id('driver-1'),
       licenseNumber: 'LIC-NG-001234',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
       availability: DriverAvailability.ON_TRIP,
-      vehicleId: 'vehicle-1',
+      vehicleId: id('vehicle-1'),
     },
     {
-      id: 'driver-profile-2',
-      userId: 'driver-2',
+      id: id('driver-profile-2'),
+      userId: id('driver-2'),
       licenseNumber: 'LIC-NG-002345',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
       availability: DriverAvailability.ON_TRIP,
-      vehicleId: 'vehicle-2',
+      vehicleId: id('vehicle-2'),
     },
     {
-      id: 'driver-profile-3',
-      userId: 'driver-3',
+      id: id('driver-profile-3'),
+      userId: id('driver-3'),
       licenseNumber: 'LIC-NG-003456',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
       availability: DriverAvailability.AVAILABLE,
-      vehicleId: 'vehicle-3',
+      vehicleId: id('vehicle-3'),
     },
     {
-      id: 'driver-profile-4',
-      userId: 'driver-4',
+      id: id('driver-profile-4'),
+      userId: id('driver-4'),
       licenseNumber: 'LIC-NG-004567',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
       availability: DriverAvailability.ON_TRIP,
-      vehicleId: 'vehicle-4',
+      vehicleId: id('vehicle-4'),
     },
     {
-      id: 'driver-profile-5',
-      userId: 'driver-5',
+      id: id('driver-profile-5'),
+      userId: id('driver-5'),
       licenseNumber: 'LIC-NG-005678',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
       availability: DriverAvailability.AVAILABLE,
-      vehicleId: 'vehicle-5',
+      vehicleId: id('vehicle-5'),
     },
   ];
 
@@ -373,24 +379,24 @@ async function main() {
   // Inactive drivers
   const inactiveDrivers = [
     {
-      id: 'driver-profile-6',
-      userId: 'driver-6',
+      id: id('driver-profile-6'),
+      userId: id('driver-6'),
       licenseNumber: 'LIC-NG-006789',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.INACTIVE,
       availability: DriverAvailability.OFF_DUTY,
     },
     {
-      id: 'driver-profile-7',
-      userId: 'driver-7',
+      id: id('driver-profile-7'),
+      userId: id('driver-7'),
       licenseNumber: 'LIC-NG-007890',
       kycStatus: KycStatus.REJECTED,
       status: DriverStatus.SUSPENDED,
       availability: DriverAvailability.OFF_DUTY,
     },
     {
-      id: 'driver-profile-8',
-      userId: 'driver-8',
+      id: id('driver-profile-8'),
+      userId: id('driver-8'),
       licenseNumber: 'LIC-NG-008901',
       kycStatus: KycStatus.PENDING,
       status: DriverStatus.INACTIVE,
@@ -409,9 +415,9 @@ async function main() {
 
   const orders = [
     {
-      id: 'order-1',
+      id: id('order-1'),
       orderNumber: 'ORD-2024-001',
-      clientId: 'client-1',
+      clientId: id('client-1'),
       status: OrderStatus.IN_TRANSIT,
       totalWeight: 3500,
       priority: Priority.NORMAL,
@@ -424,9 +430,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 82800000),
     },
     {
-      id: 'order-2',
+      id: id('order-2'),
       orderNumber: 'ORD-2024-002',
-      clientId: 'client-2',
+      clientId: id('client-2'),
       status: OrderStatus.IN_TRANSIT,
       totalWeight: 8500,
       priority: Priority.HIGH,
@@ -439,9 +445,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 39600000),
     },
     {
-      id: 'order-3',
+      id: id('order-3'),
       orderNumber: 'ORD-2024-003',
-      clientId: 'client-3',
+      clientId: id('client-3'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 2200,
       priority: Priority.NORMAL,
@@ -454,9 +460,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 3600000),
     },
     {
-      id: 'order-4',
+      id: id('order-4'),
       orderNumber: 'ORD-2024-004',
-      clientId: 'client-1',
+      clientId: id('client-1'),
       status: OrderStatus.APPROVED,
       totalWeight: 12000,
       priority: Priority.URGENT,
@@ -469,9 +475,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 1800000),
     },
     {
-      id: 'order-5',
+      id: id('order-5'),
       orderNumber: 'ORD-2024-005',
-      clientId: 'client-2',
+      clientId: id('client-2'),
       status: OrderStatus.DELIVERED,
       totalWeight: 4800,
       priority: Priority.NORMAL,
@@ -484,9 +490,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 172440000),
     },
     {
-      id: 'order-6',
+      id: id('order-6'),
       orderNumber: 'ORD-2024-006',
-      clientId: 'client-3',
+      clientId: id('client-3'),
       status: OrderStatus.SUBMITTED,
       totalWeight: 6500,
       priority: Priority.HIGH,
@@ -498,9 +504,9 @@ async function main() {
       submittedAt: new Date(Date.now() - 1800000),
     },
     {
-      id: 'order-7',
+      id: id('order-7'),
       orderNumber: 'ORD-2024-007',
-      clientId: 'client-1',
+      clientId: id('client-1'),
       status: OrderStatus.IN_TRANSIT,
       totalWeight: 2800,
       priority: Priority.NORMAL,
@@ -514,9 +520,9 @@ async function main() {
     },
     // Additional orders for driver1
     {
-      id: 'order-8',
+      id: id('order-8'),
       orderNumber: 'ORD-2024-008',
-      clientId: 'client-1',
+      clientId: id('client-1'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 4200,
       priority: Priority.HIGH,
@@ -529,9 +535,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 1800000),
     },
     {
-      id: 'order-9',
+      id: id('order-9'),
       orderNumber: 'ORD-2024-009',
-      clientId: 'client-2',
+      clientId: id('client-2'),
       status: OrderStatus.DELIVERED,
       totalWeight: 3100,
       priority: Priority.NORMAL,
@@ -544,9 +550,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 258840000),
     },
     {
-      id: 'order-10',
+      id: id('order-10'),
       orderNumber: 'ORD-2024-010',
-      clientId: 'client-3',
+      clientId: id('client-3'),
       status: OrderStatus.DELIVERED,
       totalWeight: 5500,
       priority: Priority.NORMAL,
@@ -559,9 +565,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 431640000),
     },
     {
-      id: 'order-11',
+      id: id('order-11'),
       orderNumber: 'ORD-2024-011',
-      clientId: 'client-1',
+      clientId: id('client-1'),
       status: OrderStatus.DELIVERED,
       totalWeight: 1800,
       priority: Priority.URGENT,
@@ -574,9 +580,9 @@ async function main() {
       approvedAt: new Date(Date.now() - 604440000),
     },
     {
-      id: 'order-12',
+      id: id('order-12'),
       orderNumber: 'ORD-2024-012',
-      clientId: 'client-2',
+      clientId: id('client-2'),
       status: OrderStatus.DELIVERED,
       totalWeight: 7200,
       priority: Priority.HIGH,
@@ -596,18 +602,18 @@ async function main() {
 
   // Add handling tags to orders
   const handlingTags = [
-    { orderId: 'order-1', tag: HandlingTagType.HEAVY },
-    { orderId: 'order-2', tag: HandlingTagType.HEAVY },
-    { orderId: 'order-2', tag: HandlingTagType.HAZARDOUS },
-    { orderId: 'order-3', tag: HandlingTagType.FRAGILE },
-    { orderId: 'order-3', tag: HandlingTagType.TEMPERATURE_SENSITIVE },
-    { orderId: 'order-4', tag: HandlingTagType.HEAVY },
-    { orderId: 'order-4', tag: HandlingTagType.VERTICAL_STORAGE_REQUIRED },
-    { orderId: 'order-5', tag: HandlingTagType.CHEMICAL },
-    { orderId: 'order-8', tag: HandlingTagType.HEAVY },
-    { orderId: 'order-11', tag: HandlingTagType.TEMPERATURE_SENSITIVE },
-    { orderId: 'order-11', tag: HandlingTagType.FRAGILE },
-    { orderId: 'order-12', tag: HandlingTagType.HEAVY },
+    { orderId: id('order-1'), tag: HandlingTagType.HEAVY },
+    { orderId: id('order-2'), tag: HandlingTagType.HEAVY },
+    { orderId: id('order-2'), tag: HandlingTagType.HAZARDOUS },
+    { orderId: id('order-3'), tag: HandlingTagType.FRAGILE },
+    { orderId: id('order-3'), tag: HandlingTagType.TEMPERATURE_SENSITIVE },
+    { orderId: id('order-4'), tag: HandlingTagType.HEAVY },
+    { orderId: id('order-4'), tag: HandlingTagType.VERTICAL_STORAGE_REQUIRED },
+    { orderId: id('order-5'), tag: HandlingTagType.CHEMICAL },
+    { orderId: id('order-8'), tag: HandlingTagType.HEAVY },
+    { orderId: id('order-11'), tag: HandlingTagType.TEMPERATURE_SENSITIVE },
+    { orderId: id('order-11'), tag: HandlingTagType.FRAGILE },
+    { orderId: id('order-12'), tag: HandlingTagType.HEAVY },
   ];
 
   for (const tag of handlingTags) {
@@ -621,100 +627,100 @@ async function main() {
 
   const trips = [
     {
-      id: 'trip-1',
-      orderId: 'order-1',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-1'),
+      orderId: id('order-1'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.IN_TRANSIT,
       startedAt: new Date(Date.now() - 3600000),
       eta: new Date(Date.now() + 1800000),
     },
     {
-      id: 'trip-2',
-      orderId: 'order-2',
-      driverId: 'driver-profile-2',
-      vehicleId: 'vehicle-2',
+      id: id('trip-2'),
+      orderId: id('order-2'),
+      driverId: id('driver-profile-2'),
+      vehicleId: id('vehicle-2'),
       status: TripStatus.ASSIGNED,
       eta: new Date(Date.now() + 3600000),
     },
     {
-      id: 'trip-3',
-      orderId: 'order-3',
-      driverId: 'driver-profile-3',
-      vehicleId: 'vehicle-3',
+      id: id('trip-3'),
+      orderId: id('order-3'),
+      driverId: id('driver-profile-3'),
+      vehicleId: id('vehicle-3'),
       status: TripStatus.ASSIGNED,
       eta: new Date(Date.now() + 7200000),
     },
     {
-      id: 'trip-4',
-      orderId: 'order-4',
-      driverId: 'driver-profile-4',
-      vehicleId: 'vehicle-4',
+      id: id('trip-4'),
+      orderId: id('order-4'),
+      driverId: id('driver-profile-4'),
+      vehicleId: id('vehicle-4'),
       status: TripStatus.SOP_CHECKLIST_PENDING,
       eta: new Date(Date.now() + 7200000),
     },
     {
-      id: 'trip-5',
-      orderId: 'order-5',
-      driverId: 'driver-profile-5',
-      vehicleId: 'vehicle-5',
+      id: id('trip-5'),
+      orderId: id('order-5'),
+      driverId: id('driver-profile-5'),
+      vehicleId: id('vehicle-5'),
       status: TripStatus.DELIVERED,
       startedAt: new Date(Date.now() - 86400000),
       completedAt: new Date(Date.now() - 72000000),
       eta: new Date(Date.now() - 75600000),
     },
     {
-      id: 'trip-7',
-      orderId: 'order-7',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-7'),
+      orderId: id('order-7'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.ASSIGNED,
       eta: new Date(Date.now() + 5400000),
     },
     // Additional trips for driver1
     {
-      id: 'trip-8',
-      orderId: 'order-8',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-8'),
+      orderId: id('order-8'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.ASSIGNED,
       eta: new Date(Date.now() + 5400000),
     },
     {
-      id: 'trip-9',
-      orderId: 'order-9',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-9'),
+      orderId: id('order-9'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.DELIVERED,
       startedAt: new Date(Date.now() - 259200000),
       completedAt: new Date(Date.now() - 252000000),
       eta: new Date(Date.now() - 259200000),
     },
     {
-      id: 'trip-10',
-      orderId: 'order-10',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-10'),
+      orderId: id('order-10'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.DELIVERED,
       startedAt: new Date(Date.now() - 432000000),
       completedAt: new Date(Date.now() - 424800000),
       eta: new Date(Date.now() - 432000000),
     },
     {
-      id: 'trip-11',
-      orderId: 'order-11',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-11'),
+      orderId: id('order-11'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.DELIVERED,
       startedAt: new Date(Date.now() - 604800000),
       completedAt: new Date(Date.now() - 600000000),
       eta: new Date(Date.now() - 604800000),
     },
     {
-      id: 'trip-12',
-      orderId: 'order-12',
-      driverId: 'driver-profile-1',
-      vehicleId: 'vehicle-1',
+      id: id('trip-12'),
+      orderId: id('order-12'),
+      driverId: id('driver-profile-1'),
+      vehicleId: id('vehicle-1'),
       status: TripStatus.DELIVERED,
       startedAt: new Date(Date.now() - 864000000),
       completedAt: new Date(Date.now() - 856800000),
@@ -745,7 +751,7 @@ async function main() {
   ];
 
   for (const point of trip1Points) {
-    trackingPoints.push({ ...point, tripId: 'trip-1' });
+    trackingPoints.push({ ...point, tripId: id('trip-1') });
   }
 
   // Trip 2 - In Transit
@@ -760,7 +766,7 @@ async function main() {
   ];
 
   for (const point of trip2Points) {
-    trackingPoints.push({ ...point, tripId: 'trip-2' });
+    trackingPoints.push({ ...point, tripId: id('trip-2') });
   }
 
   // Trip 4 - In Transit (just started)
@@ -771,7 +777,7 @@ async function main() {
   ];
 
   for (const point of trip4Points) {
-    trackingPoints.push({ ...point, tripId: 'trip-4' });
+    trackingPoints.push({ ...point, tripId: id('trip-4') });
   }
 
   // Trip 7 - Festac Town (Bode Thomas to 5th Avenue, F1 Close)
@@ -784,7 +790,7 @@ async function main() {
   ];
 
   for (const point of trip7Points) {
-    trackingPoints.push({ ...point, tripId: 'trip-7' });
+    trackingPoints.push({ ...point, tripId: id('trip-7') });
   }
 
   for (const point of trackingPoints) {
@@ -798,40 +804,40 @@ async function main() {
 
   const weightRecords = [
     {
-      id: 'weight-1',
-      tripId: 'trip-1',
+      id: id('weight-1'),
+      tripId: id('trip-1'),
       cargoWeight: 3500,
       vehicleCapacity: 5000,
       utilization: 0.7,
       status: WeightStatus.SAFE,
     },
     {
-      id: 'weight-2',
-      tripId: 'trip-2',
+      id: id('weight-2'),
+      tripId: id('trip-2'),
       cargoWeight: 8500,
       vehicleCapacity: 10000,
       utilization: 0.85,
       status: WeightStatus.WARNING,
     },
     {
-      id: 'weight-3',
-      tripId: 'trip-3',
+      id: id('weight-3'),
+      tripId: id('trip-3'),
       cargoWeight: 2200,
       vehicleCapacity: 2000,
       utilization: 1.1,
       status: WeightStatus.NEAR_CAPACITY,
     },
     {
-      id: 'weight-4',
-      tripId: 'trip-4',
+      id: id('weight-4'),
+      tripId: id('trip-4'),
       cargoWeight: 12000,
       vehicleCapacity: 15000,
       utilization: 0.8,
       status: WeightStatus.SAFE,
     },
     {
-      id: 'weight-5',
-      tripId: 'trip-5',
+      id: id('weight-5'),
+      tripId: id('trip-5'),
       cargoWeight: 4800,
       vehicleCapacity: 6000,
       utilization: 0.8,
@@ -839,40 +845,40 @@ async function main() {
     },
     // Additional weight records for driver1 trips
     {
-      id: 'weight-8',
-      tripId: 'trip-8',
+      id: id('weight-8'),
+      tripId: id('trip-8'),
       cargoWeight: 4200,
       vehicleCapacity: 5000,
       utilization: 0.84,
       status: WeightStatus.WARNING,
     },
     {
-      id: 'weight-9',
-      tripId: 'trip-9',
+      id: id('weight-9'),
+      tripId: id('trip-9'),
       cargoWeight: 3100,
       vehicleCapacity: 5000,
       utilization: 0.62,
       status: WeightStatus.SAFE,
     },
     {
-      id: 'weight-10',
-      tripId: 'trip-10',
+      id: id('weight-10'),
+      tripId: id('trip-10'),
       cargoWeight: 5500,
       vehicleCapacity: 5000,
       utilization: 1.1,
       status: WeightStatus.NEAR_CAPACITY,
     },
     {
-      id: 'weight-11',
-      tripId: 'trip-11',
+      id: id('weight-11'),
+      tripId: id('trip-11'),
       cargoWeight: 1800,
       vehicleCapacity: 5000,
       utilization: 0.36,
       status: WeightStatus.SAFE,
     },
     {
-      id: 'weight-12',
-      tripId: 'trip-12',
+      id: id('weight-12'),
+      tripId: id('trip-12'),
       cargoWeight: 7200,
       vehicleCapacity: 5000,
       utilization: 1.44,
@@ -891,7 +897,7 @@ async function main() {
 
   const geofences = [
     {
-      id: 'geofence-1',
+      id: id('geofence-1'),
       name: 'Lagos Mainland Zone',
       type: GeofenceType.RADIUS,
       centerLat: 6.5244,
@@ -902,7 +908,7 @@ async function main() {
       radiusD: 20000,
     },
     {
-      id: 'geofence-2',
+      id: id('geofence-2'),
       name: 'Apapa Port Zone',
       type: GeofenceType.RADIUS,
       centerLat: 6.4498,
@@ -913,7 +919,7 @@ async function main() {
       radiusD: 8000,
     },
     {
-      id: 'geofence-3',
+      id: id('geofence-3'),
       name: 'Victoria Island Zone',
       type: GeofenceType.RADIUS,
       centerLat: 6.6018,
@@ -934,36 +940,36 @@ async function main() {
 
   const geofenceEvents = [
     {
-      id: 'geofence-event-1',
-      tripId: 'trip-1',
-      geofenceId: 'geofence-1',
+      id: id('geofence-event-1'),
+      tripId: id('trip-1'),
+      geofenceId: id('geofence-1'),
       eventType: GeofenceEventType.RADIUS_A_ENTERED,
       lat: 6.5300,
       lng: 3.3850,
       triggeredAt: new Date(Date.now() - 3000000),
     },
     {
-      id: 'geofence-event-2',
-      tripId: 'trip-1',
-      geofenceId: 'geofence-1',
+      id: id('geofence-event-2'),
+      tripId: id('trip-1'),
+      geofenceId: id('geofence-1'),
       eventType: GeofenceEventType.RADIUS_B_ENTERED,
       lat: 6.5400,
       lng: 3.3900,
       triggeredAt: new Date(Date.now() - 2400000),
     },
     {
-      id: 'geofence-event-3',
-      tripId: 'trip-2',
-      geofenceId: 'geofence-2',
+      id: id('geofence-event-3'),
+      tripId: id('trip-2'),
+      geofenceId: id('geofence-2'),
       eventType: GeofenceEventType.RADIUS_A_ENTERED,
       lat: 6.4550,
       lng: 3.3800,
       triggeredAt: new Date(Date.now() - 6000000),
     },
     {
-      id: 'geofence-event-4',
-      tripId: 'trip-2',
-      geofenceId: 'geofence-2',
+      id: id('geofence-event-4'),
+      tripId: id('trip-2'),
+      geofenceId: id('geofence-2'),
       eventType: GeofenceEventType.RADIUS_B_ENTERED,
       lat: 6.4750,
       lng: 3.4000,
@@ -982,8 +988,8 @@ async function main() {
 
   const pods = [
     {
-      id: 'pod-1',
-      tripId: 'trip-5',
+      id: id('pod-1'),
+      tripId: id('trip-5'),
       imageUrl: 'https://example.com/pod/trip-5.jpg',
       signatureUrl: 'https://example.com/signatures/trip-5.png',
       receiverName: 'John Doe',
@@ -995,8 +1001,8 @@ async function main() {
     },
     // Additional POD records for driver1's completed trips
     {
-      id: 'pod-9',
-      tripId: 'trip-9',
+      id: id('pod-9'),
+      tripId: id('trip-9'),
       imageUrl: 'https://example.com/pod/trip-9.jpg',
       signatureUrl: 'https://example.com/signatures/trip-9.png',
       receiverName: 'Adeola Johnson',
@@ -1007,8 +1013,8 @@ async function main() {
       lng: 3.3792,
     },
     {
-      id: 'pod-10',
-      tripId: 'trip-10',
+      id: id('pod-10'),
+      tripId: id('trip-10'),
       imageUrl: 'https://example.com/pod/trip-10.jpg',
       signatureUrl: 'https://example.com/signatures/trip-10.png',
       receiverName: 'Chukwuma Okafor',
@@ -1019,8 +1025,8 @@ async function main() {
       lng: 3.3517,
     },
     {
-      id: 'pod-11',
-      tripId: 'trip-11',
+      id: id('pod-11'),
+      tripId: id('trip-11'),
       imageUrl: 'https://example.com/pod/trip-11.jpg',
       signatureUrl: 'https://example.com/signatures/trip-11.png',
       receiverName: 'Dr. Amina Suleiman',
@@ -1031,8 +1037,8 @@ async function main() {
       lng: 3.3515,
     },
     {
-      id: 'pod-12',
-      tripId: 'trip-12',
+      id: id('pod-12'),
+      tripId: id('trip-12'),
       imageUrl: 'https://example.com/pod/trip-12.jpg',
       signatureUrl: 'https://example.com/signatures/trip-12.png',
       receiverName: 'Biodun Adeleke',

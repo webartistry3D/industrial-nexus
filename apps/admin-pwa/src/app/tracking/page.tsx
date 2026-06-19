@@ -183,7 +183,7 @@ export default function TrackingPage() {
     }
   };
 
-  const mapCenter = fleetLocation 
+  const mapCenter = fleetLocation?.trip?.order?.deliveryLocation?.lat && fleetLocation.trip.order.deliveryLocation.lng
     ? { lat: fleetLocation.trip.order.deliveryLocation.lat, lng: fleetLocation.trip.order.deliveryLocation.lng }
     : { lat: 6.5244, lng: 3.3792 }; // Default center: Lagos, Nigeria
 
@@ -259,76 +259,88 @@ export default function TrackingPage() {
             ) : (
               <GoogleMapWrapper center={mapCenter} zoom={13}>
                 {/* Geofence Radius C - 100m (Arrival Zone) */}
-                <Circle
-                  center={{
-                    lat: fleetLocation.trip.order.deliveryLocation.lat,
-                    lng: fleetLocation.trip.order.deliveryLocation.lng,
-                  }}
-                  radius={100}
-                  options={{
-                    strokeColor: '#f97316',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: '#f97316',
-                    fillOpacity: 0.1,
-                  }}
-                />
+                {fleetLocation.trip?.order?.deliveryLocation && (
+                  <Circle
+                    center={{
+                      lat: fleetLocation.trip.order.deliveryLocation.lat,
+                      lng: fleetLocation.trip.order.deliveryLocation.lng,
+                    }}
+                    radius={100}
+                    options={{
+                      strokeColor: '#f97316',
+                      strokeOpacity: 0.8,
+                      strokeWeight: 2,
+                      fillColor: '#f97316',
+                      fillOpacity: 0.1,
+                    }}
+                  />
+                )}
                 
                 {/* Geofence Radius B - 1km (Approaching Zone) */}
-                <Circle
-                  center={{
-                    lat: fleetLocation.trip.order.deliveryLocation.lat,
-                    lng: fleetLocation.trip.order.deliveryLocation.lng,
-                  }}
-                  radius={1000}
-                  options={{
-                    strokeColor: '#eab308',
-                    strokeOpacity: 0.6,
-                    strokeWeight: 2,
-                    fillColor: '#eab308',
-                    fillOpacity: 0.05,
-                  }}
-                />
+                {fleetLocation.trip?.order?.deliveryLocation && (
+                  <Circle
+                    center={{
+                      lat: fleetLocation.trip.order.deliveryLocation.lat,
+                      lng: fleetLocation.trip.order.deliveryLocation.lng,
+                    }}
+                    radius={1000}
+                    options={{
+                      strokeColor: '#eab308',
+                      strokeOpacity: 0.6,
+                      strokeWeight: 2,
+                      fillColor: '#eab308',
+                      fillOpacity: 0.05,
+                    }}
+                  />
+                )}
                 
                 {/* Geofence Radius A - 5km (Early Awareness Zone) */}
-                <Circle
-                  center={{
-                    lat: fleetLocation.trip.order.deliveryLocation.lat,
-                    lng: fleetLocation.trip.order.deliveryLocation.lng,
-                  }}
-                  radius={5000}
-                  options={{
-                    strokeColor: '#3b82f6',
-                    strokeOpacity: 0.4,
-                    strokeWeight: 2,
-                    fillColor: '#3b82f6',
-                    fillOpacity: 0.05,
-                  }}
-                />
+                {fleetLocation.trip?.order?.deliveryLocation && (
+                  <Circle
+                    center={{
+                      lat: fleetLocation.trip.order.deliveryLocation.lat,
+                      lng: fleetLocation.trip.order.deliveryLocation.lng,
+                    }}
+                    radius={5000}
+                    options={{
+                      strokeColor: '#3b82f6',
+                      strokeOpacity: 0.4,
+                      strokeWeight: 2,
+                      fillColor: '#3b82f6',
+                      fillOpacity: 0.05,
+                    }}
+                  />
+                )}
                 
                 {/* Current vehicle location */}
-                <MapMarker
-                  position={{ lat: fleetLocation.location.lat, lng: fleetLocation.location.lng }}
-                  type="current"
-                />
+                {fleetLocation.location && (
+                  <MapMarker
+                    position={{ lat: fleetLocation.location.lat, lng: fleetLocation.location.lng }}
+                    type="current"
+                  />
+                )}
                 
                 {/* Pickup location */}
-                <MapMarker
-                  position={{
-                    lat: fleetLocation.trip.order.pickupLocation.lat,
-                    lng: fleetLocation.trip.order.pickupLocation.lng,
-                  }}
-                  type="pickup"
-                />
+                {fleetLocation.trip?.order?.pickupLocation && (
+                  <MapMarker
+                    position={{
+                      lat: fleetLocation.trip.order.pickupLocation.lat,
+                      lng: fleetLocation.trip.order.pickupLocation.lng,
+                    }}
+                    type="pickup"
+                  />
+                )}
                 
                 {/* Delivery location */}
-                <MapMarker
-                  position={{
-                    lat: fleetLocation.trip.order.deliveryLocation.lat,
-                    lng: fleetLocation.trip.order.deliveryLocation.lng,
-                  }}
-                  type="delivery"
-                />
+                {fleetLocation.trip?.order?.deliveryLocation && (
+                  <MapMarker
+                    position={{
+                      lat: fleetLocation.trip.order.deliveryLocation.lat,
+                      lng: fleetLocation.trip.order.deliveryLocation.lng,
+                    }}
+                    type="delivery"
+                  />
+                )}
               </GoogleMapWrapper>
             )}
           </div>
@@ -381,7 +393,7 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Driver</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {fleetLocation.trip.driver?.user?.firstName} {fleetLocation.trip.driver?.user?.lastName}
+                    {fleetLocation.trip.driver?.user?.firstName} {fleetLocation.trip.driver?.user?.lastName || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -392,7 +404,7 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Vehicle</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {fleetLocation.trip.vehicle?.plateNumber}
+                    {fleetLocation.trip.vehicle?.plateNumber || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -425,13 +437,13 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Pickup</p>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {fleetLocation.trip.order.pickupLocation.address}
+                    {fleetLocation.trip.order?.pickupLocation?.address || 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Delivery</p>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {fleetLocation.trip.order.deliveryLocation.address}
+                    {fleetLocation.trip.order?.deliveryLocation?.address || 'N/A'}
                   </p>
                 </div>
               </div>

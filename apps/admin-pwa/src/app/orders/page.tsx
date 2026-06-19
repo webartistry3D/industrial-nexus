@@ -18,12 +18,22 @@ const CARGO_TYPES = [
   { value: 'PERISHABLE', label: 'Perishable' },
 ];
 
+const KITTING_STATUS_OPTIONS = [
+  { value: '', label: 'All Flags' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'AGGREGATION', label: 'Aggregation' },
+  { value: 'TECHNICAL_PACKAGING', label: 'Technical Packaging' },
+  { value: 'QUALITY_CHECK', label: 'Quality Check' },
+  { value: 'DISPATCH_READY', label: 'Dispatch Ready' },
+];
+
 export default function OrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const cargoTypeParam = searchParams.get('cargoType');
   const statusParam = searchParams.get('status');
+  const kittingStatusParam = searchParams.get('kittingStatus');
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +41,7 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState(statusParam || '');
   const [cargoTypeFilter, setCargoTypeFilter] = useState(cargoTypeParam || '');
+  const [kittingStatusFilter, setKittingStatusFilter] = useState(kittingStatusParam || '');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
@@ -74,9 +85,10 @@ export default function OrdersPage() {
     setSearch('');
     setStatusFilter('');
     setCargoTypeFilter('');
+    setKittingStatusFilter('');
     setPage(1);
     // Clear URL params if present
-    if (cargoTypeParam || statusParam) {
+    if (cargoTypeParam || statusParam || kittingStatusParam) {
       router.push('/orders');
     }
   };
@@ -110,6 +122,11 @@ export default function OrdersPage() {
   const filteredOrders = useMemo(() => {
     let result = orders;
     
+    // Apply kitting status filter
+    if (kittingStatusFilter) {
+      result = result.filter(order => order.kittingStatus === kittingStatusFilter);
+    }
+    
     // Apply cargo type filter
     if (cargoTypeFilter || cargoTypeParam) {
       const filterValue = (cargoTypeFilter || cargoTypeParam || '').toUpperCase();
@@ -138,7 +155,7 @@ export default function OrdersPage() {
     }
     
     return result;
-  }, [orders, cargoTypeFilter, cargoTypeParam, search]);
+  }, [orders, kittingStatusFilter, cargoTypeFilter, cargoTypeParam, search]);
 
   const userRole = (user?.role?.toLowerCase() as 'admin' | 'client' | 'driver') || 'admin';
 
@@ -156,11 +173,13 @@ export default function OrdersPage() {
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   {(cargoTypeFilter || cargoTypeParam) ? `${cargoTypeFilter || cargoTypeParam} Orders` : 
                    (statusFilter || statusParam) ? `${statusFilter || statusParam} Orders` : 
+                   (kittingStatusFilter || kittingStatusParam) ? `${KITTING_STATUS_OPTIONS.find(opt => opt.value === (kittingStatusFilter || kittingStatusParam))?.label} Orders` :
                    'Orders'}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {(cargoTypeFilter || cargoTypeParam) ? `Filtered by cargo type` : 
                    (statusFilter || statusParam) ? `Filtered by status` : 
+                   (kittingStatusFilter || kittingStatusParam) ? `Filtered by flag` :
                    'Manage industrial orders'}
                 </p>
               </div>
@@ -197,10 +216,10 @@ export default function OrdersPage() {
               />
             </div>
             
-            {/* Filters Row - Side by side on mobile (below search), inline on desktop */}
-            <div className="flex gap-2 w-full md:w-auto">
+            {/* Filters Row - Stack vertically on mobile, inline on desktop */}
+            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
               {/* Cargo Type Filter */}
-              <div className="relative flex-1 md:flex-none md:w-auto md:min-w-[160px]">
+              <div className="relative w-full md:flex-none md:w-auto md:min-w-[160px]">
                 <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <select
                   value={cargoTypeFilter || cargoTypeParam || ''}
@@ -235,7 +254,7 @@ export default function OrdersPage() {
                     router.push('/orders');
                   }
                 }}
-                className="flex-1 md:flex-none md:w-auto md:min-w-[140px] px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full md:flex-none md:w-auto md:min-w-[140px] px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Status</option>
                 <option value="DRAFT">Draft</option>
@@ -248,11 +267,27 @@ export default function OrdersPage() {
                 <option value="DELIVERED">Delivered</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>
+              
+              {/* Kitting Status Filter (Flags) */}
+              <select
+                value={kittingStatusFilter}
+                onChange={(e) => {
+                  setKittingStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full md:flex-none md:w-auto md:min-w-[160px] px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              >
+                {KITTING_STATUS_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           
           {/* Active Filters */}
-          {(search || statusFilter || statusParam || cargoTypeFilter || cargoTypeParam) && (
+          {(search || statusFilter || statusParam || cargoTypeFilter || cargoTypeParam || kittingStatusFilter) && (
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               <span className="text-xs text-gray-500 dark:text-gray-400">Filters:</span>
               {search && (
@@ -287,6 +322,17 @@ export default function OrdersPage() {
                       if (cargoTypeParam) router.push('/orders');
                     }} 
                     className="hover:text-amber-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {kittingStatusFilter && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-xs rounded-full">
+                  Flag: {KITTING_STATUS_OPTIONS.find(opt => opt.value === kittingStatusFilter)?.label || kittingStatusFilter}
+                  <button 
+                    onClick={() => setKittingStatusFilter('')}
+                    className="hover:text-purple-900"
                   >
                     <X className="w-3 h-3" />
                   </button>

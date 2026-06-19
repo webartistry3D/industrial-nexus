@@ -55,9 +55,9 @@ export default function OrderDetailPage() {
     }
   }, [orderId]);
 
-  const fetchOrder = async () => {
+  const fetchOrder = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const response = await api.getOrder(orderId);
       setOrder(response);
@@ -157,7 +157,7 @@ export default function OrderDetailPage() {
       setActionLoading(true);
       setActionError(null);
       await api.submitOrder(orderId);
-      await fetchOrder();
+      await fetchOrder(true);
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
     } catch (err: any) {
@@ -176,7 +176,7 @@ export default function OrderDetailPage() {
       setActionLoading(true);
       setActionError(null);
       await api.rejectOrder(orderId, rejectReason);
-      await fetchOrder();
+      await fetchOrder(true);
       setShowRejectModal(false);
       setRejectReason('');
       setActionSuccess(true);
@@ -193,7 +193,7 @@ export default function OrderDetailPage() {
       setActionLoading(true);
       setActionError(null);
       await api.approveOrder(orderId);
-      await fetchOrder();
+      await fetchOrder(true);
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
     } catch (err: any) {
@@ -204,6 +204,21 @@ export default function OrderDetailPage() {
   };
 
   const handleStartKitting = async () => {
+    if (order?.status === 'APPROVED') {
+      try {
+        setActionLoading(true);
+        setActionError(null);
+        await api.startKitting(orderId);
+        await fetchOrder(true);
+      } catch (err: any) {
+        const message = err.response?.data?.message || err.message || 'Failed to start kitting';
+        setActionError(message);
+        setActionLoading(false);
+        return;
+      } finally {
+        setActionLoading(false);
+      }
+    }
     setShowKittingModal(true);
     setKittingStep(0);
   };
@@ -245,11 +260,17 @@ export default function OrderDetailPage() {
   ];
 
   const handleFinishKittingProcess = async () => {
+    if (order?.status !== 'KITTING') {
+      setShowKittingModal(false);
+      setKittingStep(0);
+      await fetchOrder(true);
+      return;
+    }
     try {
       setActionLoading(true);
       setActionError(null);
       await api.finishKitting(orderId);
-      await fetchOrder();
+      await fetchOrder(true);
       setShowKittingModal(false);
       setKittingStep(0);
       setKittingData({
@@ -262,42 +283,62 @@ export default function OrderDetailPage() {
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
     } catch (err: any) {
-      setActionError(err.message || 'Failed to finish kitting');
+      const message = err.response?.data?.message || err.message || 'Failed to finish kitting';
+      setActionError(message);
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleFinishKitting = async () => {
+    if (order?.status !== 'KITTING') {
+      await fetchOrder(true);
+      return;
+    }
     try {
       setActionLoading(true);
       setActionError(null);
       await api.finishKitting(orderId);
-      await fetchOrder();
+      await fetchOrder(true);
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
     } catch (err: any) {
-      setActionError(err.message || 'Failed to finish kitting');
+      const message = err.response?.data?.message || err.message || 'Failed to finish kitting';
+      setActionError(message);
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleAssignDriver = async () => {
+    console.log('[Order Detail] Assign Driver - Starting');
+    console.log('[Order Detail] Assign Driver - Order ID:', orderId);
+    console.log('[Order Detail] Assign Driver - Selected Driver:', selectedDriver);
+    
     if (!selectedDriver) {
+      console.error('[Order Detail] Assign Driver - No driver selected');
       setActionError('Please select a driver');
       return;
     }
     try {
       setActionLoading(true);
       setActionError(null);
+      console.log('[Order Detail] Assign Driver - Calling API');
       await api.assignDriver(orderId, selectedDriver);
-      await fetchOrder();
+      console.log('[Order Detail] Assign Driver - API call successful');
+      await fetchOrder(true);
       setShowDriverModal(false);
       setSelectedDriver('');
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
     } catch (err: any) {
+      console.error('[Order Detail] Assign Driver - Error:', err);
+      console.error('[Order Detail] Assign Driver - Error Details:', {
+        message: err.message,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data
+      });
       setActionError(err.message || 'Failed to assign driver');
     } finally {
       setActionLoading(false);
@@ -395,7 +436,7 @@ export default function OrderDetailPage() {
               </div>
             </div>
             <button
-              onClick={fetchOrder}
+              onClick={() => fetchOrder()}
               className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               Retry
@@ -684,17 +725,21 @@ export default function OrderDetailPage() {
             Order Timeline
           </h2>
           
-          <div className="space-y-3">
-            {timelineEvents.map((event, index) => (
-              <div key={index} className="flex items-center gap-3 text-sm">
-                <div className={`w-2 h-2 rounded-full ${getTimelineDotColor(event.status)}`} />
-                <span className="text-gray-500 dark:text-gray-400 w-24">{event.status}</span>
-                <span className="text-gray-900 dark:text-white flex-1">{event.description}</span>
-                <span className="text-gray-400 dark:text-gray-500 text-xs">
-                  {event.timestamp.toLocaleString()}
-                </span>
+          <div className="overflow-x-auto">
+            <div className="min-w-[600px]">
+              <div className="space-y-3">
+                {timelineEvents.map((event, index) => (
+                  <div key={index} className="flex items-center gap-3 text-sm">
+                    <div className={`w-2 h-2 rounded-full ${getTimelineDotColor(event.status)} flex-shrink-0`} />
+                    <span className="text-gray-500 dark:text-gray-400 w-32 flex-shrink-0">{event.status}</span>
+                    <span className="text-gray-900 dark:text-white flex-1 min-w-0">{event.description}</span>
+                    <span className="text-gray-400 dark:text-gray-500 text-xs whitespace-nowrap flex-shrink-0">
+                      {event.timestamp.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>

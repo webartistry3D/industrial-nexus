@@ -81,7 +81,7 @@ export default function Dashboard() {
         api.getDashboardStats().catch(() => null),
         api.getTrips({ status: 'IN_TRANSIT', limit: 5 }).catch(() => ({ data: [] })),
         api.getWeightAlerts().catch(() => []),
-        api.getOrders({ status: 'SUBMITTED', limit: 5 }).catch(() => ({ data: [] })),
+        api.getOrders({ kittingStatus: 'PENDING', limit: 5 }).catch(() => ({ data: [] })),
         api.getOrders({ limit: 100 }).catch(() => ({ data: [] }))
       ]);
       
@@ -209,7 +209,7 @@ export default function Dashboard() {
             value={loading ? '...' : pendingOrdersCount.toString()}
             trend={pendingOrdersCount > 0 ? 'Awaiting dispatch' : 'No pending'}
             color="purple"
-            onClick={() => router.push('/orders?status=DRAFT')}
+            onClick={() => router.push('/orders?kittingStatus=PENDING')}
           />
         </div>
 

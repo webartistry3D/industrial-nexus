@@ -21,7 +21,7 @@ services:
   - type: web
     name: industrial-nexus-admin
     env: node
-    buildCommand: npm install && cd apps/admin-pwa && npm install && npm run build
+    buildCommand: npm install && cd apps/admin-pwa && npm install && rm -rf .next && npm run build
     startCommand: cd apps/admin-pwa && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
@@ -32,7 +32,7 @@ services:
   - type: web
     name: industrial-nexus-client
     env: node
-    buildCommand: npm install && cd apps/client-pwa && npm install && npm run build
+    buildCommand: npm install && cd apps/client-pwa && npm install && rm -rf .next && npm run build
     startCommand: cd apps/client-pwa && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
@@ -43,7 +43,7 @@ services:
   - type: web
     name: industrial-nexus-driver
     env: node
-    buildCommand: npm install && cd apps/driver-pwa && npm install && npm run build
+    buildCommand: npm install && cd apps/driver-pwa && npm install && rm -rf .next && npm run build
     startCommand: cd apps/driver-pwa && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL

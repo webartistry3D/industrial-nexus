@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { Driver, PaginatedResponse, KycDocument, KycDocumentType, KycDocumentStatus } from '@/types';
+import { Driver, PaginatedResponse, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
 import { 
   Users, Search, Plus, Mail, Shield, MapPin, CheckCircle, XCircle, AlertCircle,
-  ChevronRight, Filter, UserCheck, UserX, Truck
+  ChevronRight, Filter, UserCheck, UserX, Truck, Edit, Trash2
 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -31,13 +31,44 @@ const AVAILABILITY_OPTIONS = [
   { value: 'OFF_DUTY', label: 'Off Duty' },
 ];
 
+const VEHICLE_STATUS_OPTIONS = [
+  { value: '', label: 'All Status' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'INACTIVE', label: 'Inactive' },
+];
+
+const VEHICLE_CATEGORY_OPTIONS = [
+  { value: '', label: 'All Categories' },
+  { value: 'LIGHT', label: 'Light' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HEAVY', label: 'Heavy' },
+  { value: 'SPECIALIZED', label: 'Specialized' },
+];
+
+interface Vehicle {
+  id: string;
+  plateNumber: string;
+  category: string;
+  capacityKg: number;
+  status: string;
+  isPartitioned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type TabType = 'drivers' | 'vehicles';
+
 export default function DriversPage() {
   const { user } = useAuth();
   const router = useRouter();
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState<TabType>('drivers');
+  
+  // Drivers state
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [driversLoading, setDriversLoading] = useState(true);
+  const [driversError, setDriversError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [kycFilter, setKycFilter] = useState('');
@@ -52,15 +83,38 @@ export default function DriversPage() {
   const [loadingKyc, setLoadingKyc] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  // Scroll to top on page load
+  // Vehicles state
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
+  const [vehiclesError, setVehiclesError] = useState<string | null>(null);
+  const [vehicleSearch, setVehicleSearch] = useState('');
+  const [vehicleStatusFilter, setVehicleStatusFilter] = useState('');
+  const [vehicleCategoryFilter, setVehicleCategoryFilter] = useState('');
+  const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
+  const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [vehicleFormData, setVehicleFormData] = useState({
+    plateNumber: '',
+    category: 'MEDIUM',
+    capacityKg: 5000,
+    isPartitioned: false,
+    status: 'ACTIVE',
+  });
+  const [vehicleSubmitting, setVehicleSubmitting] = useState(false);
+  const [vehicleSuccess, setVehicleSuccess] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [showAuditLogs, setShowAuditLogs] = useState(false);
+
+  // Scroll to top on tab change
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [activeTab]);
 
+  // Fetch drivers
   const fetchDrivers = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setDriversLoading(true);
+      setDriversError(null);
       const response: PaginatedResponse<Driver> = await api.getDrivers({
         page,
         limit: 10,
@@ -72,9 +126,9 @@ export default function DriversPage() {
       setMeta(response.meta);
     } catch (err) {
       console.error('Failed to fetch drivers:', err);
-      setError('Failed to load drivers. Please try again.');
+      setDriversError('Failed to load drivers. Please try again.');
     } finally {
-      setLoading(false);
+      setDriversLoading(false);
     }
   }, [page, statusFilter, availabilityFilter, search]);
 
@@ -82,13 +136,71 @@ export default function DriversPage() {
     fetchDrivers();
   }, [fetchDrivers]);
 
-  // Client-side filtering for KYC
+  // Fetch vehicles
+  const fetchVehicles = useCallback(async () => {
+    try {
+      setVehiclesLoading(true);
+      setVehiclesError(null);
+      const response = await api.getVehicles({
+        status: vehicleStatusFilter || undefined,
+        category: vehicleCategoryFilter || undefined,
+      });
+      setVehicles(response.data || response);
+    } catch (err) {
+      console.error('Failed to fetch vehicles:', err);
+      setVehiclesError('Failed to load vehicles. Please try again.');
+    } finally {
+      setVehiclesLoading(false);
+    }
+  }, [vehicleStatusFilter, vehicleCategoryFilter]);
+
+  useEffect(() => {
+    if (activeTab === 'vehicles') {
+      fetchVehicles();
+    }
+  }, [activeTab, fetchVehicles]);
+
+  const fetchAuditLogs = useCallback(async () => {
+    try {
+      const logs = await api.getAuditLogs({ entityType: 'VEHICLE', limit: 20 });
+      setAuditLogs(logs);
+    } catch (err) {
+      console.error('Failed to fetch audit logs:', err);
+    }
+  }, []);
+
+  // Filter helpers
   const filteredDrivers = drivers.filter(driver => {
     if (kycFilter && driver.kycStatus !== kycFilter) return false;
     return true;
   });
 
-  const getStatusColor = (status: string) => {
+  const filteredVehicles = vehicles.filter(vehicle => {
+    if (vehicleSearch && !vehicle.plateNumber.toLowerCase().includes(vehicleSearch.toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
+
+  const hasActiveDriverFilters = search || statusFilter || kycFilter || availabilityFilter;
+  const hasActiveVehicleFilters = vehicleSearch || vehicleStatusFilter || vehicleCategoryFilter;
+
+  const clearDriverFilters = () => {
+    setSearch('');
+    setStatusFilter('');
+    setKycFilter('');
+    setAvailabilityFilter('');
+    setPage(1);
+  };
+
+  const clearVehicleFilters = () => {
+    setVehicleSearch('');
+    setVehicleStatusFilter('');
+    setVehicleCategoryFilter('');
+  };
+
+  // Color helpers
+  const getDriverStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       ACTIVE: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       INACTIVE: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
@@ -115,6 +227,25 @@ export default function DriversPage() {
     return colors[availability] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
 
+  const getVehicleStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      ACTIVE: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+      INACTIVE: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+  };
+
+  const getVehicleCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      LIGHT: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+      MEDIUM: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+      HEAVY: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+      SPECIALIZED: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+  };
+
+  // Driver actions
   const handleStatusChange = async (driverId: string, newStatus: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') => {
     try {
       await api.updateDriverStatus(driverId, newStatus);
@@ -135,14 +266,6 @@ export default function DriversPage() {
     }
   };
 
-  const clearFilters = () => {
-    setSearch('');
-    setStatusFilter('');
-    setKycFilter('');
-    setAvailabilityFilter('');
-    setPage(1);
-  };
-
   // KYC Review Functions
   const handleViewKycDocuments = async (driver: Driver) => {
     try {
@@ -160,16 +283,14 @@ export default function DriversPage() {
     }
   };
 
-  const handleReviewKycDocument = async (documentId: string, status: KycDocumentStatus, rejectionReason?: string) => {
+  const handleReviewKycDocument = async (documentId: string, status: KycDocumentStatusValue, rejectionReason?: string) => {
     try {
       setReviewError(null);
       await api.updateKycDocument(documentId, { status, rejectionReason });
-      // Refresh documents
       if (selectedDriver) {
         const docs = await api.getDriverKycDocuments(selectedDriver.id);
         setKycDocuments(docs);
       }
-      // Refresh drivers list to update KYC status
       fetchDrivers();
     } catch (err: any) {
       console.error('Failed to review document:', err);
@@ -177,7 +298,7 @@ export default function DriversPage() {
     }
   };
 
-  const getDocumentTypeLabel = (type: KycDocumentType) => {
+  const getDocumentTypeLabel = (type: KycDocumentTypeValue) => {
     switch (type) {
       case KycDocumentType.GOVERNMENT_ID:
         return 'Government ID';
@@ -196,7 +317,79 @@ export default function DriversPage() {
     }
   };
 
-  const hasActiveFilters = search || statusFilter || kycFilter || availabilityFilter;
+  // Vehicle actions
+  const handleCreateVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setVehicleSubmitting(true);
+      await api.createVehicle(vehicleFormData);
+      setVehicleSuccess(true);
+      setTimeout(() => {
+        setShowCreateVehicleModal(false);
+        setVehicleSuccess(false);
+        setVehicleFormData({ plateNumber: '', category: 'MEDIUM', capacityKg: 5000, isPartitioned: false, status: 'ACTIVE' });
+        fetchVehicles();
+      }, 1500);
+    } catch (err) {
+      console.error('Failed to create vehicle:', err);
+      alert('Failed to create vehicle. Please try again.');
+    } finally {
+      setVehicleSubmitting(false);
+    }
+  };
+
+  const handleEditVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedVehicle) return;
+    try {
+      setVehicleSubmitting(true);
+      await api.updateVehicle(selectedVehicle.id, vehicleFormData);
+      setShowEditVehicleModal(false);
+      setSelectedVehicle(null);
+      setVehicleFormData({ plateNumber: '', category: 'MEDIUM', capacityKg: 5000, isPartitioned: false, status: 'ACTIVE' });
+      fetchVehicles();
+    } catch (err) {
+      console.error('Failed to update vehicle:', err);
+      alert('Failed to update vehicle. Please try again.');
+    } finally {
+      setVehicleSubmitting(false);
+    }
+  };
+
+  const handleDeactivateVehicle = async (id: string) => {
+    if (!confirm('Are you sure you want to deactivate this vehicle?')) return;
+    try {
+      await api.deactivateVehicle(id);
+      fetchVehicles();
+    } catch (err) {
+      console.error('Failed to deactivate vehicle:', err);
+      alert('Failed to deactivate vehicle. Please try again.');
+    }
+  };
+
+  const openEditVehicleModal = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setVehicleFormData({
+      plateNumber: vehicle.plateNumber,
+      category: vehicle.category,
+      capacityKg: vehicle.capacityKg,
+      isPartitioned: vehicle.isPartitioned,
+      status: vehicle.status,
+    });
+    setShowEditVehicleModal(true);
+  };
+
+  if (user?.role !== 'SUPER_ADMIN' && user?.role !== 'OPERATIONS') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+        <div className="p-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-800 dark:text-red-400">Access denied. You do not have permission to view this page.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -206,250 +399,456 @@ export default function DriversPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
+                {activeTab === 'drivers' ? (
+                  <Users className="w-6 h-6 text-blue-600" />
+                ) : (
+                  <Truck className="w-6 h-6 text-blue-600" />
+                )}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Drivers</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {activeTab === 'drivers' ? 'Drivers' : 'Vehicles'}
+                </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Manage fleet drivers and assignments
+                  {activeTab === 'drivers'
+                    ? 'Manage fleet drivers and assignments'
+                    : 'Manage fleet vehicles and capacity'}
                 </p>
               </div>
             </div>
+            {activeTab === 'drivers' ? (
+              <button
+                onClick={() => router.push('/drivers/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Driver
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    fetchAuditLogs();
+                    setShowAuditLogs(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  <Filter className="w-4 h-4" />
+                  Activity Log
+                </button>
+                <button
+                  onClick={() => setShowCreateVehicleModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Vehicle
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-4">
             <button
-              onClick={() => router.push('/drivers/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              onClick={() => setActiveTab('drivers')}
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'drivers'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
             >
-              <Plus className="w-4 h-4" />
-              Add Driver
+              <div className="flex items-center justify-center gap-2">
+                <Users className="w-4 h-4" />
+                Drivers
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('vehicles')}
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'vehicles'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Truck className="w-4 h-4" />
+                Vehicles
+              </div>
             </button>
           </div>
 
-          {/* Search & Filters */}
-          <div className="space-y-2">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search drivers by name, email, or license..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Filter Dropdowns */}
-            <div className="flex gap-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              >
-                {STATUS_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <select
-                value={kycFilter}
-                onChange={(e) => {
-                  setKycFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              >
-                {KYC_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <select
-                value={availabilityFilter}
-                onChange={(e) => {
-                  setAvailabilityFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              >
-                {AVAILABILITY_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Clear Filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Stats Summary */}
-        <div className="px-4 py-3 grid grid-cols-3 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{meta.total}</p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-            <p className="text-lg font-bold text-green-600">
-              {drivers.filter(d => d.status === 'ACTIVE').length}
-            </p>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
-            <p className="text-lg font-bold text-blue-600">
-              {drivers.filter(d => d.availability === 'ON_TRIP').length}
-            </p>
-          </div>
-        </div>
-
-        {/* Drivers List */}
-        <div className="px-4 space-y-3">
-          {loading ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading drivers...</div>
-          ) : error ? (
-            <div className="text-center py-8 text-red-500">{error}</div>
-          ) : filteredDrivers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No drivers found</p>
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="mt-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          {/* Drivers Search & Filters */}
+          {activeTab === 'drivers' && (
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search drivers by name, email, or license..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 >
-                  Clear filters
+                  {STATUS_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={kycFilter}
+                  onChange={(e) => {
+                    setKycFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  {KYC_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={availabilityFilter}
+                  onChange={(e) => {
+                    setAvailabilityFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  {AVAILABILITY_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              {hasActiveDriverFilters && (
+                <button
+                  onClick={clearDriverFilters}
+                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                >
+                  Clear all filters
                 </button>
               )}
             </div>
-          ) : (
-            filteredDrivers.map((driver) => (
-              <div
-                key={driver.id}
-                className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
-              >
-                {/* Driver Header */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                      <span className="text-lg font-semibold text-blue-600">
-                        {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {driver.user?.firstName} {driver.user?.lastName}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{driver.licenseNumber}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </div>
+          )}
 
-                {/* Contact Info */}
-                <div className="mb-3 text-sm">
-                  {driver.user?.email && (
-                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                      <Mail className="w-4 h-4" />
-                      <span className="truncate">{driver.user.email}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Status Badges */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(driver.status)}`}>
-                    {driver.status}
-                  </span>
-                  <button
-                    onClick={() => handleViewKycDocuments(driver)}
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getKycColor(driver.kycStatus)} hover:opacity-80 transition-opacity`}
-                  >
-                    KYC: {driver.kycStatus}
-                  </button>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(driver.availability)}`}>
-                    {driver.availability.replace('_', ' ')}
-                  </span>
-                </div>
-
-                {/* Assigned Vehicle */}
-                {driver.vehicle && (
-                  <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-slate-700/30 rounded-lg text-sm">
-                    <Truck className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700 dark:text-gray-300">
-                      {driver.vehicle.plateNumber} • {driver.vehicle.category}
-                    </span>
-                  </div>
-                )}
-
-                {/* Quick Actions */}
-                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 grid grid-cols-3 gap-2">
-                  {/* Status Toggle */}
-                  <select
-                    value={driver.status}
-                    onChange={(e) => handleStatusChange(driver.id, e.target.value as any)}
-                    className="px-2 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-                  >
-                    <option value="ACTIVE">Set Active</option>
-                    <option value="INACTIVE">Set Inactive</option>
-                    <option value="SUSPENDED">Suspend</option>
-                  </select>
-
-                  {/* KYC Toggle */}
-                  <select
-                    value={driver.kycStatus}
-                    onChange={(e) => handleKycChange(driver.id, e.target.value as any)}
-                    className="px-2 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-                  >
-                    <option value="PENDING">KYC Pending</option>
-                    <option value="VERIFIED">Verify KYC</option>
-                    <option value="REJECTED">Reject KYC</option>
-                  </select>
-
-                  {/* View Details */}
-                  <button
-                    onClick={() => router.push(`/drivers/${driver.id}`)}
-                    className="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-medium"
-                  >
-                    View Details
-                  </button>
-                </div>
+          {/* Vehicles Search & Filters */}
+          {activeTab === 'vehicles' && (
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search vehicles by plate number..."
+                  value={vehicleSearch}
+                  onChange={(e) => setVehicleSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-            ))
+              <div className="flex gap-2">
+                <select
+                  value={vehicleStatusFilter}
+                  onChange={(e) => setVehicleStatusFilter(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  {VEHICLE_STATUS_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={vehicleCategoryFilter}
+                  onChange={(e) => setVehicleCategoryFilter(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  {VEHICLE_CATEGORY_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              {hasActiveVehicleFilters && (
+                <button
+                  onClick={clearVehicleFilters}
+                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Pagination */}
-        {!loading && filteredDrivers.length > 0 && (
-          <div className="px-4 py-4 flex items-center justify-between">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              Page {page} of {meta.totalPages}
-            </span>
-            <button
-              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-              disabled={page === meta.totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
+        {/* Drivers Content */}
+        {activeTab === 'drivers' && (
+          <>
+            {/* Stats Summary */}
+            <div className="px-4 py-3 grid grid-cols-3 gap-3">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{meta.total}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+                <p className="text-lg font-bold text-green-600">
+                  {drivers.filter(d => d.status === 'ACTIVE').length}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {drivers.filter(d => d.availability === 'ON_TRIP').length}
+                </p>
+              </div>
+            </div>
+
+            {/* Drivers List */}
+            <div className="px-4 space-y-3">
+              {driversLoading ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading drivers...</div>
+              ) : driversError ? (
+                <div className="text-center py-8 text-red-500">{driversError}</div>
+              ) : filteredDrivers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No drivers found</p>
+                  {hasActiveDriverFilters && (
+                    <button
+                      onClick={clearDriverFilters}
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              ) : (
+                filteredDrivers.map((driver) => (
+                  <div
+                    key={driver.id}
+                    className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <span className="text-lg font-semibold text-blue-600">
+                            {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                            {driver.user?.firstName} {driver.user?.lastName}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{driver.licenseNumber}</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <div className="mb-3 text-sm">
+                      {driver.user?.email && (
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                          <Mail className="w-4 h-4" />
+                          <span className="truncate">{driver.user.email}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDriverStatusColor(driver.status)}`}>
+                        {driver.status}
+                      </span>
+                      <button
+                        onClick={() => handleViewKycDocuments(driver)}
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getKycColor(driver.kycStatus)} hover:opacity-80 transition-opacity`}
+                      >
+                        KYC: {driver.kycStatus}
+                      </button>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(driver.availability)}`}>
+                        {driver.availability.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    {driver.vehicle && (
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-slate-700/30 rounded-lg text-sm">
+                        <Truck className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {driver.vehicle.plateNumber} • {driver.vehicle.category}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 grid grid-cols-3 gap-2">
+                      <select
+                        value={driver.status}
+                        onChange={(e) => handleStatusChange(driver.id, e.target.value as any)}
+                        className="px-2 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                      >
+                        <option value="ACTIVE">Set Active</option>
+                        <option value="INACTIVE">Set Inactive</option>
+                        <option value="SUSPENDED">Suspend</option>
+                      </select>
+                      <select
+                        value={driver.kycStatus}
+                        onChange={(e) => handleKycChange(driver.id, e.target.value as any)}
+                        className="px-2 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                      >
+                        <option value="PENDING">KYC Pending</option>
+                        <option value="VERIFIED">Verify KYC</option>
+                        <option value="REJECTED">Reject KYC</option>
+                      </select>
+                      <button
+                        onClick={() => router.push(`/drivers/${driver.id}`)}
+                        className="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-medium"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Pagination */}
+            {!driversLoading && filteredDrivers.length > 0 && (
+              <div className="px-4 py-4 flex items-center justify-between">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Page {page} of {meta.totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+                  disabled={page === meta.totalPages}
+                  className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Vehicles Content */}
+        {activeTab === 'vehicles' && (
+          <>
+            {/* Stats Summary */}
+            <div className="px-4 py-3 grid grid-cols-3 gap-3">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{vehicles.length}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+                <p className="text-lg font-bold text-green-600">
+                  {vehicles.filter(v => v.status === 'ACTIVE').length}
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Partitioned</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {vehicles.filter(v => v.isPartitioned).length}
+                </p>
+              </div>
+            </div>
+
+            {/* Vehicles List */}
+            <div className="px-4 space-y-3">
+              {vehiclesLoading ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading vehicles...</div>
+              ) : vehiclesError ? (
+                <div className="text-center py-8 text-red-500">{vehiclesError}</div>
+              ) : filteredVehicles.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Truck className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No vehicles found</p>
+                  {hasActiveVehicleFilters && (
+                    <button
+                      onClick={clearVehicleFilters}
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              ) : (
+                filteredVehicles.map((vehicle) => (
+                  <div
+                    key={vehicle.id}
+                    className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <Truck className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                            {vehicle.plateNumber}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{vehicle.category}</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    <div className="mb-3 space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">Capacity</span>
+                        <span className="text-gray-900 dark:text-white font-medium">{vehicle.capacityKg.toLocaleString()} kg</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">Partitioned</span>
+                        {vehicle.isPartitioned ? (
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleStatusColor(vehicle.status)}`}>
+                        {vehicle.status}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleCategoryColor(vehicle.category)}`}>
+                        {vehicle.category}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => openEditVehicleModal(vehicle)}
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeactivateVehicle(vehicle.id)}
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Deactivate
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
         )}
       </main>
 
@@ -548,6 +947,284 @@ export default function DriversPage() {
                         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                           <CheckCircle className="w-4 h-4" />
                           <span>Document {doc.status.toLowerCase()}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Vehicle Modal */}
+      {showCreateVehicleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full">
+            <div className="p-6">
+              {vehicleSuccess ? (
+                <div className="text-center">
+                  <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold text-green-800 dark:text-green-400 mb-2">
+                    Vehicle Created Successfully!
+                  </h3>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Redirecting to vehicles list...
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    Add New Vehicle
+                  </h2>
+                  <form onSubmit={handleCreateVehicle} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Plate Number
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={vehicleFormData.plateNumber}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, plateNumber: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., ABC-123-NG"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={vehicleFormData.category}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {VEHICLE_CATEGORY_OPTIONS.filter(opt => opt.value !== '').map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Capacity (kg)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={vehicleFormData.capacityKg}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, capacityKg: parseFloat(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={vehicleFormData.status}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {VEHICLE_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="createPartitioned"
+                    checked={vehicleFormData.isPartitioned}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, isPartitioned: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="createPartitioned" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Partitioned
+                  </label>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateVehicleModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={vehicleSubmitting}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    {vehicleSubmitting ? 'Creating...' : 'Create'}
+                  </button>
+                </div>
+              </form>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Vehicle Modal */}
+      {showEditVehicleModal && selectedVehicle && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                Edit Vehicle
+              </h2>
+              <form onSubmit={handleEditVehicle} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Plate Number
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={vehicleFormData.plateNumber}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, plateNumber: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={vehicleFormData.category}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {VEHICLE_CATEGORY_OPTIONS.filter(opt => opt.value !== '').map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Capacity (kg)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={vehicleFormData.capacityKg}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, capacityKg: parseFloat(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={vehicleFormData.status}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {VEHICLE_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="editPartitioned"
+                    checked={vehicleFormData.isPartitioned}
+                    onChange={(e) => setVehicleFormData({ ...vehicleFormData, isPartitioned: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="editPartitioned" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Partitioned
+                  </label>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditVehicleModal(false);
+                      setSelectedVehicle(null);
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={vehicleSubmitting}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    {vehicleSubmitting ? 'Updating...' : 'Update'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Log Modal */}
+      {showAuditLogs && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Vehicle Activity Log
+              </h2>
+              <button
+                onClick={() => setShowAuditLogs(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto max-h-[60vh]">
+              {auditLogs.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No activity logs found
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {auditLogs.map((log) => (
+                    <div key={log.id} className="border border-gray-200 dark:border-slate-700 rounded-lg p-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            log.action === 'CREATE' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                            log.action === 'UPDATE' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                            log.action === 'DELETE' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                          }`}>
+                            {log.action}
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Vehicle: {log.newValue?.plateNumber || log.oldValue?.plateNumber || log.entityId}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      {log.user && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          By: {log.user.firstName} {log.user.lastName} ({log.user.email})
+                        </div>
+                      )}
+                      {log.oldValue && Object.keys(log.oldValue).length > 0 && (
+                        <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-600 dark:text-red-400">
+                          <span className="font-semibold">Old:</span> {JSON.stringify(log.oldValue, null, 2)}
+                        </div>
+                      )}
+                      {log.newValue && Object.keys(log.newValue).length > 0 && (
+                        <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded text-xs text-green-600 dark:text-green-400">
+                          <span className="font-semibold">New:</span> {JSON.stringify(log.newValue, null, 2)}
                         </div>
                       )}
                     </div>

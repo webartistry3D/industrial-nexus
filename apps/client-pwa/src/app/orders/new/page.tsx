@@ -6,6 +6,8 @@ import { api } from '@/lib/api';
 import { geocodeAddress } from '@/lib/geocoding';
 import { Package, ArrowLeft, MapPin, Check } from 'lucide-react';
 import { PlacesAutocomplete } from '@/components/maps/PlacesAutocomplete';
+import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { MapMarker } from '@/components/maps/MapMarker';
 import { SuccessModal } from '@/components/success-modal';
 
 export default function NewOrderPage() {
@@ -195,6 +197,26 @@ export default function NewOrderPage() {
     router.push('/orders');
   };
 
+  // Calculate map center based on pickup and delivery locations
+  const getMapCenter = () => {
+    const hasPickup = formData.pickupLat !== 0 && formData.pickupLng !== 0;
+    const hasDelivery = formData.deliveryLat !== 0 && formData.deliveryLng !== 0;
+
+    if (hasPickup && hasDelivery) {
+      return {
+        lat: (formData.pickupLat + formData.deliveryLat) / 2,
+        lng: (formData.pickupLng + formData.deliveryLng) / 2,
+      };
+    } else if (hasPickup) {
+      return { lat: formData.pickupLat, lng: formData.pickupLng };
+    } else if (hasDelivery) {
+      return { lat: formData.deliveryLat, lng: formData.deliveryLng };
+    }
+    return { lat: 6.5244, lng: 3.3792 }; // Default: Lagos, Nigeria
+  };
+
+  const mapCenter = getMapCenter();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
       {/* Header */}
@@ -263,7 +285,7 @@ export default function NewOrderPage() {
                         : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600'
                     }`}
                   >
-                    {tag}
+                    {tag.replace(/_/g, ' ')}
                   </button>
                 ))}
               </div>
@@ -282,12 +304,12 @@ export default function NewOrderPage() {
             </div>
           </div>
 
-          {/* Pickup Location */}
+          {/* Pickup & Delivery Locations with Map */}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                Pickup Location
+                <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                Locations
               </h3>
               <div className="flex gap-2">
                 {!useManualCoords && (
@@ -308,166 +330,156 @@ export default function NewOrderPage() {
                 </button>
               </div>
             </div>
-            
-            {useManualCoords ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Pickup Address
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.pickupAddress}
-                    onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter pickup address"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Latitude
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={formData.pickupLat || ''}
-                      onChange={(e) => setFormData({ ...formData, pickupLat: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      placeholder="6.4698"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Longitude
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={formData.pickupLng || ''}
-                      onChange={(e) => setFormData({ ...formData, pickupLng: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      placeholder="3.5852"
-                      required
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Enter coordinates manually if geocoding fails
-                </p>
-              </div>
-            ) : useManualEntry ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Pickup Address
-                </label>
-                <input
-                  type="text"
-                  value={formData.pickupAddress}
-                  onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter pickup address (e.g., 123 Main Street, Lagos)"
-                  required
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Address will be automatically geocoded using OpenStreetMap
-                </p>
-              </div>
-            ) : (
-              <PlacesAutocomplete
-                value={formData.pickupAddress}
-                onChange={(address, lat, lng) => setFormData({ ...formData, pickupAddress: address, pickupLat: lat, pickupLng: lng })}
-                placeholder="Enter pickup address"
-                label="Address"
-                iconColor="text-orange-600 dark:text-orange-400"
-              />
-            )}
-          </div>
 
-          {/* Delivery Location */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-green-600 dark:text-green-400" />
-              Delivery Location
-            </h3>
-            
-            {useManualCoords ? (
-              <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left: Location Inputs */}
+              <div className="space-y-6">
+                {/* Pickup Location */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Delivery Address
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.deliveryAddress}
-                    onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter delivery address"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Latitude
-                    </label>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    Pickup Location
+                  </h4>
+                  {useManualCoords ? (
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={formData.pickupAddress}
+                        onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        placeholder="Enter pickup address"
+                        required
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="number"
+                          step="any"
+                          value={formData.pickupLat || ''}
+                          onChange={(e) => setFormData({ ...formData, pickupLat: parseFloat(e.target.value) || 0 })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="Latitude"
+                          required
+                        />
+                        <input
+                          type="number"
+                          step="any"
+                          value={formData.pickupLng || ''}
+                          onChange={(e) => setFormData({ ...formData, pickupLng: parseFloat(e.target.value) || 0 })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="Longitude"
+                          required
+                        />
+                      </div>
+                    </div>
+                  ) : useManualEntry ? (
                     <input
-                      type="number"
-                      step="any"
-                      value={formData.deliveryLat || ''}
-                      onChange={(e) => setFormData({ ...formData, deliveryLat: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      placeholder="6.4698"
+                      type="text"
+                      value={formData.pickupAddress}
+                      onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      placeholder="Enter pickup address"
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Longitude
-                    </label>
+                  ) : (
+                    <PlacesAutocomplete
+                      value={formData.pickupAddress}
+                      onChange={(address, lat, lng) => setFormData({ ...formData, pickupAddress: address, pickupLat: lat, pickupLng: lng })}
+                      placeholder="Enter pickup address"
+                      label="Pickup Address"
+                      iconColor="text-orange-600 dark:text-orange-400"
+                    />
+                  )}
+                </div>
+
+                {/* Delivery Location */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    Delivery Location
+                  </h4>
+                  {useManualCoords ? (
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={formData.deliveryAddress}
+                        onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        placeholder="Enter delivery address"
+                        required
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="number"
+                          step="any"
+                          value={formData.deliveryLat || ''}
+                          onChange={(e) => setFormData({ ...formData, deliveryLat: parseFloat(e.target.value) || 0 })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="Latitude"
+                          required
+                        />
+                        <input
+                          type="number"
+                          step="any"
+                          value={formData.deliveryLng || ''}
+                          onChange={(e) => setFormData({ ...formData, deliveryLng: parseFloat(e.target.value) || 0 })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="Longitude"
+                          required
+                        />
+                      </div>
+                    </div>
+                  ) : useManualEntry ? (
                     <input
-                      type="number"
-                      step="any"
-                      value={formData.deliveryLng || ''}
-                      onChange={(e) => setFormData({ ...formData, deliveryLng: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      placeholder="3.5852"
+                      type="text"
+                      value={formData.deliveryAddress}
+                      onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      placeholder="Enter delivery address"
                       required
                     />
-                  </div>
+                  ) : (
+                    <PlacesAutocomplete
+                      value={formData.deliveryAddress}
+                      onChange={(address, lat, lng) => setFormData({ ...formData, deliveryAddress: address, deliveryLat: lat, deliveryLng: lng })}
+                      placeholder="Enter delivery address"
+                      label="Delivery Address"
+                      iconColor="text-green-600 dark:text-green-400"
+                    />
+                  )}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Enter coordinates manually if geocoding fails
-                </p>
+
+                {useManualCoords && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Enter coordinates manually if geocoding fails
+                  </p>
+                )}
+                {useManualEntry && !useManualCoords && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Addresses will be automatically geocoded using OpenStreetMap
+                  </p>
+                )}
               </div>
-            ) : useManualEntry ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Delivery Address
-                </label>
-                <input
-                  type="text"
-                  value={formData.deliveryAddress}
-                  onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter delivery address (e.g., 456 Market Street, Lagos)"
-                  required
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Address will be automatically geocoded using OpenStreetMap
-                </p>
+
+              {/* Right: Map */}
+              <div className="h-[400px] bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden">
+                <GoogleMapWrapper center={mapCenter} zoom={12}>
+                  {formData.pickupLat !== 0 && formData.pickupLng !== 0 && (
+                    <MapMarker
+                      position={{ lat: formData.pickupLat, lng: formData.pickupLng }}
+                      type="pickup"
+                      label="📦"
+                    />
+                  )}
+                  {formData.deliveryLat !== 0 && formData.deliveryLng !== 0 && (
+                    <MapMarker
+                      position={{ lat: formData.deliveryLat, lng: formData.deliveryLng }}
+                      type="delivery"
+                      label="🏠"
+                    />
+                  )}
+                </GoogleMapWrapper>
               </div>
-            ) : (
-              <PlacesAutocomplete
-                value={formData.deliveryAddress}
-                onChange={(address, lat, lng) => setFormData({ ...formData, deliveryAddress: address, deliveryLat: lat, deliveryLng: lng })}
-                placeholder="Enter delivery address"
-                label="Address"
-                iconColor="text-green-600 dark:text-green-400"
-              />
-            )}
+            </div>
           </div>
 
           {/* Submit Button */}

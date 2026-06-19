@@ -8,4 +8,8 @@ export class ChangeStatusDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsString()
+  driverId?: string;
 }
