@@ -8,6 +8,39 @@ export interface User {
   phoneNumber?: string;
 }
 
+export const KycDocumentType = {
+  GOVERNMENT_ID: 'GOVERNMENT_ID',
+  DRIVERS_LICENSE: 'DRIVERS_LICENSE',
+  PROOF_OF_ADDRESS: 'PROOF_OF_ADDRESS',
+  VEHICLE_INSURANCE: 'VEHICLE_INSURANCE',
+  VEHICLE_REGISTRATION: 'VEHICLE_REGISTRATION',
+  PROFESSIONAL_CERTIFICATION: 'PROFESSIONAL_CERTIFICATION',
+} as const;
+
+export type KycDocumentTypeValue = typeof KycDocumentType[keyof typeof KycDocumentType];
+
+export const KycDocumentStatus = {
+  PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type KycDocumentStatusValue = typeof KycDocumentStatus[keyof typeof KycDocumentStatus];
+
+export interface KycDocument {
+  id: string;
+  driverId: string;
+  documentType: KycDocumentTypeValue;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  status: KycDocumentStatusValue;
+  rejectionReason?: string;
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
 export interface Driver {
   id: string;
   userId: string;
