@@ -413,7 +413,8 @@ export default function DriversPage() {
                   {activeTab === 'drivers'
                     ? // 'Manage fleet drivers and assignments'
                       ''
-                    : 'Manage fleet vehicles and capacity'}
+                    : // 'Manage fleet vehicles and capacity'
+                      ''}
                 </p>
               </div>
             </div>
@@ -426,25 +427,13 @@ export default function DriversPage() {
                 Add Driver
               </button>
             ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    fetchAuditLogs();
-                    setShowAuditLogs(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-300"
-                >
-                  <Filter className="w-4 h-4" />
-                  Activity Log
-                </button>
-                <button
-                  onClick={() => setShowCreateVehicleModal(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Vehicle
-                </button>
-              </div>
+              <button
+                onClick={() => setShowCreateVehicleModal(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <Plus className="w-4 h-4" />
+                Add Vehicle
+              </button>
             )}
           </div>
 
@@ -501,7 +490,7 @@ export default function DriversPage() {
                     setStatusFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                  className="w-1/4 min-w-[90px] px-1 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {STATUS_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -513,7 +502,7 @@ export default function DriversPage() {
                     setKycFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                  className="w-1/4 min-w-[90px] px-2 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {KYC_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -525,7 +514,7 @@ export default function DriversPage() {
                     setAvailabilityFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                  className="flex-1 min-w-[70px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {AVAILABILITY_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>

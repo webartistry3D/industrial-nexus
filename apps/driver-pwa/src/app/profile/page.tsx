@@ -162,7 +162,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">My Profile</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">View and update your profile information</p>
+            {/* <p className="text-sm text-gray-500 dark:text-gray-400">View and update your profile information</p> */}
           </div>
         </div>
 

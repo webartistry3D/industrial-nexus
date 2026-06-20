@@ -76,7 +76,7 @@ export default function HistoryPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Trip History</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">View your completed trips</p>
+            {/* <p className="text-sm text-gray-500 dark:text-gray-400">View your completed trips</p> */}
           </div>
         </div>
 

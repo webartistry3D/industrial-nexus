@@ -146,7 +146,7 @@ export default function TrackingPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Tracking</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Track your active shipments in real-time</p>
+            {/* <p className="text-sm text-gray-500 dark:text-gray-400">Track your active shipments in real-time</p> */}
           </div>
         </div>
 
