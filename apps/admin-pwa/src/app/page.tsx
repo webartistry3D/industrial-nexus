@@ -228,32 +228,32 @@ export default function Dashboard() {
         )}
 
         {/* SLA Status */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-700/50 shadow-xl p-5">
+        <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold text-white flex items-center gap-2">
+            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               SLA Status Overview
             </h2>
-            <span className="text-xs font-medium text-slate-400 bg-slate-700/50 px-3 py-1 rounded-full">12-hour rule</span>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">12-hour rule</span>
           </div>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 rounded-xl p-4 border border-green-500/20">
-              <div className="text-3xl font-bold text-green-400 font-mono">
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400 font-mono">
                 {loading ? '...' : (stats?.activeTrips || 0) - delayedTripsCount}
               </div>
-              <div className="text-xs font-medium text-green-300 mt-1">On Track</div>
+              <div className="text-xs font-medium text-green-700 dark:text-green-300 mt-1">On Track</div>
             </div>
             <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 rounded-xl p-4 border border-amber-500/20">
-              <div className="text-3xl font-bold text-amber-400 font-mono">
+              <div className="text-3xl font-bold text-amber-600 dark:text-amber-400 font-mono">
                 {loading ? '...' : Math.max(0, delayedTripsCount - 1)}
               </div>
-              <div className="text-xs font-medium text-amber-300 mt-1">At Risk</div>
+              <div className="text-xs font-medium text-amber-700 dark:text-amber-300 mt-1">At Risk</div>
             </div>
             <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-xl p-4 border border-red-500/20">
-              <div className="text-3xl font-bold text-red-400 font-mono">
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400 font-mono">
                 {loading ? '...' : (delayedTripsCount > 0 ? 1 : 0)}
               </div>
-              <div className="text-xs font-medium text-red-300 mt-1">Breached</div>
+              <div className="text-xs font-medium text-red-700 dark:text-red-300 mt-1">Breached</div>
             </div>
           </div>
         </div>
