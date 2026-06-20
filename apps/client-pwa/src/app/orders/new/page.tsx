@@ -218,27 +218,29 @@ export default function NewOrderPage() {
   const mapCenter = getMapCenter();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       {/* Header */}
-      <div className="bg-slate-900 text-white px-4 py-4 flex items-center gap-2">
-        <button onClick={() => router.back()} className="text-white">
+      <div className="h-16 bg-slate-900/90 backdrop-blur-xl text-white px-4 flex items-center gap-2 border-b border-slate-700/50">
+        <button onClick={() => router.back()} className="text-white hover:text-blue-300 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-xl font-bold">Create New Order</h1>
+        <h1 className="text-lg font-bold">Create New Order</h1>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4 text-red-800 dark:text-red-300">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-4 text-red-800 dark:text-red-300 shadow-lg">
               {error}
             </div>
           )}
 
           {/* Cargo Description */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Package className="w-5 h-5 text-white" />
+              </div>
               Cargo Details
             </h3>
             <div>
@@ -251,7 +253,7 @@ export default function NewOrderPage() {
                 min="0"
                 value={formData.totalWeight || ''}
                 onChange={(e) => setFormData({ ...formData, totalWeight: parseFloat(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
                 required
               />
             </div>
@@ -264,7 +266,7 @@ export default function NewOrderPage() {
                 value={formData.cargoDescription}
                 onChange={(e) => setFormData({ ...formData, cargoDescription: e.target.value })}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 required
               />
             </div>
@@ -279,7 +281,7 @@ export default function NewOrderPage() {
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
                       formData.handlingTags.includes(tag)
                         ? getHandlingTagColor(tag)
                         : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600'
@@ -299,16 +301,18 @@ export default function NewOrderPage() {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
               />
             </div>
           </div>
 
           {/* Pickup & Delivery Locations with Map */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
                 Locations
               </h3>
               <div className="flex gap-2">
@@ -316,7 +320,7 @@ export default function NewOrderPage() {
                   <button
                     type="button"
                     onClick={() => setUseManualEntry(!useManualEntry)}
-                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-sm px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all duration-300"
                   >
                     {useManualEntry ? 'Use Autocomplete' : 'Manual Entry'}
                   </button>
@@ -324,7 +328,7 @@ export default function NewOrderPage() {
                 <button
                   type="button"
                   onClick={() => setUseManualCoords(!useManualCoords)}
-                  className="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+                  className="text-sm px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all duration-300"
                 >
                   {useManualCoords ? 'Hide Coordinates' : 'Manual Coords'}
                 </button>
@@ -337,7 +341,9 @@ export default function NewOrderPage() {
                 {/* Pickup Location */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
                     Pickup Location
                   </h4>
                   {useManualCoords ? (
@@ -346,7 +352,7 @@ export default function NewOrderPage() {
                         type="text"
                         value={formData.pickupAddress}
                         onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
                         placeholder="Enter pickup address"
                         required
                       />
@@ -356,7 +362,7 @@ export default function NewOrderPage() {
                           step="any"
                           value={formData.pickupLat || ''}
                           onChange={(e) => setFormData({ ...formData, pickupLat: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
                           placeholder="Latitude"
                           required
                         />
@@ -365,7 +371,7 @@ export default function NewOrderPage() {
                           step="any"
                           value={formData.pickupLng || ''}
                           onChange={(e) => setFormData({ ...formData, pickupLng: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
                           placeholder="Longitude"
                           required
                         />
@@ -376,7 +382,7 @@ export default function NewOrderPage() {
                       type="text"
                       value={formData.pickupAddress}
                       onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
                       placeholder="Enter pickup address"
                       required
                     />
@@ -394,7 +400,9 @@ export default function NewOrderPage() {
                 {/* Delivery Location */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
                     Delivery Location
                   </h4>
                   {useManualCoords ? (
@@ -403,7 +411,7 @@ export default function NewOrderPage() {
                         type="text"
                         value={formData.deliveryAddress}
                         onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
                         placeholder="Enter delivery address"
                         required
                       />
@@ -413,7 +421,7 @@ export default function NewOrderPage() {
                           step="any"
                           value={formData.deliveryLat || ''}
                           onChange={(e) => setFormData({ ...formData, deliveryLat: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
                           placeholder="Latitude"
                           required
                         />
@@ -422,7 +430,7 @@ export default function NewOrderPage() {
                           step="any"
                           value={formData.deliveryLng || ''}
                           onChange={(e) => setFormData({ ...formData, deliveryLng: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
                           placeholder="Longitude"
                           required
                         />
@@ -433,7 +441,7 @@ export default function NewOrderPage() {
                       type="text"
                       value={formData.deliveryAddress}
                       onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
                       placeholder="Enter delivery address"
                       required
                     />
@@ -461,7 +469,7 @@ export default function NewOrderPage() {
               </div>
 
               {/* Right: Map */}
-              <div className="h-[400px] bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden">
+              <div className="h-[400px] bg-gray-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-gray-200/50 dark:border-slate-700/50">
                 <GoogleMapWrapper center={mapCenter} zoom={12}>
                   {formData.pickupLat !== 0 && formData.pickupLng !== 0 && (
                     <MapMarker
@@ -486,7 +494,7 @@ export default function NewOrderPage() {
           <button
             type="submit"
             disabled={loading || geocoding}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 disabled:from-blue-400 disabled:to-blue-400 text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:cursor-not-allowed"
           >
             {geocoding ? 'Geocoding addresses...' : loading ? 'Creating Order...' : 'Create Order'}
           </button>

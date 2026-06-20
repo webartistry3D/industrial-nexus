@@ -91,25 +91,28 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="animate-pulse text-blue-600 font-semibold">Loading profile...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+          <UserIcon className="w-8 h-8 text-white" />
+        </div>
+        <p className="text-blue-600 font-semibold">Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       <main className="p-4 space-y-4">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-slate-800 dark:to-slate-700 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-6 text-white shadow-lg border border-white/10">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <UserIcon className="w-8 h-8" />
+            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+              <UserIcon className="w-10 h-10" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">{profile?.firstName} {profile?.lastName}</h1>
               <p className="text-blue-100 dark:text-slate-300">{profile?.email}</p>
-              <span className="inline-block mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
+              <span className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
                 {profile?.role}
               </span>
             </div>
@@ -117,19 +120,19 @@ export default function ProfilePage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4 text-red-800 dark:text-red-300">
+          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-4 text-red-800 dark:text-red-300 shadow-lg">
             {error}
           </div>
         )}
 
         {/* Profile Information */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700">
-          <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile Information</h2>
             {!editing && (
               <button
                 onClick={() => setEditing(true)}
-                className="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center gap-1"
+                className="text-blue-600 dark:text-blue-400 text-sm font-semibold flex items-center gap-1 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
                 <Edit className="w-4 h-4" />
                 Edit
@@ -147,7 +150,7 @@ export default function ProfilePage() {
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   required
                 />
               </div>
@@ -160,7 +163,7 @@ export default function ProfilePage() {
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   required
                 />
               </div>
@@ -173,7 +176,7 @@ export default function ProfilePage() {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 />
               </div>
 
@@ -185,7 +188,7 @@ export default function ProfilePage() {
                   type="text"
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 />
               </div>
 
@@ -197,7 +200,7 @@ export default function ProfilePage() {
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 resize-none"
                 />
               </div>
 
@@ -205,7 +208,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 disabled:from-blue-400 disabled:to-blue-400 text-white font-semibold py-2.5 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? 'Saving...' : 'Save'}
@@ -213,7 +216,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  className="px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300"
                 >
                   Cancel
                 </button>
@@ -222,7 +225,9 @@ export default function ProfilePage() {
           ) : (
             <div className="p-4 space-y-4">
               <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-gray-400 dark:text-gray-500 mt-0.5" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <Mail className="w-5 h-5 text-white mt-0.5" />
+                </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                   <p className="text-gray-900 dark:text-white">{profile?.email}</p>
@@ -231,17 +236,21 @@ export default function ProfilePage() {
 
               {profile?.phone && (
                 <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-gray-400 dark:text-gray-500 mt-0.5" />
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                    <Phone className="w-5 h-5 text-white mt-0.5" />
+                  </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
-                    <p className="text-gray-900 dark:text-white">{profile.phone}</p>
+                    <p className="text-gray-900 dark:text-white font-mono">{profile.phone}</p>
                   </div>
                 </div>
               )}
 
               {profile?.company && (
                 <div className="flex items-start gap-3">
-                  <Building className="w-5 h-5 text-gray-400 dark:text-gray-500 mt-0.5" />
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                    <Building className="w-5 h-5 text-white mt-0.5" />
+                  </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Company</p>
                     <p className="text-gray-900 dark:text-white">{profile.company}</p>
@@ -251,7 +260,9 @@ export default function ProfilePage() {
 
               {profile?.address && (
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-gray-400 dark:text-gray-500 mt-0.5" />
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                    <MapPin className="w-5 h-5 text-white mt-0.5" />
+                  </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Address</p>
                     <p className="text-gray-900 dark:text-white">{profile.address}</p>
@@ -263,21 +274,25 @@ export default function ProfilePage() {
         </div>
 
         {/* Account Settings */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700">
-          <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</h2>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-slate-700">
-            <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
-              <Shield className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+            <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
               <div className="flex-1">
                 <p className="text-gray-900 dark:text-white font-medium">Security</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Change password and security settings</p>
               </div>
             </button>
 
-            <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
-              <Bell className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                <Bell className="w-5 h-5 text-white" />
+              </div>
               <div className="flex-1">
                 <p className="text-gray-900 dark:text-white font-medium">Notifications</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Manage notification preferences</p>
@@ -289,7 +304,7 @@ export default function ProfilePage() {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
         >
           <LogOut className="w-5 h-5" />
           Logout

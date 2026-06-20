@@ -141,22 +141,25 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Loading profile...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+          <UserIcon className="w-8 h-8 text-white" />
+        </div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24 bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <PageHeader />
 
       <main className="p-4 space-y-4">
         {/* Profile Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <UserIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <UserIcon className="w-10 h-10 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -168,7 +171,9 @@ export default function ProfilePage() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-sm">
-              <Shield className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
               <span className="text-gray-600 dark:text-gray-400">
                 Role: <span className="font-medium text-gray-900 dark:text-white">{user?.role}</span>
               </span>
@@ -184,21 +189,25 @@ export default function ProfilePage() {
 
         {/* Driver Details */}
         {driver && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <h3 className="font-semibold text-gray-800 dark:text-white mb-3">Driver Information</h3>
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Driver Information</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
-                <Truck className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <Truck className="w-4 h-4 text-white" />
+                </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">License Number</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{driver.licenseNumber}</p>
+                  <p className="font-medium text-gray-900 dark:text-white font-mono">{driver.licenseNumber}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Shield className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                  <Shield className="w-4 h-4 text-white" />
+                </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">KYC Status</p>
-                  <p className={`font-medium ${
+                  <p className={`font-medium font-mono ${
                     driver.kycStatus === 'VERIFIED' ? 'text-green-600 dark:text-green-400' :
                     driver.kycStatus === 'PENDING' ? 'text-yellow-600 dark:text-yellow-400' :
                     'text-red-600 dark:text-red-400'
@@ -223,27 +232,31 @@ export default function ProfilePage() {
         )}
 
         {/* Contact Information */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-          <h3 className="font-semibold text-gray-800 dark:text-white mb-3">Contact Information</h3>
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Contact Information</h3>
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-              <p className="text-gray-900 dark:text-white">{(user as any)?.phoneNumber || 'Not provided'}</p>
+              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <Phone className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-gray-900 dark:text-white font-mono">{(user as any)?.phoneNumber || 'Not provided'}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Mail className="w-4 h-4 text-white" />
+              </div>
               <p className="text-gray-900 dark:text-white">{user?.email}</p>
             </div>
           </div>
         </div>
 
         {/* KYC Documents Section */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-800 dark:text-white">KYC Documents</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">KYC Documents</h3>
             <button
               onClick={() => setShowKycSection(!showKycSection)}
-              className="flex items-center gap-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
             >
               <Upload className="w-4 h-4" />
               Upload Document
@@ -251,9 +264,9 @@ export default function ProfilePage() {
           </div>
 
           {showKycSection && (
-            <form onSubmit={handleFileUpload} className="mb-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg space-y-3">
+            <form onSubmit={handleFileUpload} className="mb-4 p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-slate-600/50 space-y-3">
               {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-red-600 dark:text-red-400 text-sm">
+                <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border border-red-200/50 dark:border-red-700/50 rounded-xl p-3 text-red-800 dark:text-red-300 text-sm shadow-lg">
                   {error}
                 </div>
               )}
@@ -264,7 +277,7 @@ export default function ProfilePage() {
                 <select
                   value={selectedDocType}
                   onChange={(e) => setSelectedDocType(e.target.value as KycDocumentTypeValue)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   <option value={KycDocumentType.GOVERNMENT_ID}>Government ID</option>
                   <option value={KycDocumentType.DRIVERS_LICENSE}>Driver's License</option>
@@ -282,21 +295,21 @@ export default function ProfilePage() {
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setShowKycSection(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition-all duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading || !selectedFile}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5"
                 >
                   {uploading ? 'Uploading...' : 'Upload'}
                 </button>
@@ -305,22 +318,22 @@ export default function ProfilePage() {
           )}
 
           {kycDocuments.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
               No documents uploaded yet
             </p>
           ) : (
             <div className="space-y-3">
               {kycDocuments.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                      <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {getDocumentTypeLabel(doc.documentType)}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                         {doc.fileName} • {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
@@ -335,7 +348,7 @@ export default function ProfilePage() {
                     {doc.status !== KycDocumentStatus.VERIFIED && (
                       <button
                         onClick={() => handleDeleteDocument(doc.id)}
-                        className="p-1 text-red-600 hover:text-red-700 dark:text-red-400"
+                        className="p-1.5 text-red-600 hover:text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-300"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -351,7 +364,7 @@ export default function ProfilePage() {
         <div className="space-y-2">
           <button
             onClick={handleLogout}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
           >
             <LogOut className="w-5 h-5" />
             Logout

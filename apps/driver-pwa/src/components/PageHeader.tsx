@@ -53,12 +53,12 @@ export function PageHeader({ title, subtitle, showOnlineStatus = false, isOnline
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white p-4 border-b-2 border-blue-500 dark:border-blue-500 relative">
-      <div className="flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
+      <div className="h-full px-4 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold">{getHeaderTitle()}</h1>
           {getHeaderSubtitle() && (
-            <p className="text-xs text-blue-100 dark:text-gray-400">{getHeaderSubtitle()}</p>
+            <p className="text-xs text-blue-100">{getHeaderSubtitle()}</p>
           )}
         </div>
         <div className="flex items-center gap-3">

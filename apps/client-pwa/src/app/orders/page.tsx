@@ -71,14 +71,14 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       {/* Header */}
-      <div className="bg-slate-900 text-white px-4 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">My Orders</h1>
+      <div className="h-16 bg-slate-900/90 backdrop-blur-xl text-white px-4 border-b border-slate-700/50">
+        <div className="h-full flex items-center justify-between">
+          <h1 className="text-lg font-bold">My Orders</h1>
           <button
             onClick={() => router.push('/orders/new')}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
           >
             <Plus className="w-4 h-4" />
             New Order
@@ -88,7 +88,7 @@ export default function OrdersPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Filters */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-slate-700">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -97,7 +97,7 @@ export default function OrdersPage() {
                 placeholder="Search orders..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ export default function OrdersPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
               >
                 <option value="all">All Status</option>
                 <option value="SUBMITTED">Submitted</option>
@@ -119,34 +119,44 @@ export default function OrdersPage() {
         </div>
 
         {/* Orders List */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
           {loading ? (
-            <div className="p-4 text-center text-gray-600 dark:text-gray-400">
-              Loading orders...
+            <div className="p-12 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Loading orders...</p>
             </div>
           ) : error ? (
-            <div className="p-4 text-center text-red-500">{error}</div>
+            <div className="p-12 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg mb-4">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-red-500 font-medium">{error}</p>
+            </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="p-8 text-center">
-              <Package className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">No orders found</p>
+            <div className="p-12 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">No orders found</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-slate-700">
+            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
               {filteredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="p-4 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300"
                   onClick={() => router.push(`/orders/${order.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                      <Package className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="font-medium text-gray-900 dark:text-white">{order.orderNumber}</p>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                        <p className="font-medium text-gray-900 dark:text-white font-mono">{order.orderNumber}</p>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {order.status}
                         </span>
                       </div>
@@ -154,9 +164,9 @@ export default function OrdersPage() {
                         {order.deliveryLocation.address}
                       </p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                        <span className="font-mono">{new Date(order.createdAt).toLocaleDateString()}</span>
                         {order.trip?.eta && (
-                          <span>• ETA: {new Date(order.trip.eta).toLocaleDateString()}</span>
+                          <span>• ETA: <span className="font-mono">{new Date(order.trip.eta).toLocaleDateString()}</span></span>
                         )}
                       </div>
                     </div>

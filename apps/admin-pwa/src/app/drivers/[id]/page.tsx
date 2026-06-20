@@ -140,11 +140,11 @@ export default function DriverDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
         <div className="animate-pulse p-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded-2xl w-1/3 mb-4"></div>
+          <div className="h-32 bg-gray-200 dark:bg-slate-700 rounded-2xl mb-4"></div>
+          <div className="h-64 bg-gray-200 dark:bg-slate-700 rounded-2xl"></div>
         </div>
       </div>
     );
@@ -152,13 +152,15 @@ export default function DriverDetailPage() {
 
   if (error || !driver) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-4">
-        <div className="text-center py-8 text-red-500">
-          <AlertCircle className="w-12 h-12 mx-auto mb-3" />
-          <p>{error || 'Driver not found'}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 p-4">
+        <div className="text-center py-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg mb-4">
+            <AlertCircle className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-red-500 font-medium">{error || 'Driver not found'}</p>
           <button
             onClick={() => router.push('/drivers')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300"
           >
             Back to Drivers
           </button>
@@ -168,21 +170,21 @@ export default function DriverDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <main className="pb-24">
         {/* Header */}
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-4">
           <button
             onClick={() => router.push('/drivers')}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Back to Drivers</span>
           </button>
 
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-blue-600">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl font-bold text-white">
                 {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
               </span>
             </div>
@@ -190,7 +192,7 @@ export default function DriverDetailPage() {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 {driver.user?.firstName} {driver.user?.lastName}
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{driver.licenseNumber}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{driver.licenseNumber}</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(driver.status)}`}>
                   {driver.status}
@@ -208,18 +210,22 @@ export default function DriverDetailPage() {
 
         {/* Contact Info */}
         <div className="px-4 py-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Contact Information</h2>
             <div className="space-y-2">
               {driver.user?.email && (
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 text-gray-500" />
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+                    <Mail className="w-4 h-4 text-white" />
+                  </div>
                   <span className="text-gray-600 dark:text-gray-400">{driver.user.email}</span>
                 </div>
               )}
               <div className="flex items-center gap-3 text-sm">
-                <Shield className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-600 dark:text-gray-400">License: {driver.licenseNumber}</span>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm">
+                  <Shield className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-gray-600 dark:text-gray-400 font-mono">License: {driver.licenseNumber}</span>
               </div>
             </div>
           </div>
@@ -227,11 +233,11 @@ export default function DriverDetailPage() {
 
         {/* Status Management */}
         <div className="px-4 pb-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Status Management</h2>
             
             {updating && (
-              <div className="mb-3 text-sm text-blue-600">Updating...</div>
+              <div className="mb-3 text-sm text-blue-600 font-medium">Updating...</div>
             )}
 
             <div className="space-y-4">
@@ -246,10 +252,10 @@ export default function DriverDetailPage() {
                       key={status}
                       onClick={() => handleStatusChange(status)}
                       disabled={updating || driver.status === status}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                         driver.status === status
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200'
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {status}
@@ -269,10 +275,10 @@ export default function DriverDetailPage() {
                       key={kycStatus}
                       onClick={() => handleKycChange(kycStatus)}
                       disabled={updating || driver.kycStatus === kycStatus}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                         driver.kycStatus === kycStatus
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200'
+                          ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md shadow-green-500/20'
+                          : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {kycStatus}
@@ -292,10 +298,10 @@ export default function DriverDetailPage() {
                       key={availability}
                       onClick={() => handleAvailabilityChange(availability)}
                       disabled={updating || driver.availability === availability}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                         driver.availability === availability
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200'
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {availability.replace('_', ' ')}
@@ -309,20 +315,22 @@ export default function DriverDetailPage() {
 
         {/* Vehicle Assignment */}
         <div className="px-4 pb-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Vehicle Assignment</h2>
             
             {driver.vehicle ? (
-              <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Truck className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center gap-3 p-3.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+                  <Truck className="w-5 h-5 text-white" />
+                </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">{driver.vehicle.plateNumber}</p>
-                  <p className="text-sm text-gray-500">{driver.vehicle.category} • {driver.vehicle.capacityKg}kg</p>
+                  <p className="font-medium text-gray-900 dark:text-white font-mono">{driver.vehicle.plateNumber}</p>
+                  <p className="text-sm text-gray-500 font-mono">{driver.vehicle.category} • {driver.vehicle.capacityKg}kg</p>
                 </div>
                 <button
                   onClick={() => handleVehicleAssign(null)}
                   disabled={updating}
-                  className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                  className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl disabled:opacity-50 transition-all duration-300"
                 >
                   Unassign
                 </button>
@@ -333,7 +341,7 @@ export default function DriverDetailPage() {
                 <select
                   onChange={(e) => e.target.value && handleVehicleAssign(e.target.value)}
                   disabled={updating}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   <option value="">Select a vehicle to assign...</option>
                   {vehicles.map((vehicle) => (

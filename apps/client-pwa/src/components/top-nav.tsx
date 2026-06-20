@@ -38,6 +38,10 @@ export function TopNav({ role = 'client' }: TopNavProps) {
     return 'Industrial Nexus';
   };
 
+  const getHeaderSubtitle = () => {
+    return 'Client Portal';
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -57,11 +61,12 @@ export function TopNav({ role = 'client' }: TopNavProps) {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white border-b-2 border-blue-500 dark:border-blue-500 z-50">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
       <div className="h-full px-4 flex items-center justify-between">
         {/* Left: Title */}
         <div>
           <h1 className="text-lg font-bold">{getHeaderTitle()}</h1>
+          <p className="text-xs text-blue-100">{getHeaderSubtitle()}</p>
         </div>
 
         {/* Right: Actions */}

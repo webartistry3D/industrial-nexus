@@ -121,37 +121,38 @@ export default function TrackingPage() {
   const mapCenter = vehiclePosition || { lat: 6.5244, lng: 3.3792 };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <div className="border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Track Shipments</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Monitor your shipments in real-time</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+      <div className="h-16 border-b border-gray-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl px-4">
+        <div className="h-full max-w-7xl mx-auto flex items-center">
+          <div>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">Track Shipments</h1>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 pb-24">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-slate-700">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Active Shipments</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeShipments}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{activeShipments}</p>
               </div>
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Truck className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Truck className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-slate-700">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Shipments</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{shipments.length}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{shipments.length}</p>
               </div>
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <Package className="w-6 h-6 text-green-600 dark:text-green-300" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <Package className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
@@ -160,39 +161,45 @@ export default function TrackingPage() {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Shipments List */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Shipments</h2>
             </div>
-            <div className="divide-y divide-gray-200 dark:divide-slate-700 max-h-[600px] overflow-y-auto">
+            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50 max-h-[600px] overflow-y-auto">
               {loading ? (
-                <div className="p-4 text-center text-gray-600 dark:text-gray-400">
-                  Loading shipments...
+                <div className="p-12 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+                    <Package className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">Loading shipments...</p>
                 </div>
               ) : shipments.length === 0 ? (
-                <div className="p-4 text-center text-gray-600 dark:text-gray-400">
-                  No shipments found
+                <div className="p-12 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                    <Package className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">No shipments found</p>
                 </div>
               ) : (
                 shipments.map((shipment) => (
                   <div
                     key={shipment.id}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${
-                      selectedShipment?.id === shipment.id ? 'bg-blue-50 dark:bg-slate-700' : ''
+                    className={`p-4 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300 ${
+                      selectedShipment?.id === shipment.id ? 'bg-blue-50/80 dark:bg-slate-700/50' : ''
                     }`}
                     onClick={() => setSelectedShipment(shipment)}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                        <Package className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                        <Package className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-white">{shipment.orderNumber}</p>
+                        <p className="font-medium text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                           {shipment.deliveryLocation.address}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                             shipment.trip?.status === 'IN_TRANSIT'
                               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                               : shipment.trip?.status === 'ASSIGNED'
@@ -215,7 +222,7 @@ export default function TrackingPage() {
             {selectedShipment ? (
               <>
                 {/* Map */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden">
                   <div className="h-[400px]">
                     {trackingData || vehiclePosition ? (
                       <GoogleMapWrapper center={mapCenter} zoom={12}>
@@ -241,21 +248,21 @@ export default function TrackingPage() {
                       </GoogleMapWrapper>
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-600 dark:text-gray-400">Loading map...</p>
+                        <p className="text-gray-600 dark:text-gray-400 font-medium">Loading map...</p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Shipment Details */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 font-mono">
                     {selectedShipment.orderNumber}
                   </h2>
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                        <Package className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                        <Package className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm text-gray-600 dark:text-gray-400">Pickup</p>
@@ -270,8 +277,8 @@ export default function TrackingPage() {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                        <MapPin className="w-5 h-5 text-green-600 dark:text-green-300" />
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                        <MapPin className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm text-gray-600 dark:text-gray-400">Delivery</p>
@@ -282,17 +289,17 @@ export default function TrackingPage() {
                     </div>
 
                     {selectedShipment.trip?.driver && (
-                      <div className="pt-4 border-t border-gray-200 dark:border-slate-700">
+                      <div className="pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Driver</p>
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                            <Truck className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                            <Truck className="w-5 h-5 text-white" />
                           </div>
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
                               {selectedShipment.trip.driver.user.firstName} {selectedShipment.trip.driver.user.lastName}
                             </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                               Vehicle: {(selectedShipment.trip.vehicle ?? selectedShipment.trip.driver.vehicle)?.plateNumber || 'N/A'}
                             </p>
                           </div>
@@ -301,7 +308,7 @@ export default function TrackingPage() {
                     )}
 
                     {(trackingData?.location || liveLocation) && (
-                      <div className="pt-4 border-t border-gray-200 dark:border-slate-700">
+                      <div className="pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Clock className="w-4 h-4" />
@@ -309,14 +316,14 @@ export default function TrackingPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{isConnected ? 'Live' : 'Polling'}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">{isConnected ? 'Live' : 'Polling'}</span>
                           </div>
                         </div>
                       </div>
                     )}
 
                     {geofenceEvents.length > 0 && (
-                      <div className="pt-4 border-t border-gray-200 dark:border-slate-700">
+                      <div className="pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
                         <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Geofence Events</p>
                         <div className="space-y-1">
                           {geofenceEvents.map((evt, i) => (
@@ -328,7 +335,7 @@ export default function TrackingPage() {
                                 'bg-blue-500'
                               }`} />
                               <span className="text-gray-700 dark:text-gray-300">{evt.eventType.replace(/_/g, ' ')}</span>
-                              {evt.distance > 0 && <span className="text-gray-400 ml-auto text-xs">{Math.round(evt.distance)}m away</span>}
+                              {evt.distance > 0 && <span className="text-gray-400 ml-auto text-xs font-mono">{Math.round(evt.distance)}m away</span>}
                             </div>
                           ))}
                         </div>
@@ -338,9 +345,11 @@ export default function TrackingPage() {
                 </div>
               </>
             ) : (
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-12 text-center">
-                <MapPin className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Select a shipment to view tracking details</p>
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-12 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                  <MapPin className="w-8 h-8 text-white" />
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 font-medium">Select a shipment to view tracking details</p>
               </div>
             )}
           </div>

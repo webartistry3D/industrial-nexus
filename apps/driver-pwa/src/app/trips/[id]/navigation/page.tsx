@@ -55,24 +55,30 @@ export default function NavigationPage() {
     : { lat: 6.5244, lng: 3.3792 };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       {/* Header */}
-      <div className="bg-slate-900 text-white px-4 py-4 flex items-center gap-2">
-        <button onClick={() => router.back()} className="text-white">
+      <div className="bg-slate-900/90 backdrop-blur-xl text-white px-4 py-4 flex items-center gap-2 border-b border-slate-700/50">
+        <button onClick={() => router.back()} className="text-white hover:text-blue-300 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </button>
         <h1 className="text-lg font-semibold">Navigation Mode</h1>
       </div>
 
       {/* Map */}
-      <div className="h-[60vh] bg-white dark:bg-slate-800">
+      <div className="h-[60vh] bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-600 dark:text-gray-400">Loading route...</p>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+              <Navigation className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">Loading route...</p>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-red-500">{error}</p>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg mb-4">
+              <Navigation className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-red-500 font-medium">{error}</p>
           </div>
         ) : routeData ? (
           <GoogleMapWrapper center={mapCenter} zoom={14}>
@@ -91,24 +97,28 @@ export default function NavigationPage() {
       </div>
 
       {/* Navigation Info */}
-      <div className="bg-white dark:bg-slate-800 p-4 space-y-4 pb-24">
+      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl p-4 space-y-4 pb-24">
         {routeData && (
           <>
-            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-slate-700 rounded-lg">
-              <Navigation className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl border border-blue-200/50 dark:border-slate-600/50">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Navigation className="w-8 h-8 text-white" />
+              </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Distance</p>
-                <p className="font-semibold text-gray-900 dark:text-white">
+                <p className="font-semibold text-gray-900 dark:text-white font-mono">
                   {routeData.distance ? `${(routeData.distance / 1000).toFixed(1)} km` : '--'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-slate-700 rounded-lg">
-              <Clock className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl border border-green-200/50 dark:border-slate-600/50">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <Clock className="w-8 h-8 text-white" />
+              </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Estimated Time</p>
-                <p className="font-semibold text-gray-900 dark:text-white">
+                <p className="font-semibold text-gray-900 dark:text-white font-mono">
                   {routeData.estimatedDuration ? `${Math.round(routeData.estimatedDuration / 60)} min` : '--'}
                 </p>
               </div>
@@ -116,8 +126,8 @@ export default function NavigationPage() {
 
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                  <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                  <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Pickup</p>
@@ -128,8 +138,8 @@ export default function NavigationPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <MapPin className="w-5 h-5 text-green-600 dark:text-green-300" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                  <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Delivery</p>
@@ -149,7 +159,7 @@ export default function NavigationPage() {
               const url = `https://www.google.com/maps/dir/?api=1&origin=${routeData.pickup.lat},${routeData.pickup.lng}&destination=${routeData.delivery.lat},${routeData.delivery.lng}&travelmode=driving`;
               window.open(url, '_blank');
             }}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
           >
             <Navigation className="w-5 h-5" />
             Open in Google Maps

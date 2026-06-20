@@ -113,62 +113,65 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="animate-pulse text-blue-600 font-semibold">Loading order details...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+          <Package className="w-8 h-8 text-white" />
+        </div>
+        <p className="text-blue-600 font-semibold">Loading order details...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       {/* Header */}
-      <div className="bg-slate-900 text-white px-4 py-4 flex items-center gap-2">
-        <button onClick={() => router.back()} className="text-white">
+      <div className="h-16 bg-slate-900/90 backdrop-blur-xl text-white px-4 flex items-center gap-2 border-b border-slate-700/50">
+        <button onClick={() => router.back()} className="text-white hover:text-blue-300 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-xl font-bold">Order Details</h1>
+        <h1 className="text-lg font-bold">Order Details</h1>
       </div>
 
       {/* Action Messages */}
       {actionSuccess && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 mx-4 mt-4 rounded-lg text-green-700 dark:text-green-400 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 border border-green-200/50 dark:border-green-800/50 p-4 mx-4 mt-4 rounded-xl text-green-700 dark:text-green-400 flex items-center gap-2 shadow-lg">
           <CheckCircle2 className="w-4 h-4" />
           Package confirmed received successfully
         </div>
       )}
       {actionError && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mx-4 mt-4 rounded-lg text-red-700 dark:text-red-400">
+        <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border border-red-200/50 dark:border-red-800/50 p-4 mx-4 mt-4 rounded-xl text-red-700 dark:text-red-400 shadow-lg">
           {actionError}
         </div>
       )}
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         {error ? (
-          <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4 text-red-800 dark:text-red-300">
+          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-4 text-red-800 dark:text-red-300 shadow-lg">
             {error}
           </div>
         ) : order ? (
           <>
             {/* Order Info */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{order.orderNumber}</h2>
-                <span className={`inline-flex items-center px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)}`}>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber}</h2>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                   {order.status}
                 </span>
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                 Created: {new Date(order.createdAt).toLocaleString()}
               </div>
             </div>
 
             {/* Locations */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Route</h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                    <Package className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                    <Package className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">Pickup</p>
@@ -179,8 +182,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                    <MapPin className="w-5 h-5 text-green-600 dark:text-green-300" />
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                    <MapPin className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">Delivery</p>
@@ -193,7 +196,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
             </div>
 
             {/* Cargo Details */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cargo Details</h3>
               {order.cargoDescription && (
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -203,7 +206,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               {order.handlingTags && order.handlingTags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {order.handlingTags.map((tagObj, index) => (
-                    <span key={index} className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getHandlingTagColor(tagObj.tag)}`}>
+                    <span key={index} className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHandlingTagColor(tagObj.tag)}`}>
                       {tagObj.tag}
                     </span>
                   ))}
@@ -213,26 +216,30 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
             {/* Trip Information */}
             {order.trip && (
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trip Information</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Truck className="w-4 h-4" />
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+                      <Truck className="w-4 h-4 text-white" />
+                    </div>
                     <span>Status: {order.trip.status}</span>
                   </div>
                   {order.trip.eta && (
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <Clock className="w-4 h-4" />
-                      <span>ETA: {new Date(order.trip.eta).toLocaleString()}</span>
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm">
+                        <Clock className="w-4 h-4 text-white" />
+                      </div>
+                      <span>ETA: <span className="font-mono">{new Date(order.trip.eta).toLocaleString()}</span></span>
                     </div>
                   )}
                   {order.trip.driver && (
-                    <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
+                    <div className="pt-3 border-t border-gray-200/50 dark:border-slate-700/50">
                       <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Driver</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {order.trip.driver.user.firstName} {order.trip.driver.user.lastName}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                         Vehicle: {(order.trip.vehicle ?? order.trip.driver.vehicle)?.plateNumber || 'N/A'}
                       </p>
                     </div>
@@ -240,7 +247,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </div>
                 <button
                   onClick={() => router.push(`/tracking?shipment=${order.id}`)}
-                  className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
+                  className="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
                 >
                   Track Shipment
                 </button>
@@ -252,7 +259,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               <button
                 onClick={handleConfirmDelivery}
                 disabled={actionLoading}
-                className="w-full flex items-center justify-center gap-2 p-4 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PackageCheck className="w-5 h-5" />
                 {actionLoading ? 'Confirming...' : 'Package Received'}

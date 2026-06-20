@@ -59,7 +59,7 @@ export default function TripsPage() {
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <PageHeader />
 
       <main className="p-4 space-y-4">
@@ -67,30 +67,30 @@ export default function TripsPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setFilter('active')}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'active'
-                ? 'bg-blue-600 dark:bg-blue-700 text-white'
-                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700'
             }`}
           >
             Active
           </button>
           <button
             onClick={() => setFilter('completed')}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'completed'
-                ? 'bg-blue-600 dark:bg-blue-700 text-white'
-                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700'
             }`}
           >
             Completed
           </button>
           <button
             onClick={() => setFilter('all')}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'all'
-                ? 'bg-blue-600 dark:bg-blue-700 text-white'
-                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700'
             }`}
           >
             All
@@ -99,14 +99,14 @@ export default function TripsPage() {
 
         {/* Stats - Aligned with Dashboard */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
               {loading ? '...' : activeTripsCount}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Active Trips</div>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 font-mono">
               {loading ? '...' : totalCompletedCount}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Total Completed</div>
@@ -115,11 +115,18 @@ export default function TripsPage() {
 
         {/* Trip List */}
         {loading ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading trips...</div>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+              <Truck className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">Loading trips...</p>
+          </div>
         ) : filteredTrips.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <Truck className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-            <p className="dark:text-gray-400">No {filter === 'all' ? '' : filter} trips found</p>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+              <Truck className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">No {filter === 'all' ? '' : filter} trips found</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -127,10 +134,10 @@ export default function TripsPage() {
               <div
                 key={trip.id}
                 onClick={() => router.push(`/trips/${trip.id}`)}
-                className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 p-4 cursor-pointer active:bg-gray-50 dark:active:bg-slate-700 border-l-4 border-blue-500 dark:border-blue-400"
+                className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 cursor-pointer hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 border-l-4 border-blue-500 dark:border-blue-400"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-semibold text-gray-900 dark:text-white">{trip.order?.orderNumber}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</span>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
                     {trip.status.replace(/_/g, ' ')}
                   </span>
@@ -138,20 +145,24 @@ export default function TripsPage() {
 
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5" />
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm">
+                      <MapPin className="w-4 h-4 text-white mt-0.5" />
+                    </div>
                     <div>
                       <p className="text-gray-600 dark:text-gray-400">From: {trip.order?.pickupLocation?.address}</p>
                       <p className="text-gray-600 dark:text-gray-400">To: {trip.order?.deliveryLocation?.address}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-400">{trip.order?.cargoDescription} ({trip.order?.totalWeight} kg)</span>
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+                      <Package className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-gray-600 dark:text-gray-400 font-mono">{trip.order?.cargoDescription} ({trip.order?.totalWeight} kg)</span>
                   </div>
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <button className="flex-1 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors">
+                  <button className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300">
                     {trip.status === 'ASSIGNED' ? 'Start Trip' : 'View Details'}
                   </button>
                 </div>
