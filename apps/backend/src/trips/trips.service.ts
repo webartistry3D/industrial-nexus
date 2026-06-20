@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { WeightWatchService } from '../weight-watch/weight-watch.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { TripFilterDto } from './dto/trip-filter.dto';
 import { AssignDriverDto } from './dto/assign-driver.dto';
@@ -13,6 +14,7 @@ export class TripsService {
     private prisma: PrismaService,
     private auditService: AuditService,
     private weightWatchService: WeightWatchService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(createTripDto: CreateTripDto, userId: string) {
@@ -130,6 +132,18 @@ export class TripsService {
       entityId: trip.id,
       newValue: { orderId: trip.orderId, driverId: trip.driverId, vehicleId: trip.vehicleId },
     });
+
+    // Notify driver and client
+    try {
+      await this.notificationsService.notifyTripAssigned(
+        driver.userId,
+        order.clientId,
+        order.orderNumber,
+        trip.id,
+      );
+    } catch (e) {
+      console.error('[Notifications] Failed to send trip assigned notification:', e);
+    }
 
     return trip;
   }
@@ -265,6 +279,7 @@ export class TripsService {
                 firstName: true,
                 lastName: true,
                 phoneNumber: true,
+                role: true,
               },
             },
           },
@@ -323,6 +338,18 @@ export class TripsService {
       newValue: { status: TripStatus.IN_TRANSIT },
     });
 
+    // Notify driver and client
+    try {
+      await this.notificationsService.notifyTripStarted(
+        trip.driver.user.id,
+        trip.order.clientId,
+        trip.order.orderNumber,
+        id,
+      );
+    } catch (e) {
+      console.error('[Notifications] Failed to send trip started notification:', e);
+    }
+
     return updatedTrip;
   }
 
@@ -361,6 +388,18 @@ export class TripsService {
       oldValue: { status: trip.status },
       newValue: { status: TripStatus.DELIVERED },
     });
+
+    // Notify driver and client
+    try {
+      await this.notificationsService.notifyTripCompleted(
+        trip.driver.user.id,
+        trip.order.clientId,
+        trip.order.orderNumber,
+        id,
+      );
+    } catch (e) {
+      console.error('[Notifications] Failed to send trip completed notification:', e);
+    }
 
     return updatedTrip;
   }

@@ -403,13 +403,13 @@ export default function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
         <div className="animate-pulse">
-          <div className="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700" />
+          <div className="h-16 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50" />
           <div className="p-4 space-y-4">
-            <div className="h-32 bg-white dark:bg-slate-800 rounded-lg" />
-            <div className="h-48 bg-white dark:bg-slate-800 rounded-lg" />
-            <div className="h-32 bg-white dark:bg-slate-800 rounded-lg" />
+            <div className="h-32 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50" />
+            <div className="h-48 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50" />
+            <div className="h-32 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50" />
           </div>
         </div>
       </div>
@@ -418,7 +418,7 @@ export default function OrderDetailPage() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
         <div className="p-4">
           <button
             onClick={() => router.push('/orders')}
@@ -428,16 +428,18 @@ export default function OrderDetailPage() {
             Back to Orders
           </button>
           
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-5 shadow-lg shadow-red-500/10">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
+                <AlertCircle className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <p className="text-red-700 dark:text-red-400">{error || 'Order not found'}</p>
+                <p className="text-red-700 dark:text-red-400 font-medium">{error || 'Order not found'}</p>
               </div>
             </div>
             <button
               onClick={() => fetchOrder()}
-              className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
             >
               Retry
             </button>
@@ -448,9 +450,9 @@ export default function OrderDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
+      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <button
           onClick={() => router.push('/orders')}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
@@ -460,13 +462,13 @@ export default function OrderDetailPage() {
         </button>
 
         <div className="flex items-start gap-3">
-          <div className={`p-3 rounded-lg ${getStatusColor(order.status)}`}>
+          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
             {getStatusIcon(order.status)}
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{order.orderNumber}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">{order.orderNumber}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
                 {String(order.status || '').replace('_', ' ')}
               </span>
               <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
@@ -479,13 +481,13 @@ export default function OrderDetailPage() {
         {/* Action Buttons */}
         <div className="mt-4 space-y-2">
           {actionSuccess && (
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm flex items-center gap-2">
+            <div className="p-3 bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 border border-green-200/50 dark:border-green-700/50 rounded-xl text-green-700 dark:text-green-400 text-sm flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               Action completed successfully
             </div>
           )}
           {actionError && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
+            <div className="p-3 bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-xl text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
               <XCircle className="w-4 h-4" />
               {actionError}
             </div>
@@ -497,7 +499,7 @@ export default function OrderDetailPage() {
                 <button
                   onClick={handleSubmitOrder}
                   disabled={actionLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4" />
                   {actionLoading ? 'Submitting...' : 'Submit Order'}
@@ -505,7 +507,7 @@ export default function OrderDetailPage() {
                 <button
                   onClick={() => setShowRejectModal(true)}
                   disabled={actionLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <XCircle className="w-4 h-4" />
                   Reject Order
@@ -517,7 +519,7 @@ export default function OrderDetailPage() {
               <button
                 onClick={handleApproveOrder}
                 disabled={actionLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check className="w-4 h-4" />
                 {actionLoading ? 'Approving...' : 'Approve Order'}
@@ -528,7 +530,7 @@ export default function OrderDetailPage() {
               <button
                 onClick={handleStartKitting}
                 disabled={actionLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 dark:from-yellow-600 dark:to-yellow-700 dark:hover:from-yellow-700 dark:hover:to-yellow-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-yellow-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Play className="w-4 h-4" />
                 {actionLoading ? 'Starting...' : 'Start Kitting'}
@@ -539,7 +541,7 @@ export default function OrderDetailPage() {
               <button
                 onClick={() => setShowDriverModal(true)}
                 disabled={actionLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 dark:from-indigo-600 dark:to-indigo-700 dark:hover:from-indigo-700 dark:hover:to-indigo-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <UserPlus className="w-4 h-4" />
                 Assign Driver
@@ -553,9 +555,11 @@ export default function OrderDetailPage() {
       <div className="p-4 pb-24 space-y-4">
         {/* Kitting Section */}
         {order.status === 'KITTING' && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-500/20 dark:to-yellow-600/10 border border-yellow-200/50 dark:border-yellow-700/50 rounded-2xl shadow-lg shadow-yellow-500/10 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <Wrench className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-md">
+                <Wrench className="w-5 h-5 text-white" />
+              </div>
               Kitting in Progress
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -564,7 +568,7 @@ export default function OrderDetailPage() {
             <button
               onClick={handleStartKitting}
               disabled={actionLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 dark:from-yellow-600 dark:to-yellow-700 dark:hover:from-yellow-700 dark:hover:to-yellow-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-yellow-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Wrench className="w-4 h-4" />
               Continue Kitting Process
@@ -573,9 +577,11 @@ export default function OrderDetailPage() {
         )}
 
         {/* Cargo Info */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <Package className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <Package className="w-5 h-5 text-white" />
+            </div>
             Cargo Information
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">{order.cargoDescription || 'No description'}</p>
@@ -583,7 +589,7 @@ export default function OrderDetailPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
               <Weight className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">{order.totalWeight || 0} kg</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</span>
             </div>
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-gray-400" />
@@ -631,9 +637,11 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Locations */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+              <MapPin className="w-5 h-5 text-white" />
+            </div>
             Locations
           </h2>
           
@@ -656,9 +664,11 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Client Info */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <User className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+              <User className="w-5 h-5 text-white" />
+            </div>
             Client Information
           </h2>
           <p className="text-gray-900 dark:text-white font-medium">
@@ -669,9 +679,11 @@ export default function OrderDetailPage() {
 
         {/* Trip Info (if assigned) */}
         {order?.trip && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <Truck className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-md">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
               Trip Assignment
             </h2>
             
@@ -700,7 +712,7 @@ export default function OrderDetailPage() {
               {order.trip?.eta && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500 dark:text-gray-400">ETA</span>
-                  <span className="text-sm text-gray-900 dark:text-white">
+                  <span className="text-sm text-gray-900 dark:text-white font-mono">
                     {new Date(order.trip.eta).toLocaleString()}
                   </span>
                 </div>
@@ -710,7 +722,7 @@ export default function OrderDetailPage() {
             {/* View Trip Button */}
             <button
               onClick={() => router.push('/trips')}
-              className="mt-4 w-full flex items-center justify-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              className="mt-4 w-full flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 text-blue-600 dark:text-blue-400 rounded-xl hover:from-blue-500/20 hover:to-blue-600/10 dark:hover:from-blue-500/30 dark:hover:to-blue-600/20 transition-all duration-300"
             >
               View Trip Details
               <ChevronRight className="w-4 h-4" />
@@ -719,9 +731,11 @@ export default function OrderDetailPage() {
         )}
 
         {/* Timeline */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
             Order Timeline
           </h2>
           
@@ -746,8 +760,8 @@ export default function OrderDetailPage() {
 
       {/* Driver Assignment Modal */}
       {showDriverModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assign Driver</h3>
               
@@ -765,7 +779,7 @@ export default function OrderDetailPage() {
                   <select
                     value={selectedDriver}
                     onChange={(e) => setSelectedDriver(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white transition-all"
                   >
                     <option value="">Select a driver...</option>
                     {availableDrivers.map((driver) => (
@@ -783,14 +797,14 @@ export default function OrderDetailPage() {
                       setSelectedDriver('');
                       setActionError(null);
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleAssignDriver}
                     disabled={actionLoading || !selectedDriver}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {actionLoading ? 'Assigning...' : 'Assign Driver'}
                   </button>
@@ -803,8 +817,8 @@ export default function OrderDetailPage() {
 
       {/* Reject Order Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reject Order</h3>
               
@@ -822,7 +836,7 @@ export default function OrderDetailPage() {
                   <textarea
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white transition-all"
                     rows={4}
                     placeholder="Please provide a reason for rejecting this order..."
                   />
@@ -835,14 +849,14 @@ export default function OrderDetailPage() {
                       setRejectReason('');
                       setActionError(null);
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleRejectOrder}
                     disabled={actionLoading || !rejectReason.trim()}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {actionLoading ? 'Rejecting...' : 'Reject Order'}
                   </button>
@@ -855,8 +869,8 @@ export default function OrderDetailPage() {
 
       {/* Kitting Process Modal */}
       {showKittingModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Kitting Process</h3>
               
@@ -912,7 +926,7 @@ export default function OrderDetailPage() {
 
                 {/* Step-specific content */}
                 {kittingStep === 0 && (
-                  <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3 sm:p-4">
+                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-3 sm:p-4 border border-blue-200/50 dark:border-blue-700/50">
                     <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
@@ -926,7 +940,7 @@ export default function OrderDetailPage() {
                 )}
 
                 {kittingStep === 1 && (
-                  <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3 sm:p-4">
+                  <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-500/20 dark:to-yellow-600/10 rounded-xl p-3 sm:p-4 border border-yellow-200/50 dark:border-yellow-700/50">
                     <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
@@ -940,7 +954,7 @@ export default function OrderDetailPage() {
                 )}
 
                 {kittingStep === 2 && (
-                  <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3 sm:p-4">
+                  <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl p-3 sm:p-4 border border-green-200/50 dark:border-green-700/50">
                     <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
@@ -954,7 +968,7 @@ export default function OrderDetailPage() {
                 )}
 
                 {kittingStep === 3 && (
-                  <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3 sm:p-4">
+                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl p-3 sm:p-4 border border-purple-200/50 dark:border-purple-700/50">
                     <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
@@ -968,7 +982,7 @@ export default function OrderDetailPage() {
                 )}
 
                 {kittingStep === 4 && (
-                  <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3 sm:p-4 space-y-4">
+                  <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 dark:from-indigo-500/20 dark:to-indigo-600/10 rounded-xl p-3 sm:p-4 space-y-4 border border-indigo-200/50 dark:border-indigo-700/50">
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Additional Notes
@@ -976,7 +990,7 @@ export default function OrderDetailPage() {
                       <textarea
                         value={kittingData.notes}
                         onChange={(e) => setKittingData({...kittingData, notes: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-xs sm:text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white text-xs sm:text-sm transition-all"
                         rows={3}
                         placeholder="Add any additional notes about the kitting process..."
                       />
@@ -1015,7 +1029,7 @@ export default function OrderDetailPage() {
                 {kittingStep < kittingSteps.length - 1 ? (
                   <button
                     onClick={handleKittingNext}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
                   >
                     Next
                   </button>
@@ -1023,7 +1037,7 @@ export default function OrderDetailPage() {
                   <button
                     onClick={handleFinishKittingProcess}
                     disabled={actionLoading}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {actionLoading ? 'Finishing...' : 'Finish Kitting'}
                   </button>

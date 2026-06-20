@@ -90,20 +90,22 @@ export default function NewTripPage() {
 
   if (fetchingData) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <Truck className="w-8 h-8 mx-auto mb-2 animate-pulse" />
-          <p>Loading...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <Truck className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-900 dark:text-white font-semibold">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <main className="pb-24">
         {/* Header */}
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <button
             onClick={() => router.push('/trips')}
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
@@ -113,8 +115,8 @@ export default function NewTripPage() {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Truck className="w-6 h-6 text-blue-600" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <Truck className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Create New Trip</h1>
@@ -128,8 +130,10 @@ export default function NewTripPage() {
         {/* Form */}
         <div className="px-4 py-4">
           {success ? (
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
-              <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 border border-green-200/50 dark:border-green-700/50 rounded-2xl p-6 text-center shadow-lg shadow-green-500/10">
+              <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-green-500/20">
+                <CheckCircle className="w-8 h-8 text-white" />
+              </div>
               <h3 className="text-lg font-semibold text-green-800 dark:text-green-400 mb-2">
                 Trip Created Successfully!
               </h3>
@@ -140,16 +144,18 @@ export default function NewTripPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+                <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-xl p-3 flex items-center gap-2 text-red-600 dark:text-red-400 text-sm shadow-lg shadow-red-500/10">
                   <AlertCircle className="w-4 h-4" />
                   <span>{error}</span>
                 </div>
               )}
 
               {/* Order Selection */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <Package className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
                   <h2 className="font-semibold text-gray-900 dark:text-white">Select Order *</h2>
                 </div>
                 
@@ -162,7 +168,7 @@ export default function NewTripPage() {
                     name="orderId"
                     value={formData.orderId}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 transition-all"
                   >
                     <option value="">Select an order...</option>
                     {orders.map((order) => (
@@ -174,10 +180,10 @@ export default function NewTripPage() {
                 )}
 
                 {selectedOrder && (
-                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
-                    <p className="font-medium text-gray-900 dark:text-white">{selectedOrder.orderNumber}</p>
+                  <div className="mt-3 p-3 bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl text-sm border border-blue-200/50 dark:border-blue-700/50">
+                    <p className="font-medium text-gray-900 dark:text-white font-mono">{selectedOrder.orderNumber}</p>
                     <p className="text-gray-600 dark:text-gray-400">{selectedOrder.cargoDescription}</p>
-                    <p className="text-gray-500">Weight: {selectedOrder.totalWeight}kg</p>
+                    <p className="text-gray-500 font-mono">Weight: {selectedOrder.totalWeight}kg</p>
                     <p className="text-gray-500">Pickup: {selectedOrder.pickupLocation?.address}</p>
                     <p className="text-gray-500">Delivery: {selectedOrder.deliveryLocation?.address}</p>
                   </div>
@@ -185,9 +191,11 @@ export default function NewTripPage() {
               </div>
 
               {/* Driver Selection */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <Users className="w-5 h-5 text-green-600" />
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
                   <h2 className="font-semibold text-gray-900 dark:text-white">Select Driver *</h2>
                 </div>
                 
@@ -200,7 +208,7 @@ export default function NewTripPage() {
                     name="driverId"
                     value={formData.driverId}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 transition-all"
                   >
                     <option value="">Select a driver...</option>
                     {drivers.map((driver) => (
@@ -212,20 +220,22 @@ export default function NewTripPage() {
                 )}
 
                 {selectedDriver && (
-                  <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
+                  <div className="mt-3 p-3 bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl text-sm border border-green-200/50 dark:border-green-700/50">
                     <p className="font-medium text-gray-900 dark:text-white">
                       {selectedDriver.user?.firstName} {selectedDriver.user?.lastName}
                     </p>
-                    <p className="text-gray-600 dark:text-gray-400">License: {selectedDriver.licenseNumber}</p>
+                    <p className="text-gray-600 dark:text-gray-400 font-mono">License: {selectedDriver.licenseNumber}</p>
                     <p className="text-gray-500">KYC: {selectedDriver.kycStatus}</p>
                   </div>
                 )}
               </div>
 
               {/* Vehicle Selection */}
-              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <Truck className="w-5 h-5 text-orange-600" />
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                    <Truck className="w-5 h-5 text-white" />
+                  </div>
                   <h2 className="font-semibold text-gray-900 dark:text-white">Select Vehicle *</h2>
                 </div>
                 
@@ -238,7 +248,7 @@ export default function NewTripPage() {
                     name="vehicleId"
                     value={formData.vehicleId}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 transition-all"
                   >
                     <option value="">Select a vehicle...</option>
                     {vehicles.map((vehicle) => (
@@ -250,10 +260,10 @@ export default function NewTripPage() {
                 )}
 
                 {selectedVehicle && (
-                  <div className="mt-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-sm">
-                    <p className="font-medium text-gray-900 dark:text-white">{selectedVehicle.plateNumber}</p>
+                  <div className="mt-3 p-3 bg-gradient-to-br from-orange-500/10 to-orange-600/5 dark:from-orange-500/20 dark:to-orange-600/10 rounded-xl text-sm border border-orange-200/50 dark:border-orange-700/50">
+                    <p className="font-medium text-gray-900 dark:text-white font-mono">{selectedVehicle.plateNumber}</p>
                     <p className="text-gray-600 dark:text-gray-400">Category: {selectedVehicle.category}</p>
-                    <p className="text-gray-500">Capacity: {selectedVehicle.capacityKg}kg</p>
+                    <p className="text-gray-500 font-mono">Capacity: {selectedVehicle.capacityKg}kg</p>
                     <p className="text-gray-500">Partitioned: {selectedVehicle.isPartitioned ? 'Yes' : 'No'}</p>
                   </div>
                 )}
@@ -264,14 +274,14 @@ export default function NewTripPage() {
                 <button
                   type="button"
                   onClick={() => router.push('/trips')}
-                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !formData.orderId || !formData.driverId || !formData.vehicleId}
-                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Creating...' : 'Create Trip'}
                 </button>

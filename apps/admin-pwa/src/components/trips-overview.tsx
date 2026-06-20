@@ -145,7 +145,7 @@ export function TripsOverview({ trips, loading = false, onTripClick, liveLocatio
                 className={`border border-gray-200 dark:border-slate-700 rounded-lg p-3 bg-gray-50 dark:bg-slate-700/30 ${hasValidTripId && onTripClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
               >
             <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-sm text-gray-900 dark:text-white">{trip.order?.orderNumber || String(trip.id)}</span>
+              <span className="font-medium text-sm text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber || String(trip.id)}</span>
               <span className={`status-badge ${
                 trip.status === 'IN_TRANSIT' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 
                 trip.status === 'ASSIGNED' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
@@ -167,7 +167,7 @@ export function TripsOverview({ trips, loading = false, onTripClick, liveLocatio
               </div>
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                 <Clock className="w-4 h-4" />
-                <span>ETA: {formatDynamicETA(trip, liveLocation)}</span>
+                <span>ETA: <span className="font-mono">{formatDynamicETA(trip, liveLocation)}</span></span>
               </div>
             </div>
 

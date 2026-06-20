@@ -160,14 +160,14 @@ function OrdersPageContent() {
   const userRole = (user?.role?.toLowerCase() as 'admin' | 'client' | 'driver') || 'admin';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <main className="pb-24">
         {/* Header */}
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Package className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -194,7 +194,7 @@ function OrdersPageContent() {
               </button>
               <button
                 onClick={handleNewOrder}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 New
@@ -212,7 +212,7 @@ function OrdersPageContent() {
                 placeholder="Search orders..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
               />
             </div>
             
@@ -232,7 +232,7 @@ function OrdersPageContent() {
                       router.push('/orders');
                     }
                   }}
-                  className="w-full md:w-auto md:min-w-[160px] pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                  className="w-full md:w-auto md:min-w-[160px] pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer focus:shadow-lg focus:shadow-blue-500/10 transition-all"
                 >
                   {CARGO_TYPES.map(type => (
                     <option key={type.value} value={type.value}>
@@ -254,7 +254,7 @@ function OrdersPageContent() {
                     router.push('/orders');
                   }
                 }}
-                className="w-full md:flex-none md:w-auto md:min-w-[140px] px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full md:flex-none md:w-auto md:min-w-[140px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
               >
                 <option value="">All Status</option>
                 <option value="DRAFT">Draft</option>
@@ -275,7 +275,7 @@ function OrdersPageContent() {
                   setKittingStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full md:flex-none md:w-auto md:min-w-[160px] px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full md:flex-none md:w-auto md:min-w-[160px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
               >
                 {KITTING_STATUS_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>
@@ -350,15 +350,17 @@ function OrdersPageContent() {
 
         {/* Error State */}
         {error && (
-          <div className="mx-4 mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="mx-4 mt-4 bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-5 shadow-lg shadow-red-500/10">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
+                <AlertCircle className="w-5 h-5 text-white flex-shrink-0" />
+              </div>
               <div className="flex-1">
-                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+                <p className="text-sm text-red-700 dark:text-red-400 font-medium">{error}</p>
               </div>
               <button
                 onClick={fetchOrders}
-                className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm rounded-xl font-semibold hover:from-red-600 hover:to-red-700 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 Retry
               </button>
@@ -372,7 +374,7 @@ function OrdersPageContent() {
             // Skeleton Loading State
             <>
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 animate-pulse">
+                <div key={i} className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 animate-pulse">
                   <div className="flex items-start justify-between mb-3">
                     <div className="space-y-2">
                       <div className="h-4 w-32 bg-gray-200 dark:bg-slate-700 rounded" />
@@ -392,13 +394,15 @@ function OrdersPageContent() {
               ))}
             </>
           ) : filteredOrders.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Package className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-              <p className="dark:text-gray-400 mb-2">No orders found</p>
+            <div className="text-center py-12 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+              <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-gray-900 dark:text-white font-semibold mb-2">No orders found</p>
               {(search || statusFilter) && (
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
                 >
                   Clear filters
                 </button>
@@ -409,14 +413,14 @@ function OrdersPageContent() {
               <div
                 key={order.id}
                 onClick={() => router.push(`/orders/${order.id}`)}
-                className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 cursor-pointer hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all"
+                className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 cursor-pointer hover:shadow-xl hover:border-blue-300/50 dark:hover:border-blue-700/50 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{order.orderNumber || `Order ${String(order.id).slice(0, 8)}`}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber || `Order ${String(order.id).slice(0, 8)}`}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.firstName || ''} {order.client?.lastName || ''}</p>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
                     {order.status?.replace('_', ' ')}
                   </span>
                 </div>
@@ -428,9 +432,9 @@ function OrdersPageContent() {
                     <span className={`font-medium ${getPriorityColor(order.priority)}`}>
                       {order.priority}
                     </span>
-                    <span className="text-gray-500 dark:text-gray-400">{order.totalWeight || 0} kg</span>
+                    <span className="text-gray-500 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</span>
                     {order.trip?.eta && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                         ETA: {new Date(order.trip.eta).toLocaleDateString()}
                       </span>
                     )}
@@ -479,17 +483,17 @@ function OrdersPageContent() {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
               Previous
             </button>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
               Page {page} of {meta.totalPages}
             </span>
             <button
               onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
               disabled={page === meta.totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
               Next
             </button>
@@ -500,7 +504,7 @@ function OrdersPageContent() {
       {/* Mobile FAB for New Order */}
       <button
         onClick={handleNewOrder}
-        className="fixed bottom-20 right-4 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all md:hidden z-50"
+        className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full shadow-lg shadow-blue-500/20 flex items-center justify-center hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all duration-300 md:hidden z-50"
       >
         <Plus className="w-6 h-6" />
       </button>

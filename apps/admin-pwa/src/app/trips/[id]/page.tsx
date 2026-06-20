@@ -92,13 +92,13 @@ export default function TripDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
         <div className="animate-pulse">
-          <div className="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700" />
+          <div className="h-16 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50" />
           <div className="p-4 space-y-4">
-            <div className="h-32 bg-white dark:bg-slate-800 rounded-lg" />
-            <div className="h-48 bg-white dark:bg-slate-800 rounded-lg" />
-            <div className="h-32 bg-white dark:bg-slate-800 rounded-lg" />
+            <div className="h-32 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50" />
+            <div className="h-48 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50" />
+            <div className="h-32 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50" />
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function TripDetailPage() {
 
   if (error || !trip) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
         <div className="p-4 pb-24">
           <button
             onClick={() => router.push('/trips')}
@@ -117,16 +117,18 @@ export default function TripDetailPage() {
             Back to Trips
           </button>
           
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-5 shadow-lg shadow-red-500/10">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
+                <AlertCircle className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <p className="text-red-700 dark:text-red-400">{error || 'Trip not found'}</p>
+                <p className="text-red-700 dark:text-red-400 font-medium">{error || 'Trip not found'}</p>
               </div>
             </div>
             <button
               onClick={fetchTrip}
-              className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
             >
               Retry
             </button>
@@ -137,9 +139,9 @@ export default function TripDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
+      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <button
           onClick={() => router.push('/trips')}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
@@ -149,13 +151,13 @@ export default function TripDetailPage() {
         </button>
 
         <div className="flex items-start gap-3">
-          <div className={`p-3 rounded-lg ${getStatusColor(trip.status)}`}>
+          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
             {getStatusIcon(trip.status)}
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{trip.order?.orderNumber}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(trip.status)}`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
                 {trip.status?.replace('_', ' ') || 'Unknown'}
               </span>
             </div>
@@ -167,24 +169,28 @@ export default function TripDetailPage() {
       <div className="p-4 pb-24 space-y-4">
         {/* Driver & Vehicle */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-              <User className="w-4 h-4" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                <User className="w-4 h-4 text-white" />
+              </div>
               <span className="text-xs font-medium">Driver</span>
             </div>
             <p className="text-sm font-medium text-gray-900 dark:text-white">
               {trip.driver?.user?.firstName} {trip.driver?.user?.lastName}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
               {trip.driver?.licenseNumber}
             </p>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-              <Truck className="w-4 h-4" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-md">
+                <Truck className="w-4 h-4 text-white" />
+              </div>
               <span className="text-xs font-medium">Vehicle</span>
             </div>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
+            <p className="text-sm font-medium text-gray-900 dark:text-white font-mono">
               {trip.vehicle?.plateNumber}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -194,9 +200,11 @@ export default function TripDetailPage() {
         </div>
 
         {/* Route Info */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <Route className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+              <Route className="w-5 h-5 text-white" />
+            </div>
             Route
           </h2>
           <div className="space-y-4">
@@ -218,9 +226,11 @@ export default function TripDetailPage() {
         </div>
 
         {/* Trip Timeline */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
             Trip Timeline
           </h2>
           <div className="space-y-3">
@@ -235,7 +245,7 @@ export default function TripDetailPage() {
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-2 h-2 rounded-full bg-orange-500" />
                 <span className="text-gray-500 dark:text-gray-400 w-20">ETA</span>
-                <span className="text-gray-900 dark:text-white">{formatDate(trip.eta)}</span>
+                <span className="text-gray-900 dark:text-white font-mono">{formatDate(trip.eta)}</span>
               </div>
             )}
             {trip.completedAt && (
@@ -249,31 +259,35 @@ export default function TripDetailPage() {
         </div>
 
         {/* Cargo Info */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <Package className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <Package className="w-5 h-5 text-white" />
+            </div>
             Cargo
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">{trip.order?.cargoDescription || 'No description'}</p>
           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-            <span>Weight: {trip.order?.totalWeight || 0} kg</span>
+            <span className="font-mono">Weight: {trip.order?.totalWeight || 0} kg</span>
             <span>Priority: {trip.order?.priority}</span>
           </div>
         </div>
 
         {/* Geofence Events */}
         {geofenceEvents.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <Activity className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-md">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
               Geofence Events ({geofenceEvents.length})
             </h2>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {geofenceEvents.map((event, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-sm p-2 bg-gray-50 dark:bg-slate-700/30 rounded">
+                <div key={idx} className="flex items-center gap-2 text-sm p-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700/30 dark:to-slate-700/50 rounded-xl">
                   {getEventIcon(event.type)}
                   <span className="text-gray-700 dark:text-gray-300">{event.type?.replace('_', ' ') || 'Event'}</span>
-                  <span className="text-xs text-gray-400 ml-auto">{event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : 'N/A'}</span>
+                  <span className="text-xs text-gray-400 ml-auto font-mono">{event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : 'N/A'}</span>
                 </div>
               ))}
             </div>
@@ -282,12 +296,14 @@ export default function TripDetailPage() {
 
         {/* Live Tracking */}
         {trip.status === 'IN_TRANSIT' && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 rounded-2xl p-5 shadow-lg shadow-blue-500/10">
             <div className="flex items-center gap-3">
-              <Navigation className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Navigation className="w-5 h-5 text-white animate-pulse" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Live Tracking Active</p>
-                <p className="text-xs text-blue-600 dark:text-blue-400">{trackingPoints.length} tracking points recorded</p>
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Live Tracking Active</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">{trackingPoints.length} tracking points recorded</p>
               </div>
             </div>
           </div>
@@ -297,7 +313,7 @@ export default function TripDetailPage() {
         {trip.order && (
           <button
             onClick={() => router.push(`/orders/${trip.orderId}`)}
-            className="w-full flex items-center justify-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+            className="w-full flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 text-blue-600 dark:text-blue-400 rounded-xl hover:from-blue-500/20 hover:to-blue-600/10 dark:hover:from-blue-500/30 dark:hover:to-blue-600/20 transition-all duration-300"
           >
             View Order Details
             <ChevronRight className="w-4 h-4" />

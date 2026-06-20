@@ -146,33 +146,41 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
-      <main className="p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
+      <main className="p-4 space-y-6">
         {/* Greeting */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {getGreeting()}, {user?.firstName}
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName}</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Client Portal</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your shipment update</p>
         </div>
 
         {/* SLA Status Overview */}
-        <div className={`rounded-lg p-4 ${
+        <div className={`rounded-2xl p-5 shadow-xl backdrop-blur-xl ${
           slaStatus === 'good' 
-            ? 'bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700'
+            ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 dark:border-green-500/20'
             : slaStatus === 'warning'
-            ? 'bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700'
-            : 'bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700'
+            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 dark:border-amber-500/20'
+            : 'bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 dark:border-red-500/20'
         }`}>
-          <div className="flex items-center gap-3">
-            {slaStatus === 'good' && <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-300" />}
-            {slaStatus === 'warning' && <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />}
-            {slaStatus === 'critical' && <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-300" />}
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl shadow-lg ${
+              slaStatus === 'good' 
+                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
+                : slaStatus === 'warning'
+                ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white'
+                : 'bg-gradient-to-br from-red-500 to-red-600 text-white'
+            }`}>
+              {slaStatus === 'good' && <CheckCircle className="w-6 h-6" />}
+              {slaStatus === 'warning' && <AlertCircle className="w-6 h-6" />}
+              {slaStatus === 'critical' && <AlertCircle className="w-6 h-6" />}
+            </div>
             <div>
-              <p className="font-semibold text-gray-900 dark:text-white">
+              <p className="font-bold text-gray-900 dark:text-white text-lg">
                 SLA Status: {slaStatus === 'good' ? 'Good' : slaStatus === 'warning' ? 'Warning' : 'Critical'}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 {stats?.delayed || 0} delayed out of {stats?.activeShipments || 0} active shipments
               </p>
             </div>
@@ -181,59 +189,70 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-blue-500">
-            <div className="flex items-center gap-2">
-              <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl border border-blue-200/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.activeShipments || 0}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.activeShipments || 0}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-green-500">
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl border border-green-200/50 dark:border-green-700/50 shadow-lg shadow-green-500/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <Clock className="w-5 h-5 text-white" />
+              </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.inTransit || 0}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">In Transit</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.inTransit || 0}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">In Transit</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-red-500">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 rounded-xl border border-red-200/50 dark:border-red-700/50 shadow-lg shadow-red-500/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
+                <AlertCircle className="w-5 h-5 text-white" />
+              </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.delayed || 0}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Delayed</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delayed || 0}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delayed</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-l-4 border-purple-500">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl border border-purple-200/50 dark:border-purple-700/50 shadow-lg shadow-purple-500/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                <CheckCircle className="w-5 h-5 text-white" />
+              </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.delivered || 0}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Delivered</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delivered || 0}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delivered</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Active Shipments */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700">
-          <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Shipments</h2>
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              Active Shipments
+            </h2>
             <button
               onClick={() => router.push('/tracking')}
-              className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
+              className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
             >
               View All
             </button>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-slate-700">
+          <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
             {activeShipments.length === 0 ? (
               <div className="p-4 text-center text-gray-600 dark:text-gray-400">
                 No active shipments
@@ -242,24 +261,24 @@ export default function DashboardPage() {
               activeShipments.slice(0, 3).map((shipment) => (
                 <div
                   key={shipment.id}
-                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 border-l-4 border-blue-500 dark:border-blue-400"
+                  className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-transparent dark:hover:from-blue-900/20 dark:hover:to-transparent border-l-4 border-blue-500 dark:border-blue-400 transition-all duration-200"
                   onClick={() => router.push(`/tracking?shipment=${shipment.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                      <Package className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 dark:text-white">{shipment.orderNumber}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                         {shipment.deliveryLocation.address}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(shipment.trip?.status || shipment.status)}`}>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(shipment.trip?.status || shipment.status)}`}>
                           {shipment.trip?.status || shipment.status}
                         </span>
                         {shipment.trip?.eta && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                             ETA: {new Date(shipment.trip.eta).toLocaleDateString()}
                           </span>
                         )}
@@ -273,11 +292,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700">
-          <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Orders</h2>
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              Recent Orders
+            </h2>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-slate-700">
+          <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
             {recentOrders.length === 0 ? (
               <div className="p-4 text-center text-gray-600 dark:text-gray-400">
                 No recent orders
@@ -286,23 +308,23 @@ export default function DashboardPage() {
               recentOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 border-l-4 border-gray-400 dark:border-gray-500"
+                  className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent dark:hover:from-purple-900/20 dark:hover:to-transparent border-l-4 border-gray-400 dark:border-gray-500 transition-all duration-200"
                   onClick={() => router.push(`/tracking?shipment=${order.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-gray-100 dark:bg-slate-700 rounded-lg">
-                      <Package className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 shadow-md">
+                      <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 dark:text-white">{order.orderNumber}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                         {order.deliveryLocation.address}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
                           {order.status}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </span>
                       </div>

@@ -392,17 +392,17 @@ export default function DriversPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <main className="pb-24">
         {/* Header */}
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
                 {activeTab === 'drivers' ? (
-                  <Users className="w-6 h-6 text-blue-600" />
+                  <Users className="w-6 h-6 text-white" />
                 ) : (
-                  <Truck className="w-6 h-6 text-blue-600" />
+                  <Truck className="w-6 h-6 text-white" />
                 )}
               </div>
               <div>
@@ -419,7 +419,7 @@ export default function DriversPage() {
             {activeTab === 'drivers' ? (
               <button
                 onClick={() => router.push('/drivers/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Add Driver
@@ -431,14 +431,14 @@ export default function DriversPage() {
                     fetchAuditLogs();
                     setShowAuditLogs(true);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-300"
                 >
                   <Filter className="w-4 h-4" />
                   Activity Log
                 </button>
                 <button
                   onClick={() => setShowCreateVehicleModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <Plus className="w-4 h-4" />
                   Add Vehicle
@@ -451,9 +451,9 @@ export default function DriversPage() {
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setActiveTab('drivers')}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'drivers'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -464,9 +464,9 @@ export default function DriversPage() {
             </button>
             <button
               onClick={() => setActiveTab('vehicles')}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'vehicles'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -490,7 +490,7 @@ export default function DriversPage() {
                     setSearch(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 />
               </div>
               <div className="flex gap-2">
@@ -500,7 +500,7 @@ export default function DriversPage() {
                     setStatusFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {STATUS_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -512,7 +512,7 @@ export default function DriversPage() {
                     setKycFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {KYC_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -524,7 +524,7 @@ export default function DriversPage() {
                     setAvailabilityFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {AVAILABILITY_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -552,14 +552,14 @@ export default function DriversPage() {
                   placeholder="Search vehicles by plate number..."
                   value={vehicleSearch}
                   onChange={(e) => setVehicleSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 />
               </div>
               <div className="flex gap-2">
                 <select
                   value={vehicleStatusFilter}
                   onChange={(e) => setVehicleStatusFilter(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {VEHICLE_STATUS_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -568,7 +568,7 @@ export default function DriversPage() {
                 <select
                   value={vehicleCategoryFilter}
                   onChange={(e) => setVehicleCategoryFilter(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 >
                   {VEHICLE_CATEGORY_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -592,19 +592,19 @@ export default function DriversPage() {
           <>
             {/* Stats Summary */}
             <div className="px-4 py-3 grid grid-cols-3 gap-3">
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">{meta.total}</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white font-mono">{meta.total}</p>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-lg font-bold text-green-600">
+                <p className="text-lg font-bold text-green-600 font-mono">
                   {drivers.filter(d => d.status === 'ACTIVE').length}
                 </p>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
-                <p className="text-lg font-bold text-blue-600">
+                <p className="text-lg font-bold text-blue-600 font-mono">
                   {drivers.filter(d => d.availability === 'ON_TRIP').length}
                 </p>
               </div>
@@ -613,17 +613,29 @@ export default function DriversPage() {
             {/* Drivers List */}
             <div className="px-4 space-y-3">
               {driversLoading ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading drivers...</div>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading drivers...</p>
+                </div>
               ) : driversError ? (
-                <div className="text-center py-8 text-red-500">{driversError}</div>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg mb-4">
+                    <AlertCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-red-500 font-medium">{driversError}</p>
+                </div>
               ) : filteredDrivers.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No drivers found</p>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No drivers found</p>
                   {hasActiveDriverFilters && (
                     <button
                       onClick={clearDriverFilters}
-                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                      className="mt-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
                     >
                       Clear filters
                     </button>
@@ -633,12 +645,12 @@ export default function DriversPage() {
                 filteredDrivers.map((driver) => (
                   <div
                     key={driver.id}
-                    className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
+                    className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <span className="text-lg font-semibold text-blue-600">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center">
+                          <span className="text-lg font-semibold text-white">
                             {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
                           </span>
                         </div>
@@ -646,7 +658,7 @@ export default function DriversPage() {
                           <h3 className="font-semibold text-gray-900 dark:text-white">
                             {driver.user?.firstName} {driver.user?.lastName}
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{driver.licenseNumber}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{driver.licenseNumber}</p>
                         </div>
                       </div>
                       <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -677,9 +689,11 @@ export default function DriversPage() {
                     </div>
 
                     {driver.vehicle && (
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-slate-700/30 rounded-lg text-sm">
-                        <Truck className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-slate-700/30 rounded-xl text-sm">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+                          <Truck className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-gray-700 dark:text-gray-300 font-mono">
                           {driver.vehicle.plateNumber} • {driver.vehicle.category}
                         </span>
                       </div>
@@ -689,7 +703,7 @@ export default function DriversPage() {
                       <select
                         value={driver.status}
                         onChange={(e) => handleStatusChange(driver.id, e.target.value as any)}
-                        className="px-2 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                        className="px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="ACTIVE">Set Active</option>
                         <option value="INACTIVE">Set Inactive</option>
@@ -698,7 +712,7 @@ export default function DriversPage() {
                       <select
                         value={driver.kycStatus}
                         onChange={(e) => handleKycChange(driver.id, e.target.value as any)}
-                        className="px-2 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+                        className="px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="PENDING">KYC Pending</option>
                         <option value="VERIFIED">Verify KYC</option>
@@ -706,7 +720,7 @@ export default function DriversPage() {
                       </select>
                       <button
                         onClick={() => router.push(`/drivers/${driver.id}`)}
-                        className="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-medium"
+                        className="px-2 py-1.5 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
                       >
                         View Details
                       </button>
@@ -722,17 +736,17 @@ export default function DriversPage() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300"
                 >
                   Previous
                 </button>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                   Page {page} of {meta.totalPages}
                 </span>
                 <button
                   onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
                   disabled={page === meta.totalPages}
-                  className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300"
                 >
                   Next
                 </button>
@@ -746,19 +760,19 @@ export default function DriversPage() {
           <>
             {/* Stats Summary */}
             <div className="px-4 py-3 grid grid-cols-3 gap-3">
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">{vehicles.length}</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</p>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-lg font-bold text-green-600">
+                <p className="text-lg font-bold text-green-600 font-mono">
                   {vehicles.filter(v => v.status === 'ACTIVE').length}
                 </p>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Partitioned</p>
-                <p className="text-lg font-bold text-blue-600">
+                <p className="text-lg font-bold text-blue-600 font-mono">
                   {vehicles.filter(v => v.isPartitioned).length}
                 </p>
               </div>
@@ -767,17 +781,29 @@ export default function DriversPage() {
             {/* Vehicles List */}
             <div className="px-4 space-y-3">
               {vehiclesLoading ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading vehicles...</div>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+                    <Truck className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading vehicles...</p>
+                </div>
               ) : vehiclesError ? (
-                <div className="text-center py-8 text-red-500">{vehiclesError}</div>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg mb-4">
+                    <AlertCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-red-500 font-medium">{vehiclesError}</p>
+                </div>
               ) : filteredVehicles.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Truck className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No vehicles found</p>
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                    <Truck className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No vehicles found</p>
                   {hasActiveVehicleFilters && (
                     <button
                       onClick={clearVehicleFilters}
-                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                      className="mt-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
                     >
                       Clear filters
                     </button>
@@ -787,12 +813,12 @@ export default function DriversPage() {
                 filteredVehicles.map((vehicle) => (
                   <div
                     key={vehicle.id}
-                    className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
+                    className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <Truck className="w-6 h-6 text-blue-600" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center">
+                          <Truck className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -807,12 +833,14 @@ export default function DriversPage() {
                     <div className="mb-3 space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-400">Capacity</span>
-                        <span className="text-gray-900 dark:text-white font-medium">{vehicle.capacityKg.toLocaleString()} kg</span>
+                        <span className="text-gray-900 dark:text-white font-medium font-mono">{vehicle.capacityKg.toLocaleString()} kg</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-400">Partitioned</span>
                         {vehicle.isPartitioned ? (
-                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <div className="p-1 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          </div>
                         ) : (
                           <XCircle className="w-5 h-5 text-gray-400" />
                         )}
@@ -831,14 +859,14 @@ export default function DriversPage() {
                     <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 gap-2">
                       <button
                         onClick={() => openEditVehicleModal(vehicle)}
-                        className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
                       >
                         <Edit className="w-4 h-4" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeactivateVehicle(vehicle.id)}
-                        className="flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300"
                       >
                         <Trash2 className="w-4 h-4" />
                         Deactivate
@@ -854,15 +882,15 @@ export default function DriversPage() {
 
       {/* KYC Review Modal */}
       {showKycModal && selectedDriver && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200/50 dark:border-slate-700/50">
+            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 KYC Documents - {selectedDriver.user?.firstName} {selectedDriver.user?.lastName}
               </h2>
               <button
                 onClick={() => setShowKycModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 <XCircle className="w-6 h-6" />
               </button>
@@ -876,17 +904,23 @@ export default function DriversPage() {
               )}
 
               {loadingKyc ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  Loading KYC documents...
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading KYC documents...</p>
                 </div>
               ) : kycDocuments.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No KYC documents uploaded
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No KYC documents uploaded</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {kycDocuments.map((doc) => (
-                    <div key={doc.id} className="border border-gray-200 dark:border-slate-700 rounded-lg p-4">
+                    <div key={doc.id} className="bg-gray-50 dark:bg-slate-700/30 rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="font-medium text-gray-900 dark:text-white">
@@ -895,7 +929,7 @@ export default function DriversPage() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             {doc.fileName} • {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
                           </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-mono">
                             Submitted: {new Date(doc.submittedAt).toLocaleDateString()}
                           </p>
                         </div>
@@ -920,7 +954,7 @@ export default function DriversPage() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleReviewKycDocument(doc.id, KycDocumentStatus.VERIFIED)}
-                              className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                              className="flex-1 px-3 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl text-sm font-medium transition-all duration-300"
                             >
                               Approve
                             </button>
@@ -931,14 +965,14 @@ export default function DriversPage() {
                                   handleReviewKycDocument(doc.id, KycDocumentStatus.REJECTED, reason);
                                 }
                               }}
-                              className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                              className="flex-1 px-3 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-medium transition-all duration-300"
                             >
                               Reject
                             </button>
                           </div>
                           <button
                             onClick={() => handleReviewKycDocument(doc.id, KycDocumentStatus.UNDER_REVIEW)}
-                            className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            className="w-full px-3 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl text-sm font-medium transition-all duration-300"
                           >
                             Mark as Under Review
                           </button>
@@ -960,12 +994,14 @@ export default function DriversPage() {
 
       {/* Create Vehicle Modal */}
       {showCreateVehicleModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-6">
               {vehicleSuccess ? (
                 <div className="text-center">
-                  <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-lg mb-4">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
                   <h3 className="text-lg font-semibold text-green-800 dark:text-green-400 mb-2">
                     Vehicle Created Successfully!
                   </h3>
@@ -976,7 +1012,9 @@ export default function DriversPage() {
               ) : (
                 <>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <Plus className="w-5 h-5 text-white" />
+                    </div>
                     Add New Vehicle
                   </h2>
                   <form onSubmit={handleCreateVehicle} className="space-y-4">
@@ -989,7 +1027,7 @@ export default function DriversPage() {
                     required
                     value={vehicleFormData.plateNumber}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, plateNumber: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                     placeholder="e.g., ABC-123-NG"
                   />
                 </div>
@@ -1000,7 +1038,7 @@ export default function DriversPage() {
                   <select
                     value={vehicleFormData.category}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   >
                     {VEHICLE_CATEGORY_OPTIONS.filter(opt => opt.value !== '').map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1017,7 +1055,7 @@ export default function DriversPage() {
                     min="1"
                     value={vehicleFormData.capacityKg}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, capacityKg: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -1027,7 +1065,7 @@ export default function DriversPage() {
                   <select
                     value={vehicleFormData.status}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   >
                     {VEHICLE_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1050,14 +1088,14 @@ export default function DriversPage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateVehicleModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={vehicleSubmitting}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 disabled:opacity-50"
                   >
                     {vehicleSubmitting ? 'Creating...' : 'Create'}
                   </button>
@@ -1072,11 +1110,13 @@ export default function DriversPage() {
 
       {/* Edit Vehicle Modal */}
       {showEditVehicleModal && selectedVehicle && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <Edit className="w-5 h-5 text-white" />
+                </div>
                 Edit Vehicle
               </h2>
               <form onSubmit={handleEditVehicle} className="space-y-4">
@@ -1089,7 +1129,7 @@ export default function DriversPage() {
                     required
                     value={vehicleFormData.plateNumber}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, plateNumber: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -1099,7 +1139,7 @@ export default function DriversPage() {
                   <select
                     value={vehicleFormData.category}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   >
                     {VEHICLE_CATEGORY_OPTIONS.filter(opt => opt.value !== '').map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1116,7 +1156,7 @@ export default function DriversPage() {
                     min="1"
                     value={vehicleFormData.capacityKg}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, capacityKg: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -1126,7 +1166,7 @@ export default function DriversPage() {
                   <select
                     value={vehicleFormData.status}
                     onChange={(e) => setVehicleFormData({ ...vehicleFormData, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   >
                     {VEHICLE_STATUS_OPTIONS.filter(opt => opt.value !== '').map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1152,14 +1192,14 @@ export default function DriversPage() {
                       setShowEditVehicleModal(false);
                       setSelectedVehicle(null);
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={vehicleSubmitting}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 disabled:opacity-50"
                   >
                     {vehicleSubmitting ? 'Updating...' : 'Update'}
                   </button>
@@ -1172,28 +1212,31 @@ export default function DriversPage() {
 
       {/* Audit Log Modal */}
       {showAuditLogs && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-gray-200/50 dark:border-slate-700/50">
+            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Vehicle Activity Log
               </h2>
               <button
                 onClick={() => setShowAuditLogs(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 <XCircle className="w-6 h-6" />
               </button>
             </div>
             <div className="p-4 overflow-y-auto max-h-[60vh]">
               {auditLogs.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No activity logs found
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
+                    <Filter className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No activity logs found</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {auditLogs.map((log) => (
-                    <div key={log.id} className="border border-gray-200 dark:border-slate-700 rounded-lg p-3">
+                    <div key={log.id} className="bg-gray-50 dark:bg-slate-700/30 rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-3">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1208,7 +1251,7 @@ export default function DriversPage() {
                             Vehicle: {log.newValue?.plateNumber || log.oldValue?.plateNumber || log.entityId}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                           {new Date(log.createdAt).toLocaleString()}
                         </span>
                       </div>

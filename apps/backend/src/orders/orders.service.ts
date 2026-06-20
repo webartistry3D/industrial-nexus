@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderFilterDto } from './dto/order-filter.dto';
@@ -24,6 +25,7 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string, userRole: UserRole) {
@@ -67,6 +69,20 @@ export class OrdersService {
       entityId: order.id,
       newValue: { orderNumber, status: order.status, clientId },
     });
+
+    // Notify admins/ops of new submitted order (fire-and-forget)
+    if (order.status === OrderStatus.SUBMITTED) {
+      this.prisma.user.findMany({
+        where: { role: { in: ['SUPER_ADMIN', 'OPERATIONS'] as any } },
+        select: { id: true },
+      }).then(admins => {
+        this.notificationsService.notifyOrderSubmitted(
+          admins.map(a => a.id),
+          orderNumber,
+          order.id,
+        ).catch(e => console.error('[Notifications] notifyOrderSubmitted error:', e));
+      }).catch(() => {});
+    }
 
     return this.findOne(order.id);
   }
@@ -331,6 +347,18 @@ export class OrdersService {
       oldValue: { status: currentStatus },
       newValue: { status: newStatus, notes, driverId },
     });
+
+    // Notify client of status change (fire-and-forget)
+    try {
+      await this.notificationsService.notifyOrderStatusChanged(
+        order.clientId,
+        order.orderNumber,
+        id,
+        newStatus,
+      );
+    } catch (e) {
+      console.error('[Notifications] Failed to send order status notification:', e);
+    }
 
     return updatedOrder;
   }

@@ -188,17 +188,17 @@ export default function TrackingPage() {
     : { lat: 6.5244, lng: 3.3792 }; // Default center: Lagos, Nigeria
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <div className="max-w-7xl mx-auto px-4 py-6 pb-24">
         {/* Geofence Status Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-slate-700 mb-6">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
                 {currentGeofenceStatus === 'ARRIVED' ? (
-                  <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-300" />
+                  <CheckCircle className="w-8 h-8 text-white" />
                 ) : (
-                  <MapPin className="w-8 h-8 text-blue-600 dark:text-blue-300" />
+                  <MapPin className="w-8 h-8 text-white" />
                 )}
               </div>
               <div>
@@ -242,7 +242,7 @@ export default function TrackingPage() {
         </div>
 
         {/* Map */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden mb-6">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden mb-6">
           <div className="h-[600px]">
             {loading ? (
               <div className="flex items-center justify-center h-full">
@@ -348,7 +348,7 @@ export default function TrackingPage() {
 
         {/* Geofence Events Timeline */}
         {fleetLocation && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-6">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6 mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Geofence Events Timeline</h2>
             {geofenceEvents.length === 0 ? (
               <p className="text-gray-600 dark:text-gray-400">No geofence events recorded yet</p>
@@ -383,12 +383,12 @@ export default function TrackingPage() {
 
         {/* Trip Details */}
         {fleetLocation && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trip Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <Truck className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <Truck className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Driver</p>
@@ -398,19 +398,19 @@ export default function TrackingPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <Navigation className="w-5 h-5 text-green-600 dark:text-green-300" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                  <Navigation className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Vehicle</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
+                  <p className="font-medium text-gray-900 dark:text-white font-mono">
                     {fleetLocation.trip.vehicle?.plateNumber || 'N/A'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                  <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                  <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
@@ -420,12 +420,12 @@ export default function TrackingPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                  <Activity className="w-5 h-5 text-purple-600 dark:text-purple-300" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                  <Activity className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Last Event</p>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">
+                  <p className="font-medium text-gray-900 dark:text-white text-sm font-mono">
                     {geofenceEvents.length > 0 ? new Date(geofenceEvents[0].timestamp).toLocaleTimeString() : 'N/A'}
                   </p>
                 </div>

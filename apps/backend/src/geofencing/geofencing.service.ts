@@ -104,7 +104,7 @@ export class GeofencingService {
       });
     }
 
-    // Check polygon geofences (simplified - would check against stored geofences)
+    // Check polygon geofences
     const geofences = await this.prisma.geofence.findMany({
       where: { isActive: true },
     });
@@ -114,7 +114,21 @@ export class GeofencingService {
         const polygon = geofence.polygon as { lat: number; lng: number }[];
         const insidePolygon = this.isPointInPolygon(point, polygon);
 
-        if (insidePolygon) {
+        // Get previous state from Redis for exit detection
+        const stateKey = `polygon:state:${tripId}:${geofence.id}`;
+        const previousState = await this.redis.get(stateKey);
+
+        // Detect state change
+        if (previousState === 'inside' && !insidePolygon) {
+          // Exit detected
+          results.push({
+            eventType: GeofenceEventType.POLYGON_EXITED,
+            distance: 0,
+            insidePolygon: false,
+            geofenceId: geofence.id,
+          });
+        } else if (previousState !== 'inside' && insidePolygon) {
+          // Enter detected
           results.push({
             eventType: GeofenceEventType.POLYGON_ENTERED,
             distance: 0,
@@ -122,6 +136,9 @@ export class GeofencingService {
             geofenceId: geofence.id,
           });
         }
+
+        // Update state in Redis (persist for 24 hours)
+        await this.redis.setex(stateKey, 86400, insidePolygon ? 'inside' : 'outside');
       }
     }
 

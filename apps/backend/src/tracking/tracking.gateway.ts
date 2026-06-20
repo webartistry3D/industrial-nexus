@@ -41,6 +41,9 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
       const payload = this.jwtService.verify(token);
       client.data.userId = payload.sub;
       client.data.role = payload.role;
+
+      // Auto-join user to their personal room for targeted notifications
+      client.join(`user:${payload.sub}`);
       
       console.log(`[Tracking] User ${payload.sub} connected`);
     } catch (error) {
@@ -121,6 +124,18 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
         console.log(`[Tracking] Geofence event broadcast for trip ${data.tripId}: ${data.eventType}`);
       } catch (error) {
         console.error('[Tracking] Error processing geofence event:', error);
+      }
+    });
+
+    // Subscribe to notification events — push to per-user room
+    this.redis.subscribe('notification:new', (message) => {
+      try {
+        const data = JSON.parse(message);
+        // Each user is joined to a room named "user:<userId>" on connection
+        this.server.to(`user:${data.userId}`).emit('notification:new', data.notification);
+        console.log(`[Tracking] Notification pushed to user ${data.userId}`);
+      } catch (error) {
+        console.error('[Tracking] Error processing notification:', error);
       }
     });
   }

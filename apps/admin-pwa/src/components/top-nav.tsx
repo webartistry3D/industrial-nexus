@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { Sun, Moon, User, LogOut, Bell, Settings } from 'lucide-react';
+import { Sun, Moon, User, LogOut, Bell, Settings, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface TopNavProps {
   role?: 'admin' | 'client' | 'driver';
@@ -46,6 +47,10 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
     return 'Industrial Nexus';
   };
 
+  const getHeaderSubtitle = () => {
+    return 'Control Center';
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -53,23 +58,28 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
     return 'Good evening';
   };
 
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  const formatTime = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
+
   // Hide on login page
   if (pathname === '/login') return null;
 
-  const notifications = [
-    { id: 1, title: 'New trip assigned', time: '5 min ago', unread: true },
-    { id: 2, title: 'Order pending approval', time: '2 hours ago', unread: false },
-    { id: 3, title: 'Driver status update', time: '4 hours ago', unread: false },
-  ];
-
-  const unreadCount = notifications.filter(n => n.unread).length;
-
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white border-b-2 border-blue-500 dark:border-blue-500 z-50">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
       <div className="h-full px-4 flex items-center justify-between">
         {/* Left: Title */}
         <div>
           <h1 className="text-lg font-bold">{getHeaderTitle()}</h1>
+          <p className="text-xs text-blue-100">{getHeaderSubtitle()}</p>
         </div>
 
         {/* Right: Actions */}
@@ -98,17 +108,33 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
                   <div className="px-4 py-2 border-b border-gray-100 dark:border-slate-700">
                     <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                   </div>
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
-                        notification.unread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
-                      }`}
-                    >
-                      <p className="text-sm text-gray-900 dark:text-white font-medium">{notification.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{notification.time}</p>
+                  {unreadCount > 0 && (
+                    <div className="px-4 py-1.5 border-b border-gray-100 dark:border-slate-700 flex justify-end">
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Mark all read
+                      </button>
                     </div>
-                  ))}
+                  )}
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No notifications</div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        onClick={() => !notification.isRead && markAsRead(notification.id)}
+                        className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
+                          !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                        }`}
+                      >
+                        <p className="text-sm text-gray-900 dark:text-white font-medium">{notification.title}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{notification.message}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">{formatTime(notification.createdAt)}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
                 {/* Click outside to close dropdown */}
                 <div 
