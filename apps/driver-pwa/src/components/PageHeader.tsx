@@ -2,19 +2,16 @@
 
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { Sun, Moon, User, LogOut, LogOut as LogOutIcon, Wifi, WifiOff, Bell, Check } from 'lucide-react';
+import { Sun, Moon, User, LogOut, LogOut as LogOutIcon, Bell, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 
 interface PageHeaderProps {
   title?: string;
   subtitle?: string;
-  showOnlineStatus?: boolean;
-  isOnline?: boolean;
-  pendingCount?: number;
 }
 
-export function PageHeader({ title, subtitle, showOnlineStatus = false, isOnline = true, pendingCount = 0 }: PageHeaderProps) {
+export function PageHeader({ title, subtitle }: PageHeaderProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -40,18 +37,12 @@ export function PageHeader({ title, subtitle, showOnlineStatus = false, isOnline
 
   const getHeaderTitle = () => {
     if (title) return title;
-    if (pathname === '/dashboard') return 'Industrial Nexus';
-    if (pathname === '/trips') return 'My Trips';
-    if (pathname === '/tracking') return 'Live Tracking';
-    if (pathname === '/history') return 'Trip History';
-    if (pathname === '/profile') return 'My Profile';
     return 'Industrial Nexus';
   };
 
   const getHeaderSubtitle = () => {
     if (subtitle) return subtitle;
-    if (pathname === '/dashboard') return 'Driver Operations Center';
-    return '';
+    return 'Driver Operations Center';
   };
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -137,26 +128,6 @@ export function PageHeader({ title, subtitle, showOnlineStatus = false, isOnline
             )}
           </div>
 
-          {showOnlineStatus && (
-            <>
-              {isOnline ? (
-                <div className="flex items-center gap-1 bg-green-500/20 dark:bg-green-500/20 px-2 py-1 rounded-full">
-                  <Wifi className="w-3 h-3 text-green-400" />
-                  <span className="text-xs text-green-400">Online</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 bg-red-500/20 dark:bg-red-500/20 px-2 py-1 rounded-full">
-                  <WifiOff className="w-3 h-3 text-red-400" />
-                  <span className="text-xs text-red-400">Offline</span>
-                </div>
-              )}
-              {pendingCount > 0 && (
-                <div className="bg-orange-500 px-3 py-1 rounded-full">
-                  <span className="text-xs font-semibold">{pendingCount} Pending</span>
-                </div>
-              )}
-            </>
-          )}
           <button
             onClick={toggleTheme}
             className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"

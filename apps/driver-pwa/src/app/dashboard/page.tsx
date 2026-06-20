@@ -117,14 +117,14 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
-      <PageHeader showOnlineStatus={true} isOnline={isOnline} pendingCount={pendingCount} />
+      <PageHeader />
 
       {/* Main Content */}
-      <main className="p-4 space-y-6">
+      <main className="pt-20 px-4 pb-4 space-y-6">
         {/* Greeting */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName || 'Driver'}</span>
+            {getGreeting()}, <span className="text-blue-600 dark:text-blue-400">{user?.firstName || user?.email?.split('@')[0] || 'Driver'}</span>
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
             Here's your performance overview for today

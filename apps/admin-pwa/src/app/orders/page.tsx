@@ -177,10 +177,11 @@ function OrdersPageContent() {
                    'Orders'}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {(cargoTypeFilter || cargoTypeParam) ? `Filtered by cargo type` : 
-                   (statusFilter || statusParam) ? `Filtered by status` : 
+                  {(cargoTypeFilter || cargoTypeParam) ? `Filtered by cargo type` :
+                   (statusFilter || statusParam) ? `Filtered by status` :
                    (kittingStatusFilter || kittingStatusParam) ? `Filtered by flag` :
-                   'Manage industrial orders'}
+                   // 'Manage industrial orders'
+                   ''}
                 </p>
               </div>
             </div>

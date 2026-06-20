@@ -144,8 +144,9 @@ function TripsPageContent() {
                 )}
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {filterParam === 'weight-alerts' ? 'Trips with weight capacity issues' : 
-                 'Track active shipments'}
+                {filterParam === 'weight-alerts' ? 'Trips with weight capacity issues' :
+                 // 'Track active shipments'
+                 ''}
               </p>
             </div>
             <button

@@ -35,10 +35,10 @@ export default function AnalogClock() {
         {/* Hour markers */}
         {[...Array(12)].map((_, i) => {
           const angle = (i * 30 - 90) * (Math.PI / 180);
-          const x1 = 50 + 40 * Math.cos(angle);
-          const y1 = 50 + 40 * Math.sin(angle);
-          const x2 = 50 + 45 * Math.cos(angle);
-          const y2 = 50 + 45 * Math.sin(angle);
+          const x1 = Math.round(50 + 40 * Math.cos(angle));
+          const y1 = Math.round(50 + 40 * Math.sin(angle));
+          const x2 = Math.round(50 + 45 * Math.cos(angle));
+          const y2 = Math.round(50 + 45 * Math.sin(angle));
           return (
             <line
               key={i}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { Trip } from '@/types';
-import { Truck, Package, MapPin, CheckCircle, Calendar } from 'lucide-react';
+import { Truck, Package, MapPin, CheckCircle, Calendar, Clock } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function HistoryPage() {
@@ -68,7 +68,18 @@ export default function HistoryPage() {
     <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <PageHeader />
 
-      <main className="p-4 space-y-4">
+      <main className="pt-20 px-4 pb-4 space-y-4">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <Clock className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Trip History</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">View your completed trips</p>
+          </div>
+        </div>
+
         {/* Filter Tabs */}
         <div className="flex gap-2">
           <button

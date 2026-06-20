@@ -411,7 +411,8 @@ export default function DriversPage() {
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {activeTab === 'drivers'
-                    ? 'Manage fleet drivers and assignments'
+                    ? // 'Manage fleet drivers and assignments'
+                      ''
                     : 'Manage fleet vehicles and capacity'}
                 </p>
               </div>

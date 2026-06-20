@@ -138,7 +138,18 @@ export default function TrackingPage() {
     <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <PageHeader />
 
-      <main className="p-4">
+      <main className="pt-20 px-4 pb-4">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <MapPin className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Tracking</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Track your active shipments in real-time</p>
+          </div>
+        </div>
+
         {/* Back Button */}
         <button onClick={() => router.back()} className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />

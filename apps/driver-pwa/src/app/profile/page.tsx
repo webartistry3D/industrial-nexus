@@ -154,7 +154,18 @@ export default function ProfilePage() {
     <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <PageHeader />
 
-      <main className="p-4 space-y-4">
+      <main className="pt-20 px-4 pb-4 space-y-4">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <UserIcon className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">View and update your profile information</p>
+          </div>
+        </div>
+
         {/* Profile Card */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
           <div className="flex items-center gap-4 mb-4">
