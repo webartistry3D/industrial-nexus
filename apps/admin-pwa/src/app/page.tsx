@@ -271,14 +271,14 @@ export default function Dashboard() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            <button 
-              onClick={handleNewOrder}
+            <button
+              onClick={handleViewAllOrders}
               className="group flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="p-2 bg-blue-500 rounded-lg text-white group-hover:scale-110 transition-transform">
-                <Plus className="w-4 h-4" />
+                <Package className="w-4 h-4" />
               </div>
-              <span>New Order</span>
+              <span>View Orders</span>
             </button>
             <button 
               onClick={handleAssignTrip}

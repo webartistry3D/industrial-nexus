@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
+import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp, Plus, MapPin } from 'lucide-react';
 
 interface DashboardStats {
   activeShipments: number;
@@ -238,8 +238,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Active Shipments */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+        {/* Active Shipments and Recent Orders - Side by side on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Active Shipments */}
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
           <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -292,12 +294,18 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
               Recent Orders
             </h2>
+            <button
+              onClick={() => router.push('/orders')}
+              className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
+            >
+              View All
+            </button>
           </div>
           <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
             {recentOrders.length === 0 ? (
@@ -333,6 +341,35 @@ export default function DashboardPage() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-lg p-5">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => router.push('/orders/new')}
+              className="group flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="p-2 bg-blue-500 rounded-lg text-white group-hover:scale-110 transition-transform">
+                <Plus className="w-4 h-4" />
+              </div>
+              <span>New Order</span>
+            </button>
+            <button
+              onClick={() => router.push('/tracking')}
+              className="group flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-900/30 dark:to-green-800/20 rounded-xl border border-green-200/50 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="p-2 bg-green-500 rounded-lg text-white group-hover:scale-110 transition-transform">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <span>Track Order</span>
+            </button>
           </div>
         </div>
       </main>
