@@ -113,6 +113,9 @@ export function Navbar() {
                 </a>
               ))}
               <div className="pt-4 border-t border-[rgba(150,180,220,0.12)] flex flex-col gap-3">
+                <Button variant="ghost" size="md" href="/login" onClick={() => setMobileOpen(false)}>
+                  Sign In
+                </Button>
                 {/* <Button variant="outline" size="md" href="#demo">
                   Request Demo
                 </Button> */}
