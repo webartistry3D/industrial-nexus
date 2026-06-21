@@ -455,6 +455,27 @@ class ApiClient {
     const response = await this.client.delete(`/notifications/${id}`);
     return response.data;
   }
+
+  // Handling Tags
+  async getAllHandlingTags() {
+    const response = await this.client.get('/settings/handling-tags');
+    return response.data;
+  }
+
+  async createHandlingTag(name: string) {
+    const response = await this.client.post('/settings/handling-tags', { name });
+    return response.data;
+  }
+
+  async updateHandlingTag(id: string, name: string) {
+    const response = await this.client.put(`/settings/handling-tags/${id}`, { name });
+    return response.data;
+  }
+
+  async deleteHandlingTag(id: string) {
+    const response = await this.client.delete(`/settings/handling-tags/${id}`);
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

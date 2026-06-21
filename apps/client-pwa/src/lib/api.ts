@@ -145,6 +145,11 @@ class ApiClient {
     const response = await this.client.delete(`/notifications/${id}`);
     return response.data;
   }
+
+  async getHandlingTags() {
+    const response = await this.client.get('/settings/handling-tags');
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

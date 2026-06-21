@@ -2,12 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { Order, Driver, Vehicle } from '@/types';
 import { ArrowLeft, Truck, CheckCircle, AlertCircle, Package, Users } from 'lucide-react';
 
 export default function NewTripPage() {
   const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);

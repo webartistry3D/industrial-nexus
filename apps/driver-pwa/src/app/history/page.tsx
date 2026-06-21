@@ -10,7 +10,7 @@ import { PageHeader } from '@/components/PageHeader';
 
 export default function HistoryPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled'>('all');
@@ -20,10 +20,14 @@ export default function HistoryPage() {
   }, []);
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
     if (user) {
       fetchTrips();
     }
-  }, [user]);
+  }, [authLoading, user, router]);
 
   const fetchTrips = async () => {
     try {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 import { api } from '@/lib/api';
@@ -33,7 +34,15 @@ interface GeofenceEvent {
 
 export default function TrackingPage() {
   const { isConnected, subscribe, unsubscribe } = useTrackingWebSocket();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const [fleetLocation, setFleetLocation] = useState<FleetLocation | null>(null);
   const [geofenceEvents, setGeofenceEvents] = useState<GeofenceEvent[]>([]);
   const [currentGeofenceStatus, setCurrentGeofenceStatus] = useState<string>('OUTSIDE_ALL_ZONES');

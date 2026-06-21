@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
@@ -10,6 +11,14 @@ import { ArrowLeft, Navigation, MapPin, Truck, Clock } from 'lucide-react';
 
 export default function NavigationPage() {
   const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const params = useParams();
   const [routeData, setRouteData] = useState<any>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);

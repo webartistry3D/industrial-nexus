@@ -28,8 +28,15 @@ const KITTING_STATUS_OPTIONS = [
 ];
 
 function OrdersPageContent() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const searchParams = useSearchParams();
   const cargoTypeParam = searchParams.get('cargoType');
   const statusParam = searchParams.get('status');

@@ -29,35 +29,77 @@ export default function NewOrderPage() {
     handlingTags: [] as string[],
     notes: '',
     totalWeight: 0,
+    priority: 'NORMAL' as 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
   });
 
-  const handlingTagOptions = ['HEAVY', 'FRAGILE', 'HAZARDOUS', 'CHEMICAL', 'VERTICAL_STORAGE_REQUIRED', 'TEMPERATURE_SENSITIVE'];
+  const [handlingTagOptions, setHandlingTagOptions] = useState<string[]>([]);
+  const [tagsLoading, setTagsLoading] = useState(false);
 
-  // Clear invalid tags from state
+  // Fetch handling tags from backend
   useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      handlingTags: prev.handlingTags.filter(tag => handlingTagOptions.includes(tag)),
-    }));
+    const fetchHandlingTags = async () => {
+      try {
+        setTagsLoading(true);
+        const tags = await api.getHandlingTags();
+        setHandlingTagOptions(tags.map((tag: any) => tag.name));
+      } catch (err) {
+        console.error('Failed to fetch handling tags:', err);
+        // Fallback to default tags if fetch fails
+        setHandlingTagOptions(['HEAVY', 'FRAGILE', 'HAZARDOUS', 'CHEMICAL', 'VERTICAL_STORAGE_REQUIRED', 'TEMPERATURE_SENSITIVE']);
+      } finally {
+        setTagsLoading(false);
+      }
+    };
+
+    fetchHandlingTags();
   }, []);
 
-  const getHandlingTagColor = (tag: string) => {
+  // Clear invalid tags from state when tags are loaded
+  useEffect(() => {
+    if (handlingTagOptions.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        handlingTags: prev.handlingTags.filter(tag => handlingTagOptions.includes(tag)),
+      }));
+    }
+  }, [handlingTagOptions]);
+
+  const getHandlingTagColor = (tag: string, isSelected: boolean) => {
     const upperTag = tag.toUpperCase();
-    switch (upperTag) {
-      case 'HEAVY':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      case 'FRAGILE':
-        return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300';
-      case 'HAZARDOUS':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'CHEMICAL':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      case 'VERTICAL_STORAGE_REQUIRED':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'TEMPERATURE_SENSITIVE':
-        return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    if (isSelected) {
+      switch (upperTag) {
+        case 'HEAVY':
+          return 'bg-purple-500 text-white dark:bg-purple-600';
+        case 'FRAGILE':
+          return 'bg-pink-500 text-white dark:bg-pink-600';
+        case 'HAZARDOUS':
+          return 'bg-red-500 text-white dark:bg-red-600';
+        case 'CHEMICAL':
+          return 'bg-orange-500 text-white dark:bg-orange-600';
+        case 'VERTICAL_STORAGE_REQUIRED':
+          return 'bg-yellow-500 text-white dark:bg-yellow-600';
+        case 'TEMPERATURE_SENSITIVE':
+          return 'bg-cyan-500 text-white dark:bg-cyan-600';
+        default:
+          return 'bg-gray-500 text-white dark:bg-gray-600';
+      }
+    } else {
+      switch (upperTag) {
+        case 'HEAVY':
+          return 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50';
+        case 'FRAGILE':
+          return 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/50';
+        case 'HAZARDOUS':
+          return 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50';
+        case 'CHEMICAL':
+          return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50';
+        case 'VERTICAL_STORAGE_REQUIRED':
+          return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/50';
+        case 'TEMPERATURE_SENSITIVE':
+          return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50';
+        default:
+          return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900/50';
+      }
     }
   };
 
@@ -148,6 +190,7 @@ export default function NewOrderPage() {
           },
           handlingTags: updatedFormData.handlingTags,
           deliveryInstructions: updatedFormData.notes,
+          priority: updatedFormData.priority,
         };
 
         console.log('Sending order data:', JSON.stringify(orderData, null, 2));
@@ -174,6 +217,7 @@ export default function NewOrderPage() {
           },
           handlingTags: formData.handlingTags,
           deliveryInstructions: formData.notes,
+          priority: formData.priority,
         };
 
         console.log('Sending order data (direct path):', JSON.stringify(orderData, null, 2));
@@ -260,6 +304,40 @@ export default function NewOrderPage() {
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Priority
+              </label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT' })}
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+              >
+                <option value="LOW">Low</option>
+                <option value="NORMAL">Normal</option>
+                <option value="HIGH">High</option>
+                <option value="URGENT">Urgent</option>
+              </select>
+              <div className="mt-2 text-xs">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="font-semibold text-gray-600 dark:text-gray-400">LOW:</span>
+                  <span className="text-gray-600 dark:text-gray-400">Non-urgent, 5-7 day delivery window, routine restocking</span>
+                </div>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">NORMAL:</span>
+                  <span className="text-blue-600 dark:text-blue-400">Standard 2-3 day delivery, most orders</span>
+                </div>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="font-semibold text-orange-600 dark:text-orange-400">HIGH:</span>
+                  <span className="text-orange-600 dark:text-orange-400">Time-sensitive, 24-48 hours, important commitments</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-red-600 dark:text-red-400">URGENT:</span>
+                  <span className="text-red-600 dark:text-red-400">Same-day/overnight, critical operations, emergencies</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Cargo Description
               </label>
               <textarea
@@ -282,9 +360,7 @@ export default function NewOrderPage() {
                     type="button"
                     onClick={() => toggleTag(tag)}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                      formData.handlingTags.includes(tag)
-                        ? getHandlingTagColor(tag)
-                        : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600'
+                      getHandlingTagColor(tag, formData.handlingTags.includes(tag))
                     }`}
                   >
                     {tag.replace(/_/g, ' ')}

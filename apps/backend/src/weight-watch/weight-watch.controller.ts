@@ -3,12 +3,12 @@ import { WeightWatchService, WeightValidationResult } from './weight-watch.servi
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole, HandlingTagType } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 
 class ValidateWeightDto {
   cargoWeight: number;
   vehicleId: string;
-  handlingTags: HandlingTagType[];
+  handlingTags: string[];
 }
 
 @Controller('weight-watch')

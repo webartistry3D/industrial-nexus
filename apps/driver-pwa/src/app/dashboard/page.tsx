@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [avgDeliveryTime, setAvgDeliveryTime] = useState(0);
   const [thisWeekCompleted, setThisWeekCompleted] = useState(0);
   const [onTimeRate, setOnTimeRate] = useState(0);
+  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'last_7_days' | 'last_30_days'>('last_7_days');
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -44,7 +45,7 @@ export default function Dashboard() {
     if (user) {
       fetchTrips();
     }
-  }, [user]);
+  }, [user, dateFilter]);
 
   const fetchTrips = async () => {
     try {
@@ -53,7 +54,65 @@ export default function Dashboard() {
       const tripData = response.data || [];
       setTrips(tripData);
       
-      // Count completed today
+      // Calculate date range based on filter
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (dateFilter) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'yesterday':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+          startDate.setHours(23, 59, 59, 999);
+          break;
+        case 'last_7_days':
+          startDate = new Date(now);
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'last_30_days':
+          startDate = new Date(now);
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        default:
+          startDate = new Date(now);
+          startDate.setDate(startDate.getDate() - 7);
+      }
+      
+      const endDate = dateFilter === 'yesterday' 
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        : new Date();
+      
+      if (dateFilter === 'yesterday') {
+        endDate.setHours(23, 59, 59, 999);
+        startDate.setHours(0, 0, 0, 0);
+      }
+      
+      // Filter trips based on date range
+      const filteredTrips = tripData.filter((t: Trip) => {
+        const completedAt = t.completedAt ? new Date(t.completedAt) : null;
+        if (!completedAt) return false;
+        
+        if (dateFilter === 'today') {
+          return completedAt.toDateString() === now.toDateString();
+        } else if (dateFilter === 'yesterday') {
+          const yesterday = new Date(now);
+          yesterday.setDate(yesterday.getDate() - 1);
+          return completedAt.toDateString() === yesterday.toDateString();
+        } else {
+          return completedAt >= startDate && completedAt <= endDate;
+        }
+      });
+      
+      // Debug: Log active trips count
+      const activeCount = tripData.filter((t: Trip) => t.status !== 'DELIVERED' && t.status !== 'CANCELLED').length;
+      console.log('[Dashboard] Total trips:', tripData.length, 'Active trips:', activeCount, 'Filter:', dateFilter);
+      
+      // Count completed based on filter
+      const completedCount = filteredTrips.length || 0;
+      setThisWeekCompleted(completedCount);
+      
+      // Count completed today (always show today's count separately)
       const today = new Date().toDateString();
       const completedTodayCount = tripData.filter((t: Trip) => 
         t.status === 'DELIVERED' && 
@@ -64,15 +123,6 @@ export default function Dashboard() {
       // Count total completed
       const totalCompletedCount = tripData.filter((t: Trip) => t.status === 'DELIVERED').length || 0;
       setTotalCompleted(totalCompletedCount);
-
-      // Calculate this week's completions
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const thisWeekCount = tripData.filter((t: Trip) => 
-        t.status === 'DELIVERED' && 
-        new Date(t.completedAt || '') >= weekAgo
-      ).length || 0;
-      setThisWeekCompleted(thisWeekCount);
 
       // Calculate average delivery time (in hours)
       const completedTrips = tripData.filter((t: Trip) => 
@@ -126,7 +176,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
             {getGreeting()}, <span className="text-blue-600 dark:text-blue-400">{user?.firstName || user?.email?.split('@')[0] || 'Driver'}</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
             Here's your performance overview for today
           </p>
         </div>
@@ -140,70 +190,79 @@ export default function Dashboard() {
         </div>
 
         {/* Performance Overview */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5 text-gray-900 dark:text-white">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-5 text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                <Activity className="w-5 h-5 text-white" />
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <h2 className="font-bold">Performance Overview</h2>
+              <h2 className="font-bold text-sm sm:text-base">Performance</h2>
             </div>
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-slate-700/50 px-3 py-1 rounded-full">Last 7 Days</div>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as any)}
+              className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="last_7_days">Last 7 Days</option>
+              <option value="last_30_days">Last 30 Days</option>
+            </select>
           </div>
-          <div className="grid grid-cols-4 gap-2">
-            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-3 text-center border border-blue-200/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/10">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">{loading ? '...' : activeTrips.length}</div>
-              <div className="text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Active</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2">
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-2 sm:p-3 text-center border border-blue-200/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/10">
+              <div className="text-2xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400 font-mono">{loading ? '...' : activeTrips.length}</div>
+              <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Active</div>
             </div>
-            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl p-3 text-center border border-green-200/50 dark:border-green-700/50 shadow-lg shadow-green-500/10">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400 font-mono">{loading ? '...' : completedToday}</div>
-              <div className="text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Today</div>
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl p-2 sm:p-3 text-center border border-green-200/50 dark:border-green-700/50 shadow-lg shadow-green-500/10">
+              <div className="text-2xl sm:text-4xl font-bold text-green-600 dark:text-green-400 font-mono">{loading ? '...' : completedToday}</div>
+              <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Today</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl p-3 text-center border border-purple-200/50 dark:border-purple-700/50 shadow-lg shadow-purple-500/10">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 font-mono">{loading ? '...' : thisWeekCompleted}</div>
-              <div className="text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">This Week</div>
+            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl p-2 sm:p-3 text-center border border-purple-200/50 dark:border-purple-700/50 shadow-lg shadow-purple-500/10">
+              <div className="text-2xl sm:text-4xl font-bold text-purple-600 dark:text-purple-400 font-mono">{loading ? '...' : thisWeekCompleted}</div>
+              <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">{dateFilter === 'today' ? 'Today' : dateFilter === 'yesterday' ? 'Yesterday' : dateFilter === 'last_7_days' ? '7 Days' : '30 Days'}</div>
             </div>
-            <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-500/20 dark:to-yellow-600/10 rounded-xl p-3 text-center border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg shadow-yellow-500/10">
-              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 font-mono">{loading ? '...' : totalCompleted}</div>
-              <div className="text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Total</div>
+            <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-500/20 dark:to-yellow-600/10 rounded-xl p-2 sm:p-3 text-center border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg shadow-yellow-500/10">
+              <div className="text-2xl sm:text-4xl font-bold text-yellow-600 dark:text-yellow-400 font-mono">{loading ? '...' : totalCompleted}</div>
+              <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Total</div>
             </div>
           </div>
         </div>
 
         {/* Detailed Metrics */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                <Clock className="w-5 h-5 text-white" />
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-3 sm:p-4 flex flex-col justify-between">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg. Delivery Time</span>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Efficiency Metric</div>
+                <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Average Time</span>
+                <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Efficiency Metric</div>
               </div>
             </div>
             <div className="flex items-end justify-between">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white font-mono">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-mono">
                 {loading ? '...' : `${avgDeliveryTime}h`}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">per trip</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">per trip</div>
             </div>
           </div>
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                <CheckCircle className="w-5 h-5 text-white" />
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-3 sm:p-4 flex flex-col justify-between">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">On-Time Rate</span>
-                <div className="text-xs text-gray-500 dark:text-gray-400">SLA Compliance</div>
+                <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">On-Time Rate</span>
+                <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">SLA Compliance</div>
               </div>
             </div>
             <div className="flex items-end justify-between">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white font-mono">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-mono">
                 {loading ? '...' : `${onTimeRate}%`}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">12h SLA</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">12h SLA</div>
             </div>
           </div>
         </div>
@@ -235,9 +294,6 @@ export default function Dashboard() {
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`p-3 rounded-xl shadow-md ${onTimeRate >= 90 ? 'bg-gradient-to-br from-green-500 to-green-600' : onTimeRate >= 70 ? 'bg-gradient-to-br from-yellow-500 to-yellow-600' : 'bg-gradient-to-br from-red-500 to-red-600'}`}>
-                  <Award className="w-6 h-6 text-white" />
-                </div>
                 <div>
                   <div className="font-bold text-gray-900 dark:text-white">
                     {onTimeRate >= 90 ? 'Excellent Performance' : onTimeRate >= 70 ? 'Good Performance' : 'Needs Improvement'}
@@ -300,7 +356,7 @@ export default function Dashboard() {
         )}
 
         {/* Quick Summary - Show other active trips count */}
-        {activeTrips.length > 1 && (
+        {activeTrips.length > 0 && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -309,7 +365,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {activeTrips.length - 1} more active trip{activeTrips.length - 1 > 1 ? 's' : ''}
+                    {activeTrips.length} active trip{activeTrips.length !== 1 ? 's' : ''}
                   </span>
                   <div className="text-xs text-gray-500 dark:text-gray-400">In your queue</div>
                 </div>

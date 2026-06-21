@@ -21,7 +21,7 @@ export class TripsService {
     // Verify order exists and is ready for assignment
     const order = await this.prisma.order.findUnique({
       where: { id: createTripDto.orderId },
-      include: { handlingTags: true, trip: true },
+      include: { handlingTags: { include: { tag: true } }, trip: true },
     });
 
     if (!order) {
@@ -62,7 +62,7 @@ export class TripsService {
     const weightValidation = await this.weightWatchService.validateTripWeight(
       order.totalWeight,
       vehicle.id,
-      order.handlingTags.map(t => t.tag),
+      order.handlingTags.map(t => t.tag.name),
     );
 
     if (!weightValidation.canAssign) {
@@ -79,7 +79,7 @@ export class TripsService {
       },
       include: {
         order: {
-          include: { handlingTags: true },
+          include: { handlingTags: { include: { tag: true } } },
         },
         driver: {
           include: {
@@ -268,7 +268,7 @@ export class TripsService {
       where: { id },
       include: {
         order: {
-          include: { handlingTags: true },
+          include: { handlingTags: { include: { tag: true } } },
         },
         driver: {
           include: {
@@ -546,7 +546,7 @@ export class TripsService {
     await this.weightWatchService.validateTripWeight(
       trip.order.totalWeight,
       newVehicle.id,
-      trip.order.handlingTags.map(t => t.tag),
+      trip.order.handlingTags.map(t => t.tag.name),
     );
 
     await this.auditService.log({

@@ -11,8 +11,15 @@ import {
 } from 'lucide-react';
 
 export default function DriverDetailPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const params = useParams();
   const driverId = params.id as string;
   

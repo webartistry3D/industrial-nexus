@@ -20,7 +20,7 @@ export interface Order {
   deliveryLocation: Location;
   cargoDescription?: string;
   deliveryInstructions?: string;
-  handlingTags: HandlingTag[];
+  handlingTags: string[];
   createdAt: string;
   updatedAt: string;
   trip?: Trip;
@@ -31,8 +31,6 @@ export interface Location {
   lng: number;
   address: string;
 }
-
-export type HandlingTag = 'FRAGILE' | 'HEAVY' | 'CHEMICAL' | 'HAZARDOUS' | 'TEMPERATURE_SENSITIVE' | 'VERTICAL_STORAGE';
 
 export const KycDocumentType = {
   GOVERNMENT_ID: 'GOVERNMENT_ID',

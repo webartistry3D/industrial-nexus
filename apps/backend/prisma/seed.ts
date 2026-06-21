@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, UserStatus, DriverStatus, KycStatus, DriverAvailability, VehicleCategory, VehicleStatus, OrderStatus, Priority, KittingStatus, TripStatus, HandlingTagType, WeightStatus, GeofenceType, GeofenceEventType } from '@prisma/client';
+import { PrismaClient, UserRole, UserStatus, DriverStatus, KycStatus, DriverAvailability, VehicleCategory, VehicleStatus, OrderStatus, Priority, KittingStatus, TripStatus, WeightStatus, GeofenceType, GeofenceEventType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { v5 as uuidv5 } from 'uuid';
 
@@ -40,7 +40,8 @@ async function main() {
   await prisma.pOD.deleteMany();
   await prisma.weightRecord.deleteMany();
   await prisma.trip.deleteMany();
-  await prisma.handlingTag.deleteMany();
+  await prisma.orderHandlingTag.deleteMany();
+  await prisma.availableHandlingTag.deleteMany();
   await prisma.order.deleteMany();
   await prisma.driver.deleteMany();
   await prisma.vehicle.deleteMany();
@@ -331,7 +332,7 @@ async function main() {
       licenseNumber: 'LIC-NG-001234',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
-      availability: DriverAvailability.ON_TRIP,
+      availability: DriverAvailability.AVAILABLE,
       vehicleId: id('vehicle-1'),
     },
     {
@@ -340,7 +341,7 @@ async function main() {
       licenseNumber: 'LIC-NG-002345',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
-      availability: DriverAvailability.ON_TRIP,
+      availability: DriverAvailability.AVAILABLE,
       vehicleId: id('vehicle-2'),
     },
     {
@@ -358,7 +359,7 @@ async function main() {
       licenseNumber: 'LIC-NG-004567',
       kycStatus: KycStatus.VERIFIED,
       status: DriverStatus.ACTIVE,
-      availability: DriverAvailability.ON_TRIP,
+      availability: DriverAvailability.AVAILABLE,
       vehicleId: id('vehicle-4'),
     },
     {
@@ -418,7 +419,7 @@ async function main() {
       id: id('order-1'),
       orderNumber: 'ORD-2024-001',
       clientId: id('client-1'),
-      status: OrderStatus.IN_TRANSIT,
+      status: OrderStatus.ASSIGNED,
       totalWeight: 3500,
       priority: Priority.NORMAL,
       pickupLocation: locations.lagosMainland,
@@ -433,7 +434,7 @@ async function main() {
       id: id('order-2'),
       orderNumber: 'ORD-2024-002',
       clientId: id('client-2'),
-      status: OrderStatus.IN_TRANSIT,
+      status: OrderStatus.ASSIGNED,
       totalWeight: 8500,
       priority: Priority.HIGH,
       pickupLocation: locations.apapa,
@@ -463,14 +464,14 @@ async function main() {
       id: id('order-4'),
       orderNumber: 'ORD-2024-004',
       clientId: id('client-1'),
-      status: OrderStatus.APPROVED,
+      status: OrderStatus.ASSIGNED,
       totalWeight: 12000,
       priority: Priority.URGENT,
       pickupLocation: locations.apapa,
       deliveryLocation: locations.ajah,
       cargoDescription: 'Steel pipes',
       deliveryInstructions: 'Requires crane for unloading',
-      kittingStatus: KittingStatus.QUALITY_CHECK,
+      kittingStatus: KittingStatus.DISPATCH_READY,
       submittedAt: new Date(Date.now() - 3600000),
       approvedAt: new Date(Date.now() - 1800000),
     },
@@ -507,7 +508,7 @@ async function main() {
       id: id('order-7'),
       orderNumber: 'ORD-2024-007',
       clientId: id('client-1'),
-      status: OrderStatus.IN_TRANSIT,
+      status: OrderStatus.ASSIGNED,
       totalWeight: 2800,
       priority: Priority.NORMAL,
       pickupLocation: locations.festacTown,
@@ -600,24 +601,35 @@ async function main() {
     await prisma.order.create({ data: order });
   }
 
+  // Create available handling tags
+  const availableTagNames = ['FRAGILE', 'HEAVY', 'CHEMICAL', 'HAZARDOUS', 'VERTICAL_STORAGE_REQUIRED', 'TEMPERATURE_SENSITIVE'];
+  for (const name of availableTagNames) {
+    await prisma.availableHandlingTag.create({ data: { id: id(`tag-${name}`), name } });
+  }
+
   // Add handling tags to orders
-  const handlingTags = [
-    { orderId: id('order-1'), tag: HandlingTagType.HEAVY },
-    { orderId: id('order-2'), tag: HandlingTagType.HEAVY },
-    { orderId: id('order-2'), tag: HandlingTagType.HAZARDOUS },
-    { orderId: id('order-3'), tag: HandlingTagType.FRAGILE },
-    { orderId: id('order-3'), tag: HandlingTagType.TEMPERATURE_SENSITIVE },
-    { orderId: id('order-4'), tag: HandlingTagType.HEAVY },
-    { orderId: id('order-4'), tag: HandlingTagType.VERTICAL_STORAGE_REQUIRED },
-    { orderId: id('order-5'), tag: HandlingTagType.CHEMICAL },
-    { orderId: id('order-8'), tag: HandlingTagType.HEAVY },
-    { orderId: id('order-11'), tag: HandlingTagType.TEMPERATURE_SENSITIVE },
-    { orderId: id('order-11'), tag: HandlingTagType.FRAGILE },
-    { orderId: id('order-12'), tag: HandlingTagType.HEAVY },
+  const orderTagMappings = [
+    { orderId: id('order-1'), tagName: 'HEAVY' },
+    { orderId: id('order-2'), tagName: 'HEAVY' },
+    { orderId: id('order-2'), tagName: 'HAZARDOUS' },
+    { orderId: id('order-3'), tagName: 'FRAGILE' },
+    { orderId: id('order-3'), tagName: 'TEMPERATURE_SENSITIVE' },
+    { orderId: id('order-4'), tagName: 'HEAVY' },
+    { orderId: id('order-4'), tagName: 'VERTICAL_STORAGE_REQUIRED' },
+    { orderId: id('order-5'), tagName: 'CHEMICAL' },
+    { orderId: id('order-8'), tagName: 'HEAVY' },
+    { orderId: id('order-11'), tagName: 'TEMPERATURE_SENSITIVE' },
+    { orderId: id('order-11'), tagName: 'FRAGILE' },
+    { orderId: id('order-12'), tagName: 'HEAVY' },
   ];
 
-  for (const tag of handlingTags) {
-    await prisma.handlingTag.create({ data: tag });
+  for (const mapping of orderTagMappings) {
+    await prisma.orderHandlingTag.create({
+      data: {
+        orderId: mapping.orderId,
+        tagId: id(`tag-${mapping.tagName}`),
+      },
+    });
   }
 
   console.log(`✅ Created ${orders.length} orders with handling tags`);
@@ -631,8 +643,7 @@ async function main() {
       orderId: id('order-1'),
       driverId: id('driver-profile-1'),
       vehicleId: id('vehicle-1'),
-      status: TripStatus.IN_TRANSIT,
-      startedAt: new Date(Date.now() - 3600000),
+      status: TripStatus.ASSIGNED,
       eta: new Date(Date.now() + 1800000),
     },
     {
@@ -656,7 +667,7 @@ async function main() {
       orderId: id('order-4'),
       driverId: id('driver-profile-4'),
       vehicleId: id('vehicle-4'),
-      status: TripStatus.SOP_CHECKLIST_PENDING,
+      status: TripStatus.ASSIGNED,
       eta: new Date(Date.now() + 7200000),
     },
     {

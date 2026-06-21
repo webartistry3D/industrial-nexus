@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { WeightStatus, HandlingTagType } from '@prisma/client';
+import { WeightStatus } from '@prisma/client';
 
 export interface WeightValidationResult {
   canAssign: boolean;
@@ -18,7 +18,7 @@ export class WeightWatchService {
   async validateTripWeight(
     cargoWeight: number,
     vehicleId: string,
-    handlingTags: HandlingTagType[],
+    handlingTags: string[],
   ): Promise<WeightValidationResult> {
     const vehicle = await this.prisma.vehicle.findUnique({
       where: { id: vehicleId },
@@ -154,15 +154,15 @@ export class WeightWatchService {
     });
   }
 
-  private checkCargoCompatibility(handlingTags: HandlingTagType[]): { 
+  private checkCargoCompatibility(handlingTags: string[]): { 
     isCompatible: boolean; 
     compatibility: 'COMPATIBLE' | 'INCOMPATIBLE';
     reason?: string 
   } {
-    const hasFragile = handlingTags.includes(HandlingTagType.FRAGILE);
-    const hasHeavy = handlingTags.includes(HandlingTagType.HEAVY);
-    const hasChemical = handlingTags.includes(HandlingTagType.CHEMICAL);
-    const hasHazardous = handlingTags.includes(HandlingTagType.HAZARDOUS);
+    const hasFragile = handlingTags.includes('FRAGILE');
+    const hasHeavy = handlingTags.includes('HEAVY');
+    const hasChemical = handlingTags.includes('CHEMICAL');
+    const hasHazardous = handlingTags.includes('HAZARDOUS');
 
     // Heavy + Fragile = Requires partitioned vehicle
     if (hasHeavy && hasFragile) {
@@ -188,10 +188,10 @@ export class WeightWatchService {
     };
   }
 
-  private requiresPartitionedVehicle(handlingTags: HandlingTagType[]): boolean {
-    const hasFragile = handlingTags.includes(HandlingTagType.FRAGILE);
-    const hasHeavy = handlingTags.includes(HandlingTagType.HEAVY);
-    const hasChemical = handlingTags.includes(HandlingTagType.CHEMICAL);
+  private requiresPartitionedVehicle(handlingTags: string[]): boolean {
+    const hasFragile = handlingTags.includes('FRAGILE');
+    const hasHeavy = handlingTags.includes('HEAVY');
+    const hasChemical = handlingTags.includes('CHEMICAL');
 
     // Mixed cargo scenarios requiring partitioning
     return (hasFragile && hasHeavy) || (hasFragile && hasChemical);

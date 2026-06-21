@@ -586,16 +586,25 @@ export default function OrderDetailPage() {
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">{order.cargoDescription || 'No description'}</p>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="flex items-center gap-2">
               <Weight className="w-4 h-4 text-gray-400" />
               <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</span>
             </div>
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">{String(order.kittingStatus || '').replace('_', ' ') || 'N/A'}</span>
+              <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
+                {String(order.priority || 'NORMAL')} Priority
+              </span>
             </div>
           </div>
+
+          {order.deliveryInstructions && (
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Delivery Instructions:</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{order.deliveryInstructions}</p>
+            </div>
+          )}
 
           {order.handlingTags && order.handlingTags.length > 0 && (
             <div className="mt-4">
@@ -610,7 +619,7 @@ export default function OrderDetailPage() {
                   } else if (tag && typeof tag === 'object') {
                     const tagObj = tag as Record<string, unknown>;
                     // Try multiple possible property names for the tag value
-                    const rawValue = tagObj.type || tagObj.name || tagObj.value || tagObj.label || tagObj.handlingTag || tagObj.tag;
+                    const rawValue = (tagObj.tag as Record<string, unknown>)?.name || tagObj.tag || tagObj.name || tagObj.type || tagObj.value || tagObj.label || tagObj.handlingTag;
                     if (rawValue !== undefined && rawValue !== null) {
                       tagText = String(rawValue);
                     } else {

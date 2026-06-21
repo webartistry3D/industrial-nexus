@@ -13,16 +13,17 @@ export function NavWrapper({ children }: NavWrapperProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const isLoginPage = pathname === '/login';
+  const isLandingPage = pathname === '/';
   
   const role = 'client' as 'admin' | 'client';
 
   return (
     <>
-      <TopNav role={role} />
-      <div className={isLoginPage ? '' : 'pt-16'}>
+      {!isLandingPage && <TopNav role={role} />}
+      <div className={isLoginPage || isLandingPage ? '' : 'pt-16'}>
         {children}
       </div>
-      {!isLoginPage && <MobileNav role={role} />}
+      {!isLoginPage && !isLandingPage && <MobileNav role={role} />}
     </>
   );
 }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { RoleGuard } from '@/components/role-guard';
 import { useAuth } from '@/hooks/useAuth';
-import { Settings, Save, Bell, Shield, Database, Globe, Clock, AlertTriangle, Users, Plus, Search, Filter, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Settings, Save, Bell, Shield, Database, Globe, Clock, AlertTriangle, Users, Plus, Search, Filter, Edit, Trash2, UserCheck, UserX, Tag as TagIcon, X, Check } from 'lucide-react';
 
 interface SystemSettings {
   general: {
@@ -50,9 +50,17 @@ interface User {
 }
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'general' | 'users'>('general');
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
+
+  const [activeTab, setActiveTab] = useState<'general' | 'users' | 'tags'>('general');
   
   // Settings state
   const [settings, setSettings] = useState<SystemSettings>({
@@ -108,6 +116,13 @@ export default function SettingsPage() {
     status: 'ACTIVE',
   });
 
+  // Tags management state
+  const [handlingTags, setHandlingTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
+  const [editingTag, setEditingTag] = useState<string | null>(null);
+  const [editedTagValue, setEditedTagValue] = useState('');
+  const [tagsLoading, setTagsLoading] = useState(false);
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -115,6 +130,9 @@ export default function SettingsPage() {
   useEffect(() => {
     if (activeTab === 'users') {
       fetchUsers();
+    }
+    if (activeTab === 'tags') {
+      fetchHandlingTags();
     }
   }, [activeTab, searchTerm, roleFilter, statusFilter]);
 
@@ -148,6 +166,18 @@ export default function SettingsPage() {
       setError(err.message || 'Failed to fetch users');
     } finally {
       setUsersLoading(false);
+    }
+  };
+
+  const fetchHandlingTags = async () => {
+    try {
+      setTagsLoading(true);
+      const response = await api.getAllHandlingTags();
+      setHandlingTags(response.map((tag: any) => tag.name));
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch handling tags');
+    } finally {
+      setTagsLoading(false);
     }
   };
 
@@ -221,6 +251,70 @@ export default function SettingsPage() {
       status: user.status,
     });
     setShowEditUserModal(true);
+  };
+
+  // Tag management functions
+  const handleAddTag = async () => {
+    const trimmedTag = newTag.trim().toUpperCase();
+    if (trimmedTag && !handlingTags.includes(trimmedTag)) {
+      try {
+        await api.createHandlingTag(trimmedTag);
+        setNewTag('');
+        await fetchHandlingTags();
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } catch (err: any) {
+        setError(err.message || 'Failed to create tag');
+      }
+    }
+  };
+
+  const handleDeleteTag = async (tagToDelete: string) => {
+    if (confirm(`Are you sure you want to delete the tag "${tagToDelete}"?`)) {
+      try {
+        // Find the tag object with this name to get its ID
+        const response = await api.getAllHandlingTags();
+        const tagToDeleteObj = response.find((tag: any) => tag.name === tagToDelete);
+        if (tagToDeleteObj) {
+          await api.deleteHandlingTag(tagToDeleteObj.id);
+          await fetchHandlingTags();
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to delete tag');
+      }
+    }
+  };
+
+  const handleStartEditTag = (tag: string) => {
+    setEditingTag(tag);
+    setEditedTagValue(tag);
+  };
+
+  const handleSaveEditTag = async () => {
+    const trimmedValue = editedTagValue.trim().toUpperCase();
+    if (trimmedValue && trimmedValue !== editingTag && !handlingTags.includes(trimmedValue)) {
+      try {
+        const response = await api.getAllHandlingTags();
+        const tagToEdit = response.find((tag: any) => tag.name === editingTag);
+        if (tagToEdit) {
+          await api.updateHandlingTag(tagToEdit.id, trimmedValue);
+          setEditingTag(null);
+          setEditedTagValue('');
+          await fetchHandlingTags();
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to update tag');
+      }
+    }
+  };
+
+  const handleCancelEditTag = () => {
+    setEditingTag(null);
+    setEditedTagValue('');
   };
 
   const getStatusColor = (status: string) => {
@@ -327,6 +421,16 @@ export default function SettingsPage() {
               }`}
             >
               User Management
+            </button>
+            <button
+              onClick={() => setActiveTab('tags')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'tags'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              Tags Management
             </button>
           </div>
         </div>
@@ -770,7 +874,7 @@ export default function SettingsPage() {
             </div>
           </div>
           </div>
-        ) : (
+        ) : activeTab === 'users' ? (
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
               <div className="flex items-center justify-between mb-6">
@@ -913,7 +1017,109 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
-        )}
+        ) : activeTab === 'tags' ? (
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+                  <TagIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Handling Tags Management</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Configure cargo handling tags for orders</p>
+                </div>
+              </div>
+
+              {/* Add New Tag */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Add New Tag</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Enter tag name (e.g., FRAGILE)"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={handleAddTag}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Tag
+                  </button>
+                </div>
+              </div>
+
+              {/* Tags List */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Current Tags</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {handlingTags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center justify-between bg-gray-50 dark:bg-slate-700 rounded-lg p-3 border border-gray-200 dark:border-slate-600"
+                    >
+                      {editingTag === tag ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={editedTagValue}
+                            onChange={(e) => setEditedTagValue(e.target.value)}
+                            className="flex-1 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm"
+                          />
+                          <button
+                            onClick={handleSaveEditTag}
+                            className="text-green-600 hover:text-green-700 p-1"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={handleCancelEditTag}
+                            className="text-red-600 hover:text-red-700 p-1"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{tag}</span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleStartEditTag(tag)}
+                              className="text-blue-600 hover:text-blue-700 p-1"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTag(tag)}
+                              className="text-red-600 hover:text-red-700 p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Info Section */}
+              <div className="mt-6 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <TagIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-300">Tag Information</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                      Handling tags are used to classify cargo requirements. These tags appear on order creation forms and help operations teams identify special handling requirements.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* Create User Modal */}
         {showCreateUserModal && (

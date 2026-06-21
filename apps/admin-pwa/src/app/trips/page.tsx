@@ -10,8 +10,15 @@ import {
 } from 'lucide-react';
 
 function TripsPageContent() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const searchParams = useSearchParams();
   const filterParam = searchParams.get('filter');
   const statusParam = searchParams.get('status');

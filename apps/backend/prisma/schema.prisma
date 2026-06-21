@@ -184,7 +184,7 @@ model Order {
 
   // Relations
   client         User         @relation("ClientOrders", fields: [clientId], references: [id])
-  handlingTags   HandlingTag[]
+  handlingTags   OrderHandlingTag[]
   kittingLogs    KittingLog[]
   trip           Trip?
   weightRecord   WeightRecord?
@@ -192,15 +192,27 @@ model Order {
   @@map("orders")
 }
 
-model HandlingTag {
-  id      String      @id @default(uuid())
-  orderId String      @map("order_id")
-  tag     HandlingTagType
+model AvailableHandlingTag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  orderTags OrderHandlingTag[]
+
+  @@map("available_handling_tags")
+}
+
+model OrderHandlingTag {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  tagId     String   @map("tag_id")
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tag   AvailableHandlingTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
-  @@unique([orderId, tag])
-  @@map("handling_tags")
+  @@unique([orderId, tagId])
+  @@map("order_handling_tags")
 }
 
 model KittingLog {

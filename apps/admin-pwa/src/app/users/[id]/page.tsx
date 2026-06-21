@@ -45,9 +45,16 @@ interface Activity {
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isLoading: authLoading } = useAuth();
   const userId = params.id as string;
-  
+
+  useEffect(() => {
+    if (!authLoading && !currentUser) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, currentUser, router]);
+
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<UserDetails | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);

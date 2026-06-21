@@ -195,7 +195,7 @@ export default function DashboardPage() {
                 <Truck className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.activeShipments || 0}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.activeShipments || 0}</p>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</p>
               </div>
             </div>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
                 <Clock className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.inTransit || 0}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.inTransit || 0}</p>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">In Transit</p>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                 <AlertCircle className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delayed || 0}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delayed || 0}</p>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delayed</p>
               </div>
             </div>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
                 <CheckCircle className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delivered || 0}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delivered || 0}</p>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delivered</p>
               </div>
             </div>

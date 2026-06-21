@@ -14,7 +14,7 @@ import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 
 export default function TrackingPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [trackingHistory, setTrackingHistory] = useState<any[]>([]);
@@ -28,6 +28,13 @@ export default function TrackingPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     currentTripRef.current = currentTrip;

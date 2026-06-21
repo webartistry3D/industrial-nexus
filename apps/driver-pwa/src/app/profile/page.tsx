@@ -10,7 +10,7 @@ import { PageHeader } from '@/components/PageHeader';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading: authLoading } = useAuth();
   const [driver, setDriver] = useState<Driver | null>(null);
   const [kycDocuments, setKycDocuments] = useState<KycDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,10 +25,14 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
     if (user) {
       fetchProfile();
     }
-  }, [user]);
+  }, [authLoading, user, router]);
 
   const fetchProfile = async () => {
     try {

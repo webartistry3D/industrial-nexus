@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsOptional, IsEnum, IsObject, ValidateNested, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Priority, HandlingTagType } from '@prisma/client';
+import { Priority } from '@prisma/client';
 
 class LocationDto {
   @IsNumber()
@@ -45,6 +45,6 @@ export class UpdateOrderDto {
 
   @IsOptional()
   @IsArray()
-  @IsEnum(HandlingTagType, { each: true })
-  handlingTags?: HandlingTagType[];
+  @IsString({ each: true })
+  handlingTags?: string[];
 }

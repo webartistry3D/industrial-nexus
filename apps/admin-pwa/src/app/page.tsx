@@ -37,7 +37,14 @@ export default function Dashboard() {
 
   // Fetch dashboard data
   useEffect(() => {
+    // Force redirect to login if not authenticated
     if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+    
+    // Also redirect immediately if user is null (bypass authLoading)
+    if (user === null && !authLoading) {
       router.push('/login');
       return;
     }
@@ -155,7 +162,7 @@ export default function Dashboard() {
     return 'Good evening';
   };
 
-  if (authLoading || (!user && !error)) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-slate-900">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -163,13 +170,18 @@ export default function Dashboard() {
     );
   }
 
+  if (!user) {
+    router.push('/login');
+    return null;
+  }
+
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       {/* Main Content */}
-      <main className="p-4 pb-24 space-y-6">
+      <main className="p-4 pb-24 space-y-3">
         {/* Greeting */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName}</span>
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">

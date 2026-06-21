@@ -12,8 +12,15 @@ import {
 } from 'lucide-react';
 
 export default function TripDetailPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const params = useParams();
   const tripId = params.id as string;
 
@@ -195,6 +202,9 @@ export default function TripDetailPage() {
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {trip.vehicle?.category}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">
+              {trip.vehicle?.capacityKg} kg
             </p>
           </div>
         </div>

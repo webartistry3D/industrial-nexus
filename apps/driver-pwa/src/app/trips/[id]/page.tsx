@@ -16,7 +16,14 @@ const sopChecklist = [
 
 export default function TripDetail({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
   const [checklist, setChecklist] = useState(sopChecklist);

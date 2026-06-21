@@ -59,8 +59,15 @@ interface Vehicle {
 type TabType = 'drivers' | 'vehicles';
 
 export default function DriversPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+  }, [authLoading, user, router]);
   
   // Tab state
   const [activeTab, setActiveTab] = useState<TabType>('drivers');

@@ -54,11 +54,11 @@ export class OrdersService {
 
     // Create handling tags if provided
     if (createOrderDto.handlingTags && createOrderDto.handlingTags.length > 0) {
-      await this.prisma.handlingTag.createMany({
-        data: createOrderDto.handlingTags.map(tag => ({
-          orderId: order.id,
-          tag,
-        })),
+      const availableTags = await this.prisma.availableHandlingTag.findMany({
+        where: { name: { in: createOrderDto.handlingTags.map(t => t.toUpperCase()) } },
+      });
+      await this.prisma.orderHandlingTag.createMany({
+        data: availableTags.map(tag => ({ orderId: order.id, tagId: tag.id })),
       });
     }
 
@@ -125,7 +125,7 @@ export class OrdersService {
               lastName: true,
             },
           },
-          handlingTags: true,
+          handlingTags: { include: { tag: true } },
           trip: {
             select: {
               id: true,
@@ -185,7 +185,7 @@ export class OrdersService {
             phoneNumber: true,
           },
         },
-        handlingTags: true,
+        handlingTags: { include: { tag: true } },
         kittingLogs: {
           orderBy: { createdAt: 'desc' },
           include: {
@@ -262,13 +262,13 @@ export class OrdersService {
 
     // Update handling tags if provided
     if (updateOrderDto.handlingTags !== undefined) {
-      await this.prisma.handlingTag.deleteMany({ where: { orderId: id } });
+      await this.prisma.orderHandlingTag.deleteMany({ where: { orderId: id } });
       if (updateOrderDto.handlingTags.length > 0) {
-        await this.prisma.handlingTag.createMany({
-          data: updateOrderDto.handlingTags.map(tag => ({
-            orderId: id,
-            tag,
-          })),
+        const availableTags = await this.prisma.availableHandlingTag.findMany({
+          where: { name: { in: updateOrderDto.handlingTags.map(t => t.toUpperCase()) } },
+        });
+        await this.prisma.orderHandlingTag.createMany({
+          data: availableTags.map(tag => ({ orderId: id, tagId: tag.id })),
         });
       }
     }
