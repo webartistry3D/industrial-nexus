@@ -183,7 +183,7 @@ export default function Dashboard() {
 
         {/* Top Row: Clock & Weather */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-blue-500/10 border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
             <AnalogClock />
           </div>
           <WeatherWidget />

@@ -11,10 +11,14 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from '../redis/redis.service';
 
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : true;
+
 @WebSocketGateway({
   namespace: '/tracking',
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3003'],
+    origin: corsOrigins,
     credentials: true,
   },
 })
