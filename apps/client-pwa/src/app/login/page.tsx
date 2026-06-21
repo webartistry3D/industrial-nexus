@@ -59,8 +59,8 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
             <Truck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Client Portal</h1>
-          <p className="text-gray-600 dark:text-gray-400">Track your industrial shipments</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Industrial Nexus</h1>
+          <p className="text-gray-600 dark:text-gray-400">Client</p>
         </div>
 
         {error && (

@@ -65,7 +65,7 @@ export default function Login() {
             <Truck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Industrial Nexus</h1>
-          <p className="text-gray-600 dark:text-gray-400">Admin Control Tower</p>
+          <p className="text-gray-600 dark:text-gray-400">Operations</p>
         </div>
 
         {error && (
