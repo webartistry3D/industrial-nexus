@@ -66,7 +66,7 @@ export default function NavigationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       {/* Header */}
-      <div className="bg-slate-900/90 backdrop-blur-xl text-white px-4 py-4 flex items-center gap-2 border-b border-slate-700/50">
+      <div className="bg-slate-900 text-white px-4 py-4 flex items-center gap-2 border-b border-slate-700">
         <button onClick={() => router.back()} className="text-white hover:text-blue-300 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </button>
@@ -74,7 +74,7 @@ export default function NavigationPage() {
       </div>
 
       {/* Map */}
-      <div className="h-[60vh] bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50">
+      <div className="h-[60vh] bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
@@ -106,7 +106,7 @@ export default function NavigationPage() {
       </div>
 
       {/* Navigation Info */}
-      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl p-4 space-y-4 pb-24">
+      <div className="bg-white dark:bg-slate-800 p-4 space-y-4 pb-24">
         {routeData && (
           <>
             <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl border border-blue-200/50 dark:border-slate-600/50">
@@ -168,7 +168,7 @@ export default function NavigationPage() {
               const url = `https://www.google.com/maps/dir/?api=1&origin=${routeData.pickup.lat},${routeData.pickup.lng}&destination=${routeData.delivery.lat},${routeData.delivery.lng}&travelmode=driving`;
               window.open(url, '_blank');
             }}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 active:opacity-80 transition-opacity duration-150"
           >
             <Navigation className="w-5 h-5" />
             Open in Google Maps

@@ -58,7 +58,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50 will-change-transform">
       <div className="h-full px-4 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold">{getHeaderTitle()}</h1>

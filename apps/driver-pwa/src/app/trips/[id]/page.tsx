@@ -172,14 +172,14 @@ export default function TripDetail({ params }: { params: { id: string } }) {
           <button
             onClick={handleStartTrip}
             disabled={actionLoading}
-            className="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl shadow-lg active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Play className="w-5 h-5" />
             {actionLoading ? 'Starting...' : 'Start Trip'}
           </button>
         )}
         {/* Trip Status */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -215,7 +215,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
         {(trip.status === 'IN_TRANSIT' || trip.status === 'ASSIGNED') && (
           <button
             onClick={() => router.push('/tracking')}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900 text-white rounded-xl p-4 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 border border-blue-500/30 dark:border-blue-400/30"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white rounded-xl p-4 flex items-center justify-center gap-2 shadow-lg active:opacity-80 transition-opacity duration-150 border border-blue-500/30 dark:border-blue-400/30"
           >
             <Navigation className="w-5 h-5" />
             <span className="font-semibold">View Live Tracking</span>
@@ -223,7 +223,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
         )}
 
         {/* Trip Details */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
           <h2 className="font-semibold text-gray-800 dark:text-white mb-3">Order Details</h2>
           <div className="space-y-3 text-sm">
             <div className="flex items-start gap-2">
@@ -257,7 +257,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
         </div>
 
         {/* Timestamps */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Timeline</h2>
           <div className="space-y-3 text-sm">
             {trip.startedAt && (
@@ -301,14 +301,14 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
         {/* SOP Checklist */}
         {isSOPPending && (
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3">SOP Checklist</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Complete all items before starting trip</p>
             <div className="space-y-2">
               {checklist.map((item) => (
                 <label
                   key={item.id}
-                  className="flex items-center gap-3 p-3 border border-gray-200/50 dark:border-slate-700/50 rounded-xl cursor-pointer active:bg-gray-50 dark:active:bg-slate-700 hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300"
+                  className="flex items-center gap-3 p-3 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer active:bg-gray-50 dark:active:bg-slate-700 transition-colors duration-150"
                 >
                   <input
                     type="checkbox"
@@ -331,25 +331,25 @@ export default function TripDetail({ params }: { params: { id: string } }) {
             <button
               onClick={startTrip}
               disabled={!allCompleted || submitting}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white py-3 rounded-xl font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? 'Starting...' : 'Start Trip'}
             </button>
           )}
           {isInTransit && (
             <>
-              <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300">
+              <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 active:opacity-80 transition-opacity duration-150">
                 <Camera className="w-5 h-5" />
                 Capture POD
               </button>
-              <button className="w-full bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-gray-300 dark:hover:bg-slate-600 transition-all duration-300">
+              <button className="w-full bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 active:opacity-80 transition-opacity duration-150">
                 <Pen className="w-5 h-5" />
                 Get Signature
               </button>
               <button
                 onClick={completeTrip}
                 disabled={submitting}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 active:opacity-80 transition-opacity duration-150"
               >
                 <CheckCircle className="w-5 h-5" />
                 {submitting ? 'Completing...' : 'Complete Delivery'}

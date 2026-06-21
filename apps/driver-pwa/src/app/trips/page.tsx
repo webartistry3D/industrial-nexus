@@ -85,7 +85,7 @@ export default function TripsPage() {
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'active'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
-                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700'
+                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
             Active
@@ -95,7 +95,7 @@ export default function TripsPage() {
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'completed'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
-                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700'
+                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
             Completed
@@ -105,7 +105,7 @@ export default function TripsPage() {
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'all'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
-                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700'
+                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
             All
@@ -114,13 +114,13 @@ export default function TripsPage() {
 
         {/* Stats - Aligned with Dashboard */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
               {loading ? '...' : activeTripsCount}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Active Trips</div>
           </div>
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 font-mono">
               {loading ? '...' : totalCompletedCount}
             </div>
@@ -149,7 +149,7 @@ export default function TripsPage() {
               <div
                 key={trip.id}
                 onClick={() => router.push(`/trips/${trip.id}`)}
-                className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 cursor-pointer hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 border-l-4 border-blue-500 dark:border-blue-400"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 cursor-pointer active:opacity-80 transition-opacity duration-150 border-l-4 border-blue-500 dark:border-blue-400"
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-semibold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</span>
@@ -177,7 +177,7 @@ export default function TripsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <button className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300">
+                  <button className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150">
                     {trip.status === 'ASSIGNED' ? 'Start Trip' : 'View Details'}
                   </button>
                 </div>

@@ -170,7 +170,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
               <UserIcon className="w-10 h-10 text-white" />
@@ -203,7 +203,7 @@ export default function ProfilePage() {
 
         {/* Driver Details */}
         {driver && (
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Driver Information</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
@@ -246,7 +246,7 @@ export default function ProfilePage() {
         )}
 
         {/* Contact Information */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Contact Information</h3>
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3">
@@ -265,12 +265,12 @@ export default function ProfilePage() {
         </div>
 
         {/* KYC Documents Section */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-gray-900 dark:text-white">KYC Documents</h3>
             <button
               onClick={() => setShowKycSection(!showKycSection)}
-              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
             >
               <Upload className="w-4 h-4" />
               Upload Document
@@ -323,7 +323,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={uploading || !selectedFile}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {uploading ? 'Uploading...' : 'Upload'}
                 </button>
@@ -378,7 +378,7 @@ export default function ProfilePage() {
         <div className="space-y-2">
           <button
             onClick={handleLogout}
-            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 active:opacity-80 transition-opacity duration-150"
           >
             <LogOut className="w-5 h-5" />
             Logout

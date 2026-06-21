@@ -183,14 +183,14 @@ export default function Dashboard() {
 
         {/* Top Row: Clock & Weather */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
             <AnalogClock />
           </div>
           <WeatherWidget />
         </div>
 
         {/* Performance Overview */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 sm:p-5 text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-5 text-gray-900 dark:text-white">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
@@ -231,7 +231,7 @@ export default function Dashboard() {
 
         {/* Detailed Metrics */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-3 sm:p-4 flex flex-col justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -248,7 +248,7 @@ export default function Dashboard() {
               <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">per trip</div>
             </div>
           </div>
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-3 sm:p-4 flex flex-col justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
                 <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -271,7 +271,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push('/trips')}
-            className="group bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-2xl p-5 flex flex-col items-center gap-3 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 border border-blue-500/30 dark:border-blue-400/30"
+            className="group bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:opacity-80 transition-opacity duration-150 border border-blue-500/30 dark:border-blue-400/30"
           >
             <div className="p-2 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
               <Truck className="w-6 h-6" />
@@ -280,7 +280,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => router.push('/tracking')}
-            className="group bg-gradient-to-r from-slate-600 to-slate-700 dark:from-slate-700 dark:to-slate-800 text-white rounded-2xl p-5 flex flex-col items-center gap-3 hover:shadow-lg hover:shadow-slate-500/20 hover:-translate-y-0.5 transition-all duration-300 border border-slate-500/30 dark:border-slate-600/30"
+            className="group bg-gradient-to-r from-slate-600 to-slate-700 dark:from-slate-700 dark:to-slate-800 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:opacity-80 transition-opacity duration-150 border border-slate-500/30 dark:border-slate-600/30"
           >
             <div className="p-2 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
               <MapPin className="w-6 h-6" />
@@ -291,7 +291,7 @@ export default function Dashboard() {
 
         {/* Performance Badge */}
         {!loading && totalCompleted > 0 && (
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div>
@@ -357,7 +357,7 @@ export default function Dashboard() {
 
         {/* Quick Summary - Show other active trips count */}
         {activeTrips.length > 0 && (
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
@@ -372,7 +372,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => router.push('/trips')}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
               >
                 View All →
               </button>
@@ -382,7 +382,7 @@ export default function Dashboard() {
 
         {/* Empty State */}
         {!loading && activeTrips.length === 0 && (
-          <div className="text-center py-12 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
             <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
               <Truck className="w-10 h-10 text-white" />
             </div>
@@ -390,7 +390,7 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">You're all caught up! Great work today.</p>
             <button
               onClick={() => router.push('/trips')}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-6 py-2 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-6 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
             >
               View History
             </button>

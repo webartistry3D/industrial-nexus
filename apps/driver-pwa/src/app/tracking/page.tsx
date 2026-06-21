@@ -164,7 +164,7 @@ export default function TrackingPage() {
         </button>
 
         {/* Map */}
-        <div className="h-[50vh] bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden">
+        <div className="h-[50vh] bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
@@ -204,7 +204,7 @@ export default function TrackingPage() {
         {/* Trip Info */}
         {currentTrip && (
           <div className="p-4 space-y-4">
-            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <h2 className="font-semibold text-gray-900 dark:text-white mb-3 font-mono">
                 Trip {currentTrip.order?.orderNumber}
               </h2>
@@ -235,7 +235,7 @@ export default function TrackingPage() {
             </div>
 
             {/* Status */}
-            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
@@ -250,7 +250,7 @@ export default function TrackingPage() {
                 </div>
                 <button
                   onClick={() => router.push(`/trips/${currentTrip.id}`)}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
                 >
                   View Details
                 </button>
@@ -258,7 +258,7 @@ export default function TrackingPage() {
             </div>
 
             {/* GPS & WebSocket Status */}
-            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${currentLocation ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -278,7 +278,7 @@ export default function TrackingPage() {
 
             {/* Geofence Events */}
             {geofenceEvents.length > 0 && (
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">Geofence Events</h3>
                 <div className="space-y-2">
                   {geofenceEvents.map((evt, i) => (
