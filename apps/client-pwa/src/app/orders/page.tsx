@@ -30,17 +30,20 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [page]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getMyOrders();
+      const data = await api.getMyOrders({ page, limit: 10 });
       setOrders(data.data || []);
+      setMeta(data.meta || { page: 1, limit: 10, total: 0, totalPages: 1 });
     } catch (err) {
       console.error('Failed to fetch orders:', err);
       setError('Failed to load orders');
@@ -174,11 +177,11 @@ export default function OrdersPage() {
               <p className="text-gray-600 dark:text-gray-400 font-medium">No orders found</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+            <div className="space-y-3">
               {filteredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="p-4 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300"
+                  className="bg-gray-50/50 dark:bg-slate-700/30 rounded-xl p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300"
                   onClick={() => router.push(`/orders/${order.id}`)}
                 >
                   <div className="flex items-start gap-3">
@@ -243,6 +246,29 @@ export default function OrdersPage() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {!loading && (
+          <div className="px-4 py-4 flex items-center justify-between">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              Page {page} of {meta.totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+              disabled={page === meta.totalPages}
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

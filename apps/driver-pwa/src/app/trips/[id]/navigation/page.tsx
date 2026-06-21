@@ -61,7 +61,7 @@ export default function NavigationPage() {
 
   const mapCenter = currentLocation || routeData?.pickup
     ? { lat: currentLocation?.lat || routeData.pickup.lat, lng: currentLocation?.lng || routeData.pickup.lng }
-    : { lat: 6.5244, lng: 3.3792 };
+    : { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">

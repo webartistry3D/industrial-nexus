@@ -176,9 +176,9 @@ export default function Dashboard() {
               <div className="p-2 bg-blue-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Package className="w-4 h-4" /></div>
               <span>View Orders</span>
             </button>
-            <button onClick={() => router.push('/trips/assign')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-900/30 dark:to-green-800/20 rounded-xl border border-green-200/50 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/trips')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-900/30 dark:to-green-800/20 rounded-xl border border-green-200/50 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-green-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Route className="w-4 h-4" /></div>
-              <span>Assign Trip</span>
+              <span>View Trips</span>
             </button>
             <button onClick={() => router.push('/trips')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/30 dark:to-purple-800/20 rounded-xl border border-purple-200/50 dark:border-purple-700/50 text-purple-700 dark:text-purple-400 text-sm font-semibold hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-purple-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Radio className="w-4 h-4" /></div>

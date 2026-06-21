@@ -118,7 +118,7 @@ export default function TrackingPage() {
   const vehiclePosition = liveLocation || (trackingData?.location
     ? { lat: trackingData.location.lat, lng: trackingData.location.lng }
     : null);
-  const mapCenter = vehiclePosition || { lat: 6.5244, lng: 3.3792 };
+  const mapCenter = vehiclePosition || { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
@@ -140,7 +140,7 @@ export default function TrackingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Active Shipments</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{activeShipments}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{activeShipments}</p>
               </div>
               <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
                 <Truck className="w-6 h-6 text-white" />
@@ -152,7 +152,7 @@ export default function TrackingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Shipments</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">{shipments.length}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{shipments.length}</p>
               </div>
               <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
                 <Package className="w-6 h-6 text-white" />

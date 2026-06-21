@@ -74,8 +74,8 @@ class ApiClient {
   }
 
   // Orders
-  async getMyOrders() {
-    const response = await this.client.get('/orders');
+  async getMyOrders(params?: { page?: number; limit?: number }) {
+    const response = await this.client.get('/orders', { params });
     return response.data;
   }
 

@@ -591,17 +591,17 @@ export default function DriversPage() {
             <div className="px-4 py-3 grid grid-cols-3 gap-3">
               <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white font-mono">{meta.total}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</p>
               </div>
               <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-lg font-bold text-green-600 font-mono">
+                <p className="text-4xl font-bold text-green-600 font-mono">
                   {drivers.filter(d => d.status === 'ACTIVE').length}
                 </p>
               </div>
               <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
-                <p className="text-lg font-bold text-blue-600 font-mono">
+                <p className="text-4xl font-bold text-blue-600 font-mono">
                   {drivers.filter(d => d.availability === 'ON_TRIP').length}
                 </p>
               </div>
@@ -759,17 +759,17 @@ export default function DriversPage() {
             <div className="px-4 py-3 grid grid-cols-3 gap-3">
               <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</p>
               </div>
               <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-lg font-bold text-green-600 font-mono">
+                <p className="text-4xl font-bold text-green-600 font-mono">
                   {vehicles.filter(v => v.status === 'ACTIVE').length}
                 </p>
               </div>
               <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Partitioned</p>
-                <p className="text-lg font-bold text-blue-600 font-mono">
+                <p className="text-4xl font-bold text-blue-600 font-mono">
                   {vehicles.filter(v => v.isPartitioned).length}
                 </p>
               </div>

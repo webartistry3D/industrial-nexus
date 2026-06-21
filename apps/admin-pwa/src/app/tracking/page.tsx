@@ -194,62 +194,38 @@ export default function TrackingPage() {
 
   const mapCenter = fleetLocation?.trip?.order?.deliveryLocation?.lat && fleetLocation.trip.order.deliveryLocation.lng
     ? { lat: fleetLocation.trip.order.deliveryLocation.lat, lng: fleetLocation.trip.order.deliveryLocation.lng }
-    : { lat: 6.5244, lng: 3.3792 }; // Default center: Lagos, Nigeria
+    : { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
-      <div className="max-w-7xl mx-auto px-4 py-6 pb-24">
-        {/* Geofence Status Card */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                {currentGeofenceStatus === 'ARRIVED' ? (
-                  <CheckCircle className="w-8 h-8 text-white" />
-                ) : (
-                  <MapPin className="w-8 h-8 text-white" />
-                )}
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Current Geofence Status</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
-                  {currentGeofenceStatus.replace(/_/g, ' ')}
-                </p>
-              </div>
+      {/* Header */}
+      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <Navigation className="w-6 h-6 text-white" />
             </div>
-            {fleetLocation && (
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {isConnected ? 'Connected' : 'Disconnected'}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {/* Geofence Zone Legend */}
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span className="text-gray-600 dark:text-gray-400">Radius A (5km)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <span className="text-gray-600 dark:text-gray-400">Radius B (1km)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500" />
-                <span className="text-gray-600 dark:text-gray-400">Radius C (100m)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-500" />
-                <span className="text-gray-600 dark:text-gray-400">Polygon Zone</span>
-              </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                Live Tracking
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Real-time fleet location monitoring
+              </p>
             </div>
           </div>
+          {fleetLocation && (
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
+          )}
         </div>
+      </div>
 
+      <main className="px-4 py-4 pb-24">
         {/* Map */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden mb-6">
           <div className="h-[600px]">
@@ -459,7 +435,7 @@ export default function TrackingPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

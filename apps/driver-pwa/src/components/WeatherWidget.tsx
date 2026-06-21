@@ -38,9 +38,9 @@ export default function WeatherWidget() {
     // Fetch real weather data from Open-Meteo API
     const fetchWeather = async () => {
       try {
-        // Lagos coordinates: 6.5244° N, 3.3792° E
+        // TLH Logistics Hub coordinates: 6.502206° N, 3.305082° E – Ago Palace Way, Okota, Lagos
         const response = await fetch(
-          'https://api.open-meteo.com/v1/forecast?latitude=6.5244&longitude=3.3792&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto'
+          'https://api.open-meteo.com/v1/forecast?latitude=6.502206&longitude=3.305082&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto'
         );
         const data = await response.json();
         
@@ -123,7 +123,6 @@ export default function WeatherWidget() {
           <div className="text-xs sm:text-sm text-blue-100 dark:text-blue-200">{weather.condition}</div>
         </div>
         <div className="text-right ml-2">
-          <div className="text-[10px] sm:text-xs text-blue-100 dark:text-blue-200">{weather.location}</div>
           <div className="text-[10px] sm:text-xs text-blue-200 dark:text-blue-300">Lagos, Nigeria</div>
         </div>
       </div>

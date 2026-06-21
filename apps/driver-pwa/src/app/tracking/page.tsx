@@ -135,7 +135,7 @@ export default function TrackingPage() {
     ? { lat: currentLocation.lat, lng: currentLocation.lng }
     : currentTrip?.order?.deliveryLocation
     ? { lat: currentTrip.order.deliveryLocation.lat, lng: currentTrip.order.deliveryLocation.lng }
-    : { lat: 6.5244, lng: 3.3792 };
+    : { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
 
   const polyline = trackingHistory.length > 0
     ? trackingHistory.map((point: any) => ({ lat: point.lat, lng: point.lng }))
@@ -158,10 +158,10 @@ export default function TrackingPage() {
         </div>
 
         {/* Back Button */}
-        <button onClick={() => router.back()} className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+        {/* <button onClick={() => router.back()} className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Back</span>
-        </button>
+        </button> */}
 
         {/* Map */}
         <div className="h-[50vh] bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
