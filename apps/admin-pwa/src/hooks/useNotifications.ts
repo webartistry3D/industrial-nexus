@@ -108,7 +108,7 @@ export function useNotifications() {
 
       socket = io(`${WS_URL}/tracking`, {
         auth: { token },
-        transports: ['websocket'],
+        transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionDelay: 5000,
       });
