@@ -498,6 +498,7 @@ enum KittingStatus {
   TECHNICAL_PACKAGING
   QUALITY_CHECK
   DISPATCH_READY
+  COMPLETED
 }
 
 enum KittingStage {
