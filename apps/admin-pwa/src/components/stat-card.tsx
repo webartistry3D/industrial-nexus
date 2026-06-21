@@ -59,7 +59,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
           <Icon className="w-5 h-5" />
         </div>
         {trend && (
-          <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-slate-700/50 px-2 py-0.5 rounded-full">{trend}</span>
+          <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-slate-700/50 px-2 py-0.5 rounded-full ml-2">{trend}</span>
         )}
       </div>
       <div className="mt-4 relative z-10">
