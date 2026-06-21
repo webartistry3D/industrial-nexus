@@ -123,7 +123,7 @@ export default function OrdersPage() {
           {loading ? (
             <div className="p-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
-                <Package className="w-8 h-8 text-white" />
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 font-medium">Loading orders...</p>
             </div>

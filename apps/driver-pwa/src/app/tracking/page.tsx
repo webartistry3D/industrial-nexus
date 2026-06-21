@@ -167,10 +167,9 @@ export default function TrackingPage() {
         <div className="h-[50vh] bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
-                <Navigation className="w-8 h-8 text-white" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">Loading map...</p>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center h-full">

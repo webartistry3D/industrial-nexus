@@ -139,8 +139,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="animate-pulse text-blue-600 font-semibold">Loading dashboard...</div>
+      <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+        </div>
       </div>
     );
   }

@@ -147,11 +147,9 @@ export default function DriverDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
-        <div className="animate-pulse p-4">
-          <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded-2xl w-1/3 mb-4"></div>
-          <div className="h-32 bg-gray-200 dark:bg-slate-700 rounded-2xl mb-4"></div>
-          <div className="h-64 bg-gray-200 dark:bg-slate-700 rounded-2xl"></div>
+      <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
         </div>
       </div>
     );
