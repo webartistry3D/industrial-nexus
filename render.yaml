@@ -18,7 +18,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGIN
-        value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com,https://industrial-nexus.onrender.com
+        value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com
 
   - type: web
     name: industrial-nexus-admin
