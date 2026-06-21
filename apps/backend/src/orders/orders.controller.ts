@@ -42,7 +42,13 @@ export class OrdersController {
     @Query() filterDto: OrderFilterDto,
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
-    return this.ordersService.findAll(filterDto, user.userId, user.role);
+    try {
+      console.log('[OrdersController] findAll called with filter:', filterDto, 'user:', user);
+      return this.ordersService.findAll(filterDto, user.userId, user.role);
+    } catch (error) {
+      console.error('[OrdersController] Error in findAll:', error);
+      throw error;
+    }
   }
 
   @Get(':id')
