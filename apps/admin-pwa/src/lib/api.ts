@@ -391,6 +391,16 @@ class ApiClient {
     return response.data;
   }
 
+  async getDriverPerformance() {
+    const response = await this.client.get('/analytics/drivers');
+    return response.data;
+  }
+
+  async getDeliveryTrends(days = 30) {
+    const response = await this.client.get('/analytics/trends', { params: { days } });
+    return response.data;
+  }
+
   // Tracking
   async getLiveTripLocation(tripId: string) {
     const response = await this.client.get(`/tracking/trips/${tripId}/live`);

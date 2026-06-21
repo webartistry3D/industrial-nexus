@@ -5,14 +5,14 @@ import { usePathname } from 'next/navigation';
 
 export function DriverNavWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/login';
+  const hideNav = pathname === '/login' || pathname === '/';
 
   return (
     <>
-      <div className={isLoginPage ? '' : 'pb-24'}>
+      <div className={hideNav ? '' : 'pb-24'}>
         {children}
       </div>
-      <BottomNavigation />
+      {!hideNav && <BottomNavigation />}
     </>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { Package, MapPin, Truck, Clock, ArrowLeft, CheckCircle2, PackageCheck } from 'lucide-react';
+import { Package, MapPin, Truck, Clock, ArrowLeft, CheckCircle2, PackageCheck, FileCheck, User, Phone, StickyNote, ImageIcon } from 'lucide-react';
 
 interface HandlingTag {
   id: string;
@@ -15,6 +15,18 @@ interface HandlingTag {
     createdAt: string;
     updatedAt: string;
   };
+}
+
+interface POD {
+  id: string;
+  imageUrl?: string;
+  signatureUrl?: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  notes?: string;
+  capturedAt: string;
+  lat?: number;
+  lng?: number;
 }
 
 interface Order {
@@ -34,6 +46,7 @@ interface Order {
       vehicle?: { plateNumber: string } | null;
     };
     vehicle?: { plateNumber: string } | null;
+    pod?: POD | null;
   };
   createdAt: string;
 }
@@ -277,6 +290,93 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             )}
             </div>
+
+            {/* Proof of Delivery */}
+            {order.trip?.pod && (
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                    <FileCheck className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Proof of Delivery</h3>
+                  <span className="ml-auto px-2.5 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-semibold rounded-full">Captured</span>
+                </div>
+
+                <div className="space-y-4">
+                  {/* POD Image */}
+                  {order.trip.pod.imageUrl && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5" /> Delivery Photo
+                      </p>
+                      <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900">
+                        <img
+                          src={order.trip.pod.imageUrl}
+                          alt="Proof of delivery photo"
+                          className="w-full max-h-64 object-contain"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Signature */}
+                  {order.trip.pod.signatureUrl && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                        <FileCheck className="w-3.5 h-3.5" /> Receiver Signature
+                      </p>
+                      <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2">
+                        <img
+                          src={order.trip.pod.signatureUrl}
+                          alt="Receiver signature"
+                          className="w-full max-h-32 object-contain"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Receiver Info */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {order.trip.pod.receiverName && (
+                      <div className="flex items-center gap-2.5 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                        <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Received by</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{order.trip.pod.receiverName}</p>
+                        </div>
+                      </div>
+                    )}
+                    {order.trip.pod.receiverPhone && (
+                      <div className="flex items-center gap-2.5 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                        <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Contact</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white font-mono">{order.trip.pod.receiverPhone}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Notes */}
+                  {order.trip.pod.notes && (
+                    <div className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                      <StickyNote className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Notes</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{order.trip.pod.notes}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Captured timestamp */}
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-mono text-right">
+                    Captured: {new Date(order.trip.pod.capturedAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Package Received Button for IN_TRANSIT orders */}
             {order.status === 'IN_TRANSIT' && (

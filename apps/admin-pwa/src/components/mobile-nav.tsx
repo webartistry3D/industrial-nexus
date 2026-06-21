@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, MapPin, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, MapPin } from 'lucide-react';
 
 interface MobileNavProps {
   role: 'admin' | 'client' | 'driver';
 }
 
 const adminLinks = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Package, label: 'Orders', path: '/orders' },
   { icon: Truck, label: 'Trips', path: '/trips' },
   { icon: MapPin, label: 'Tracking', path: '/tracking' },
@@ -16,7 +16,7 @@ const adminLinks = [
 ];
 
 const clientLinks = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Package, label: 'Orders', path: '/orders' },
   { icon: Truck, label: 'Trips', path: '/trips' },
   { icon: MapPin, label: 'Tracking', path: '/tracking' },

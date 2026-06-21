@@ -12,17 +12,17 @@ interface NavWrapperProps {
 export function NavWrapper({ children }: NavWrapperProps) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const isLoginPage = pathname === '/login';
+  const hideNav = pathname === '/login' || pathname === '/';
   
   const role = (user?.role === 'CLIENT' ? 'client' : 'admin') as 'admin' | 'client';
 
   return (
     <>
-      <TopNav role={role} />
-      <div className={isLoginPage ? '' : 'pt-16'}>
+      {!hideNav && <TopNav role={role} />}
+      <div className={hideNav ? '' : 'pt-16'}>
         {children}
       </div>
-      {!isLoginPage && <MobileNav role={role} />}
+      {!hideNav && <MobileNav role={role} />}
     </>
   );
 }

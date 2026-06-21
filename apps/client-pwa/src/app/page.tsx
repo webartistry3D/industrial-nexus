@@ -23,9 +23,7 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      router.push('/dashboard');
-    } else {
-      router.push('/login');
+      router.replace('/dashboard');
     }
   }, [router]);
 

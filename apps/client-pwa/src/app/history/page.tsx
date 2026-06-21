@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, MapPin, Calendar, CheckCircle, Clock, XCircle, ArrowRight } from 'lucide-react';
+import { Package, MapPin, Calendar, CheckCircle, Clock, XCircle, ArrowRight, History } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 
@@ -88,6 +88,17 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+      {/* Header */}
+      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <History className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">History</h1>
+          </div>
+        </div>
+      </div>
       <main className="p-4 space-y-4">
         {/* Stats Summary */}
         <div className="grid grid-cols-2 gap-3">

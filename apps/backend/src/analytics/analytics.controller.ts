@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -10,5 +10,15 @@ export class AnalyticsController {
   @Get('dashboard')
   async getDashboardStats() {
     return this.analyticsService.getDashboardStats();
+  }
+
+  @Get('drivers')
+  async getDriverPerformance() {
+    return this.analyticsService.getDriverPerformance();
+  }
+
+  @Get('trends')
+  async getDeliveryTrends(@Query('days') days?: string) {
+    return this.analyticsService.getDeliveryTrends(days ? parseInt(days, 10) : 30);
   }
 }
