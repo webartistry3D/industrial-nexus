@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import { AuthProvider } from '@/hooks/useAuth'
 import { NavWrapper } from '@/components/nav-wrapper'
 import { ScrollToTop } from '@/components/scroll-to-top'
+import { OrientationLock } from '@/components/orientation-lock'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -39,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-gray-50`} suppressHydrationWarning>
+        <OrientationLock />
         <AuthProvider>
           <ScrollToTop />
           <NavWrapper>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/hooks/useAuth';
 import { DriverNavWrapper } from '@/components/driver-nav-wrapper';
+import { OrientationLock } from '@/components/orientation-lock';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -46,6 +47,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-gray-100 font-sans">
+        <OrientationLock />
         <AuthProvider>
           <DriverNavWrapper>
             {children}

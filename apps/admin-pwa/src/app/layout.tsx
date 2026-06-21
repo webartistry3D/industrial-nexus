@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/components/auth-provider'
 import { NavWrapper } from '@/components/nav-wrapper'
+import { OrientationLock } from '@/components/orientation-lock'
 
 export const metadata: Metadata = {
   title: 'Industrial Nexus - Admin Control Tower',
@@ -46,6 +47,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-gray-50" suppressHydrationWarning>
+        <OrientationLock />
         <AuthProvider>
           <NavWrapper>
             {children}

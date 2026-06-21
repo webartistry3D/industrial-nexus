@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { Package, Truck, Sun, Moon } from 'lucide-react';
+import { Package, Truck, Sun, Moon, Home } from 'lucide-react';
 
 export default function Login() {
   // Theme toggle
@@ -44,8 +44,15 @@ export default function Login() {
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4 relative">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-slate-700">
-        {/* Theme Toggle Button - Centered */}
-        <div className="flex justify-center mb-6">
+        {/* Theme Toggle and Home Button - Centered */}
+        <div className="flex justify-center gap-3 mb-6">
+          <button
+            onClick={() => router.push('/')}
+            className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-slate-700"
+            aria-label="Go to home"
+          >
+            <Home className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </button>
           <button
             onClick={toggleTheme}
             className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-slate-700"
