@@ -119,10 +119,10 @@ export function HeroSection() {
               variants={itemVariants}
               className="flex flex-wrap gap-3 mb-12"
             >
-              <Button variant="primary" size="lg" href="#demo">
+              {/* <Button variant="primary" size="lg" href="#demo">
                 <Play size={15} />
                 Request a Demo
-              </Button>
+              </Button> */}
               <Button variant="outline" size="lg" href="#platform">
                 Explore Platform
               </Button>

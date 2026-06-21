@@ -62,13 +62,13 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" href="#contact">
+            <Button variant="ghost" size="sm" href="/login">
               Sign In
             </Button>
-            <Button variant="primary" size="sm" href="#demo">
+            {/* <Button variant="primary" size="sm" href="#demo">
               Request Demo
               <ChevronRight size={14} />
-            </Button>
+            </Button> */}
           </div>
 
           {/* Mobile menu toggle */}
@@ -113,9 +113,9 @@ export function Navbar() {
                 </a>
               ))}
               <div className="pt-4 border-t border-[rgba(150,180,220,0.12)] flex flex-col gap-3">
-                <Button variant="outline" size="md" href="#demo">
+                {/* <Button variant="outline" size="md" href="#demo">
                   Request Demo
-                </Button>
+                </Button> */}
               </div>
             </motion.div>
           </motion.div>
