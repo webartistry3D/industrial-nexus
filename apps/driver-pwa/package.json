@@ -10,6 +10,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@react-google-maps/api": "^2.20.8",
     "axios": "^1.6.7",
     "idb": "^8.0.0",

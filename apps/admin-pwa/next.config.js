@@ -1,3 +1,14 @@
+const withPWA = require('@ducanh2912/next-pwa').default({
+  dest: 'public',
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === 'development',
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -6,6 +17,6 @@ const nextConfig = {
   env: {
     API_URL: process.env.API_URL || 'http://localhost:3001',
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = withPWA(nextConfig);
