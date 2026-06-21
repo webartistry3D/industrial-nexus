@@ -401,6 +401,23 @@ export default function OrderDetailPage() {
     return colors[priority] || 'text-gray-600';
   };
 
+  const getHandlingTagColor = (tagName: string) => {
+    const upperTag = tagName.toUpperCase();
+    const colors: Record<string, string> = {
+      HEAVY: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      FRAGILE: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+      HAZARDOUS: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      CHEMICAL: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+      VERTICAL_STORAGE_REQUIRED: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      TEMPERATURE_SENSITIVE: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
+      TECHNICAL_PACKAGING: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+      PERISHABLE: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300',
+      OVERSIZED: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+      URGENT: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300',
+    };
+    return colors[upperTag] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
@@ -571,8 +588,10 @@ export default function OrderDetailPage() {
           </div>
         )}
 
-        {/* Cargo Info */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+        {/* Desktop Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Cargo Info */}
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
             <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
               <Package className="w-5 h-5 text-white" />
@@ -606,35 +625,37 @@ export default function OrderDetailPage() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Handling Tags:</p>
               <div className="flex flex-wrap gap-1">
                 {order.handlingTags.map((tag, index) => {
-                  // Handle different tag formats with robust extraction
+                  // handlingTags from API is OrderHandlingTag[] with nested tag object
                   let tagText: string;
-                  
+
                   if (typeof tag === 'string') {
                     tagText = tag;
                   } else if (tag && typeof tag === 'object') {
                     const tagObj = tag as Record<string, unknown>;
-                    // Try multiple possible property names for the tag value
-                    const rawValue = (tagObj.tag as Record<string, unknown>)?.name || tagObj.tag || tagObj.name || tagObj.type || tagObj.value || tagObj.label || tagObj.handlingTag;
-                    if (rawValue !== undefined && rawValue !== null) {
-                      tagText = String(rawValue);
+                    // The backend returns { ..., tag: { name: 'HEAVY', ... } }
+                    const nestedTag = tagObj.tag;
+                    if (nestedTag && typeof nestedTag === 'object') {
+                      const nestedTagObj = nestedTag as Record<string, unknown>;
+                      tagText = String(nestedTagObj.name || nestedTagObj.type || nestedTagObj.value || nestedTagObj.label || '');
                     } else {
-                      // Last resort: get first string property value
-                      const firstStringProp = Object.values(tagObj).find(v => typeof v === 'string');
-                      tagText = firstStringProp ? String(firstStringProp) : JSON.stringify(tagObj);
+                      tagText = String(tagObj.name || tagObj.type || tagObj.value || tagObj.label || '');
                     }
                   } else {
                     tagText = String(tag);
                   }
-                  
+
+                  // Skip empty or invalid results
+                  if (!tagText || tagText === '[object Object]') return null;
+
                   // Format: replace underscores with spaces
                   tagText = tagText.replace(/_/g, ' ');
-                  
+
                   return (
-                    <span key={index} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs rounded">
+                    <span key={index} className={`px-2 py-1 text-xs rounded ${getHandlingTagColor(tagText)}`}>
                       {tagText}
                     </span>
                   );
-                })}
+                }).filter(Boolean)}
               </div>
             </div>
           )}
@@ -733,6 +754,7 @@ export default function OrderDetailPage() {
             </button>
           </div>
         )}
+        </div>
 
         {/* Timeline */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">

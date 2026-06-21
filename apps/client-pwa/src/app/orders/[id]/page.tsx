@@ -8,7 +8,13 @@ import { Package, MapPin, Truck, Clock, ArrowLeft, CheckCircle2, PackageCheck } 
 interface HandlingTag {
   id: string;
   orderId: string;
-  tag: string;
+  tagId: string;
+  tag: {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 interface Order {
@@ -195,8 +201,10 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
 
-            {/* Cargo Details */}
-            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+            {/* Desktop Grid Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Cargo Details */}
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cargo Details</h3>
               {order.cargoDescription && (
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -205,11 +213,26 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               )}
               {order.handlingTags && order.handlingTags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {order.handlingTags.map((tagObj, index) => (
-                    <span key={index} className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHandlingTagColor(tagObj.tag)}`}>
-                      {tagObj.tag}
-                    </span>
-                  ))}
+                  {order.handlingTags.map((tagObj, index) => {
+                    // Extract tag name from nested object returned by backend
+                    let tagName: string;
+                    if (tagObj && typeof tagObj === 'object') {
+                      const nestedTag = tagObj.tag;
+                      if (nestedTag && typeof nestedTag === 'object') {
+                        tagName = String(nestedTag.name || '');
+                      } else {
+                        tagName = String(tagObj.tag || '');
+                      }
+                    } else {
+                      tagName = String(tagObj);
+                    }
+                    if (!tagName) return null;
+                    return (
+                      <span key={index} className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHandlingTagColor(tagName)}`}>
+                        {tagName.replace(/_/g, ' ')}
+                      </span>
+                    );
+                  }).filter(Boolean)}
                 </div>
               )}
             </div>
@@ -253,6 +276,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </button>
               </div>
             )}
+            </div>
 
             {/* Package Received Button for IN_TRANSIT orders */}
             {order.status === 'IN_TRANSIT' && (

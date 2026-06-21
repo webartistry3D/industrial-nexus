@@ -125,6 +125,23 @@ function OrdersPageContent() {
     return colors[priority] || 'text-gray-600';
   };
 
+  const getHandlingTagColor = (tagName: string) => {
+    const upperTag = tagName.toUpperCase();
+    const colors: Record<string, string> = {
+      HEAVY: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      FRAGILE: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+      HAZARDOUS: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      CHEMICAL: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+      VERTICAL_STORAGE_REQUIRED: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      TEMPERATURE_SENSITIVE: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
+      TECHNICAL_PACKAGING: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+      PERISHABLE: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300',
+      OVERSIZED: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+      URGENT: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300',
+    };
+    return colors[upperTag] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+  };
+
   // Apply client-side filtering
   const filteredOrders = useMemo(() => {
     let result = orders;
@@ -456,28 +473,31 @@ function OrdersPageContent() {
                 {order.handlingTags && order.handlingTags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {order.handlingTags.map((tag, index) => {
-                      // Robust tag extraction to prevent [object Object]
+                      // handlingTags from API is OrderHandlingTag[] with nested tag object
                       let tagText: string;
                       if (typeof tag === 'string') {
                         tagText = tag;
                       } else if (tag && typeof tag === 'object') {
                         const tagObj = tag as Record<string, unknown>;
-                        const rawValue = tagObj.type || tagObj.name || tagObj.value || tagObj.label || tagObj.handlingTag || tagObj.tag;
-                        if (rawValue !== undefined && rawValue !== null) {
-                          tagText = String(rawValue);
+                        // The backend returns { ..., tag: { name: 'HEAVY', ... } }
+                        const nestedTag = tagObj.tag;
+                        if (nestedTag && typeof nestedTag === 'object') {
+                          const nestedTagObj = nestedTag as Record<string, unknown>;
+                          tagText = String(nestedTagObj.name || nestedTagObj.type || nestedTagObj.value || nestedTagObj.label || '');
                         } else {
-                          const firstStringProp = Object.values(tagObj).find(v => typeof v === 'string');
-                          tagText = firstStringProp ? String(firstStringProp) : JSON.stringify(tagObj);
+                          tagText = String(tagObj.name || tagObj.type || tagObj.value || tagObj.label || '');
                         }
                       } else {
                         tagText = String(tag);
                       }
+                      // Skip if empty after extraction
+                      if (!tagText || tagText === '[object Object]') return null;
                       return (
-                        <span key={index} className="px-2 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs rounded">
+                        <span key={index} className={`px-2 py-0.5 text-xs rounded ${getHandlingTagColor(tagText)}`}>
                           {tagText.replace(/_/g, ' ')}
                         </span>
                       );
-                    })}
+                    }).filter(Boolean)}
                   </div>
                 )}
               </div>
