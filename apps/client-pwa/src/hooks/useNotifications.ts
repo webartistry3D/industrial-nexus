@@ -18,20 +18,42 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const socketRef = useRef<Socket | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const initialFetchDone = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio('/new-notification.mp3');
+      audioRef.current.preload = 'auto';
+    }
+  }, []);
+
+  const playNotificationSound = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  }, []);
 
   const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
   const fetchNotifications = useCallback(async () => {
     try {
       const data = await api.getNotifications();
-      setNotifications(Array.isArray(data) ? data : []);
-      setUnreadCount((Array.isArray(data) ? data : []).filter((n: Notification) => !n.isRead).length);
+      const list = Array.isArray(data) ? data : [];
+      const unread = list.filter((n: Notification) => !n.isRead).length;
+      setNotifications(list);
+      setUnreadCount(unread);
+      if (!initialFetchDone.current) {
+        initialFetchDone.current = true;
+        if (unread > 0) playNotificationSound();
+      }
     } catch (err) {
       console.error('[Notifications] Failed to fetch:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [playNotificationSound]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
@@ -88,6 +110,7 @@ export function useNotifications() {
     socket.on('notification:new', (notification: Notification) => {
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
+      playNotificationSound();
     });
 
     socket.on('connect_error', (err) => {
