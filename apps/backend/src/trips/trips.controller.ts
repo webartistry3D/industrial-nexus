@@ -88,7 +88,7 @@ export class TripsController {
   @HttpCode(HttpStatus.OK)
   submitPOD(
     @Param('id') id: string,
-    @Body() podData: { photoUrl?: string; signatureUrl?: string; notes?: string },
+    @Body() podData: { photoUrl?: string; signatureUrl?: string; notes?: string; lat?: number; lng?: number },
     @CurrentUser() user: { userId: string },
   ) {
     return this.tripsService.submitPOD(id, podData, user.userId);

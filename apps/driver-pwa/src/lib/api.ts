@@ -114,6 +114,8 @@ class ApiClient {
     photoUrl?: string;
     signatureUrl?: string;
     notes?: string;
+    lat?: number;
+    lng?: number;
   }) {
     const response = await this.client.post(`/trips/${tripId}/pod`, podData);
     return response.data;

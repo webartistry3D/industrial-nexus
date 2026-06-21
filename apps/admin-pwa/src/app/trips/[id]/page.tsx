@@ -314,6 +314,73 @@ export default function TripDetailPage() {
           </div>
         )}
 
+        {/* POD Information */}
+        {(trip as any).pod && (
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <CheckCircle2 className="w-5 h-5 text-white" />
+              </div>
+              Proof of Delivery
+            </h2>
+            <div className="space-y-3">
+              {/* Timestamp */}
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <span className="text-gray-500 dark:text-gray-400">Captured:</span>
+                <span className="text-gray-900 dark:text-white font-mono">
+                  {(trip as any).pod.capturedAt ? new Date((trip as any).pod.capturedAt).toLocaleString() : 'N/A'}
+                </span>
+              </div>
+              
+              {/* GPS Coordinates */}
+              {(trip as any).pod.lat && (trip as any).pod.lng && (
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">Location:</span>
+                  <span className="text-gray-900 dark:text-white font-mono">
+                    {(trip as any).pod.lat.toFixed(6)}, {(trip as any).pod.lng.toFixed(6)}
+                  </span>
+                </div>
+              )}
+              
+              {/* Photo */}
+              {(trip as any).pod.imageUrl && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Delivery Photo</p>
+                  <img 
+                    src={(trip as any).pod.imageUrl} 
+                    alt="POD" 
+                    className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700" 
+                  />
+                </div>
+              )}
+              
+              {/* Signature */}
+              {(trip as any).pod.signatureUrl && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Receiver Signature</p>
+                  <img 
+                    src={(trip as any).pod.signatureUrl} 
+                    alt="Signature" 
+                    className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white" 
+                  />
+                </div>
+              )}
+              
+              {/* Notes */}
+              {(trip as any).pod.notes && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Notes</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-xl">
+                    {(trip as any).pod.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* View Order Button */}
         {trip.order && (
           <button

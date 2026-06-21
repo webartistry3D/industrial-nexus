@@ -182,6 +182,25 @@ export default function TripDetail({ params }: { params: { id: string } }) {
     setPodSubmitting(true);
     setPodError(null);
     try {
+      // Get GPS coordinates
+      let lat: number | undefined, lng: number | undefined;
+      if ('geolocation' in navigator) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 60000
+            });
+          });
+          lat = position.coords.latitude;
+          lng = position.coords.longitude;
+        } catch (error) {
+          console.warn('Failed to get GPS coordinates:', error);
+          // Continue without GPS coordinates
+        }
+      }
+
       await api.submitPOD(params.id, {
         photoUrl: podForm.photoUrl || undefined,
         signatureUrl: podForm.signatureUrl || undefined,
@@ -190,6 +209,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
           podForm.receiverPhone ? `Phone: ${podForm.receiverPhone}` : '',
           podForm.notes,
         ].filter(Boolean).join(' | ') || undefined,
+        lat,
+        lng,
       });
       setPodSuccess(true);
       setShowPODForm(false);

@@ -421,7 +421,7 @@ export class TripsService {
     return trackingPoint;
   }
 
-  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; notes?: string }, userId: string) {
+  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; notes?: string; lat?: number; lng?: number }, userId: string) {
     const trip = await this.findOne(id);
 
     if (trip.pod) {
@@ -434,6 +434,8 @@ export class TripsService {
         imageUrl: podData.photoUrl,
         signatureUrl: podData.signatureUrl,
         notes: podData.notes,
+        lat: podData.lat,
+        lng: podData.lng,
         capturedAt: new Date(),
       },
     });
@@ -443,7 +445,7 @@ export class TripsService {
       action: 'CREATE',
       entityType: 'POD',
       entityId: pod.id,
-      newValue: { tripId: id, imageUrl: podData.photoUrl },
+      newValue: { tripId: id, imageUrl: podData.photoUrl, lat: podData.lat, lng: podData.lng },
     });
 
     return pod;
