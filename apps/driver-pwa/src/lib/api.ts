@@ -2,6 +2,38 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+let refreshPromise: Promise<string | null> | null = null;
+
+export async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return null;
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+      const { accessToken } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      return accessToken;
+    } catch (refreshError) {
+      const refreshStatus = (refreshError as AxiosError).response?.status;
+      if (refreshStatus === 401 || refreshStatus === 403) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+      }
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -30,28 +62,17 @@ class ApiClient {
       (response) => response,
       async (error: AxiosError) => {
         const originalRequest = error.config;
-        
-        if (error.response?.status === 401 && originalRequest) {
-          try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-              const response = await axios.post(`${API_URL}/auth/refresh`, {
-                refreshToken,
-              });
-              
-              const { accessToken } = response.data;
-              localStorage.setItem('accessToken', accessToken);
-              
-              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-              return this.client(originalRequest);
-            }
-          } catch (refreshError) {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            window.location.href = '/login';
+
+        if (error.response?.status === 401 && originalRequest && !originalRequest.url?.includes('/auth/')) {
+          (originalRequest as unknown as Record<string, unknown>)['_retry'] = true;
+
+          const newAccessToken = await refreshAccessToken();
+          if (newAccessToken) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            return this.client(originalRequest);
           }
         }
-        
+
         return Promise.reject(error);
       }
     );

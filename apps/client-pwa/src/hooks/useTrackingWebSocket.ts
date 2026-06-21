@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { refreshAccessToken } from '@/lib/api';
 
 export function useTrackingWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
@@ -9,9 +10,20 @@ export function useTrackingWebSocket() {
 
   const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
-  const connect = () => {
+  const isRefreshingRef = useRef(false);
+  const reconnectAttemptsRef = useRef(0);
+  const MAX_RECONNECT_ATTEMPTS = 2;
+
+  const connect = async (tokenOverride?: string) => {
     try {
-      const token = localStorage.getItem('accessToken');
+      let token = tokenOverride || localStorage.getItem('accessToken');
+      if (!token) return;
+
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+
       const socket = io(`${WS_URL}/tracking`, {
         auth: { token },
         transports: ['websocket'],
@@ -22,6 +34,7 @@ export function useTrackingWebSocket() {
       socket.on('connect', () => {
         setIsConnected(true);
         setError(null);
+        reconnectAttemptsRef.current = 0;
         console.log('[Tracking WebSocket] Connected');
         // Re-subscribe all registered handlers after reconnect
         eventHandlersRef.current.forEach((_, key) => {
@@ -36,9 +49,24 @@ export function useTrackingWebSocket() {
         console.log('[Tracking WebSocket] Disconnected');
       });
 
-      socket.on('connect_error', (err) => {
+      socket.on('connect_error', async (err) => {
         console.error('[Tracking WebSocket] Error:', err);
         setError('WebSocket connection error');
+
+        const isTokenError = err.message?.includes('jwt expired') ||
+          err.message?.includes('TokenExpiredError') ||
+          err.message?.includes('Unauthorized') ||
+          err.message?.includes('invalid token');
+
+        if (isTokenError && !isRefreshingRef.current && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttemptsRef.current += 1;
+          isRefreshingRef.current = true;
+          const newToken = await refreshAccessToken();
+          isRefreshingRef.current = false;
+          if (newToken) {
+            connect(newToken);
+          }
+        }
       });
 
       socket.on('location:update', (data) => {

@@ -2,6 +2,39 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+let refreshPromise: Promise<string | null> | null = null;
+
+export async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return null;
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+      const { accessToken } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      return accessToken;
+    } catch (refreshError) {
+      const refreshStatus = (refreshError as AxiosError).response?.status;
+      if (refreshStatus === 401 || refreshStatus === 403) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+        if (typeof window !== 'undefined' && !currentPath.includes('/login')) {
+          window.location.href = '/login';
+        }
+      }
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -30,64 +63,24 @@ class ApiClient {
       (response) => response,
       async (error: AxiosError) => {
         const originalRequest = error.config;
-        
+
         // Skip if no config, already retried, or is auth endpoint
-        if (!originalRequest || 
+        if (!originalRequest ||
             (originalRequest as unknown as Record<string, unknown>)['_retry'] ||
             originalRequest.url?.includes('/auth/')) {
           return Promise.reject(error);
         }
-        
+
         if (error.response?.status === 401) {
-          const refreshToken = localStorage.getItem('refreshToken');
-          const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-          
-          console.log(`[Auth] 401 on ${originalRequest.url}, hasRefreshToken: ${!!refreshToken}, path: ${currentPath}`);
-          
-          // No refresh token - only logout if not on public pages
-          if (!refreshToken) {
-            console.log('[Auth] No refresh token, logging out');
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            if (typeof window !== 'undefined' && !currentPath.includes('/login')) {
-              window.location.href = '/login';
-            }
-            return Promise.reject(error);
-          }
-          
-          // Mark as retried to prevent loops
           (originalRequest as unknown as Record<string, unknown>)['_retry'] = true;
-          
-          // Try to refresh token using plain axios (bypasses this interceptor)
-          try {
-            console.log('[Auth] Attempting token refresh...');
-            const response = await axios.post(`${API_URL}/auth/refresh`, {
-              refreshToken,
-            });
-            
-            const { accessToken } = response.data;
-            console.log('[Auth] Token refresh successful');
-            localStorage.setItem('accessToken', accessToken);
-            
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+          const newAccessToken = await refreshAccessToken();
+          if (newAccessToken) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return this.client(originalRequest);
-          } catch (refreshError) {
-            const refreshStatus = (refreshError as AxiosError).response?.status;
-            console.log(`[Auth] Token refresh failed with status: ${refreshStatus}`);
-            
-            // Only logout if refresh token is actually invalid (401/403)
-            if (refreshStatus === 401 || refreshStatus === 403) {
-              console.log('[Auth] Refresh token invalid, logging out');
-              localStorage.removeItem('accessToken');
-              localStorage.removeItem('refreshToken');
-              if (typeof window !== 'undefined' && !currentPath.includes('/login')) {
-                window.location.href = '/login';
-              }
-            }
-            return Promise.reject(refreshError);
           }
         }
-        
+
         return Promise.reject(error);
       }
     );

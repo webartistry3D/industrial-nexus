@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { api } from '@/lib/api';
+import { api, refreshAccessToken } from '@/lib/api';
 
 export interface Notification {
   id: string;
@@ -92,39 +92,68 @@ export function useNotifications() {
 
   // Connect WebSocket and listen for real-time notifications
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!token) return;
+    let socket: Socket | null = null;
+    let isRefreshing = false;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 2;
+
+    const connectSocket = async (tokenOverride?: string) => {
+      let token = tokenOverride || (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null);
+      if (!token) return;
+
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+      }
+
+      socket = io(`${WS_URL}/tracking`, {
+        auth: { token },
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionDelay: 5000,
+      });
+
+      socket.on('connect', () => {
+        console.log('[Notifications WS] Connected');
+        reconnectAttempts = 0;
+      });
+
+      socket.on('notification:new', (notification: Notification) => {
+        setNotifications(prev => [notification, ...prev]);
+        setUnreadCount(prev => prev + 1);
+        playNotificationSound();
+      });
+
+      socket.on('connect_error', async (err) => {
+        console.error('[Notifications WS] Connection error:', err);
+
+        const isTokenError = err.message?.includes('jwt expired') ||
+          err.message?.includes('TokenExpiredError') ||
+          err.message?.includes('Unauthorized') ||
+          err.message?.includes('invalid token');
+
+        if (isTokenError && !isRefreshing && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts += 1;
+          isRefreshing = true;
+          const newToken = await refreshAccessToken();
+          isRefreshing = false;
+          if (newToken) {
+            connectSocket(newToken);
+          }
+        }
+      });
+
+      socketRef.current = socket;
+    };
 
     fetchNotifications();
-
-    const socket = io(`${WS_URL}/tracking`, {
-      auth: { token },
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionDelay: 5000,
-    });
-
-    socket.on('connect', () => {
-      console.log('[Notifications WS] Connected');
-    });
-
-    socket.on('notification:new', (notification: Notification) => {
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
-      playNotificationSound();
-    });
-
-    socket.on('connect_error', (err) => {
-      console.error('[Notifications WS] Connection error:', err);
-    });
-
-    socketRef.current = socket;
+    connectSocket();
 
     return () => {
-      socket.disconnect();
+      socket?.disconnect();
       socketRef.current = null;
     };
-  }, []);
+  }, [fetchNotifications, playNotificationSound]);
 
   return {
     notifications,
