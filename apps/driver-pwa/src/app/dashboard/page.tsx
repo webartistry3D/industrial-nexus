@@ -170,10 +170,10 @@ export default function Dashboard() {
       <PageHeader />
 
       {/* Main Content */}
-      <main className="pt-20 px-4 pb-4 space-y-6">
+      <main className="pt-20 px-4 pb-4 space-y-6" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Greeting */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {getGreeting()}, <span className="text-blue-600 dark:text-blue-400">{user?.firstName || user?.email?.split('@')[0] || 'Driver'}</span>
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
@@ -355,27 +355,46 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Quick Summary - Show other active trips count */}
+        {/* Active Trips List */}
         {activeTrips.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {activeTrips.length} active trip{activeTrips.length !== 1 ? 's' : ''}
-                  </span>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">In your queue</div>
-                </div>
-              </div>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                Active Trips
+              </h2>
               <button
                 onClick={() => router.push('/trips')}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
               >
-                View All →
+                View All
               </button>
+            </div>
+            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+              {activeTrips.slice(0, 3).map((trip) => (
+                <div
+                  key={trip.id}
+                  className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-transparent dark:hover:from-blue-900/20 dark:hover:to-transparent border-l-4 border-blue-500 dark:border-blue-400 transition-all duration-200"
+                  onClick={() => router.push(`/trips/${trip.id}`)}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <Package className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        {trip.order?.deliveryLocation?.address}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
+                          {trip.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

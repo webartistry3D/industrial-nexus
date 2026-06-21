@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp, Plus, MapPin } from 'lucide-react';
+import AnalogClock from '@/components/AnalogClock';
+import WeatherWidget from '@/components/WeatherWidget';
 
 interface DashboardStats {
   activeShipments: number;
@@ -152,41 +154,18 @@ export default function DashboardPage() {
       <main className="p-4 space-y-6">
         {/* Greeting */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName}</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your shipment update</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your shipment update</p>
         </div>
 
-        {/* SLA Status Overview */}
-        <div className={`rounded-2xl p-5 shadow-xl backdrop-blur-xl ${
-          slaStatus === 'good' 
-            ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 dark:border-green-500/20'
-            : slaStatus === 'warning'
-            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 dark:border-amber-500/20'
-            : 'bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 dark:border-red-500/20'
-        }`}>
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl shadow-lg ${
-              slaStatus === 'good' 
-                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
-                : slaStatus === 'warning'
-                ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white'
-                : 'bg-gradient-to-br from-red-500 to-red-600 text-white'
-            }`}>
-              {slaStatus === 'good' && <CheckCircle className="w-6 h-6" />}
-              {slaStatus === 'warning' && <AlertCircle className="w-6 h-6" />}
-              {slaStatus === 'critical' && <AlertCircle className="w-6 h-6" />}
-            </div>
-            <div>
-              <p className="font-bold text-gray-900 dark:text-white text-lg">
-                SLA Status: {slaStatus === 'good' ? 'Good' : slaStatus === 'warning' ? 'Warning' : 'Critical'}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                {stats?.delayed || 0} delayed out of {stats?.activeShipments || 0} active shipments
-              </p>
-            </div>
+        {/* Clock and Weather Widgets */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
+            <AnalogClock />
           </div>
+          <WeatherWidget />
         </div>
 
         {/* Stats Cards */}
@@ -236,6 +215,37 @@ export default function DashboardPage() {
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delivered || 0}</p>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delivered</p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SLA Status */}
+        <div className={`rounded-2xl p-5 shadow-xl backdrop-blur-xl ${
+          slaStatus === 'good'
+            ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 dark:border-green-500/20'
+            : slaStatus === 'warning'
+            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 dark:border-amber-500/20'
+            : 'bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 dark:border-red-500/20'
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl shadow-lg ${
+              slaStatus === 'good'
+                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
+                : slaStatus === 'warning'
+                ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white'
+                : 'bg-gradient-to-br from-red-500 to-red-600 text-white'
+            }`}>
+              {slaStatus === 'good' && <CheckCircle className="w-6 h-6" />}
+              {slaStatus === 'warning' && <AlertCircle className="w-6 h-6" />}
+              {slaStatus === 'critical' && <AlertCircle className="w-6 h-6" />}
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 dark:text-white text-lg">
+                SLA Status: {slaStatus === 'good' ? 'Good' : slaStatus === 'warning' ? 'Warning' : 'Critical'}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {stats?.delayed || 0} delayed out of {stats?.activeShipments || 0} active shipments
+              </p>
             </div>
           </div>
         </div>
@@ -315,7 +325,7 @@ export default function DashboardPage() {
                 No recent orders
               </div>
             ) : (
-              recentOrders.map((order) => (
+              recentOrders.slice(0, 3).map((order) => (
                 <div
                   key={order.id}
                   className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent dark:hover:from-purple-900/20 dark:hover:to-transparent border-l-4 border-gray-400 dark:border-gray-500 transition-all duration-200"

@@ -13,6 +13,8 @@ import {
 import { StatCard } from '@/components/stat-card';
 import { AlertsPanel } from '@/components/alerts-panel';
 import { TripsOverview } from '@/components/trips-overview';
+import AnalogClock from '@/components/AnalogClock';
+import WeatherWidget from '@/components/WeatherWidget';
 
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -116,12 +118,19 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
-      <main className="p-4 pb-24 space-y-3">
+      <main className="p-4 pb-24 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName}</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your operations update</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your operations update</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
+            <AnalogClock />
+          </div>
+          <WeatherWidget />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
