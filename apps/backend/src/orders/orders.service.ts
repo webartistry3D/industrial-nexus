@@ -70,19 +70,17 @@ export class OrdersService {
       newValue: { orderNumber, status: order.status, clientId },
     });
 
-    // Notify admins/ops of new submitted order (fire-and-forget)
-    if (order.status === OrderStatus.SUBMITTED) {
-      this.prisma.user.findMany({
-        where: { role: { in: ['SUPER_ADMIN', 'OPERATIONS'] as any } },
-        select: { id: true },
-      }).then(admins => {
-        this.notificationsService.notifyOrderSubmitted(
-          admins.map(a => a.id),
-          orderNumber,
-          order.id,
-        ).catch(e => console.error('[Notifications] notifyOrderSubmitted error:', e));
-      }).catch(() => {});
-    }
+    // Notify admins/ops of new draft order (fire-and-forget)
+    this.prisma.user.findMany({
+      where: { role: { in: ['SUPER_ADMIN', 'OPERATIONS'] as any } },
+      select: { id: true },
+    }).then(adminOps => {
+      this.notificationsService.notifyOrderCreated(
+        adminOps.map(u => u.id),
+        orderNumber,
+        order.id,
+      ).catch(e => console.error('[Notifications] notifyOrderCreated error:', e));
+    }).catch(() => {});
 
     return this.findOne(order.id);
   }
@@ -348,17 +346,9 @@ export class OrdersService {
       newValue: { status: newStatus, notes, driverId },
     });
 
-    // Notify client of status change (fire-and-forget)
-    try {
-      await this.notificationsService.notifyOrderStatusChanged(
-        order.clientId,
-        order.orderNumber,
-        id,
-        newStatus,
-      );
-    } catch (e) {
-      console.error('[Notifications] Failed to send order status notification:', e);
-    }
+    // Fire notifications based on new status
+    this.fireStatusNotifications(newStatus, order.orderNumber, id, order.clientId, driverId)
+      .catch(e => console.error('[Notifications] fireStatusNotifications error:', e));
 
     return updatedOrder;
   }
@@ -415,7 +405,81 @@ export class OrdersService {
       newValue: { status: OrderStatus.ASSIGNED, driverId },
     });
 
+    // Notify driver, client, admin and ops of driver assignment
+    this.prisma.user.findMany({
+      where: { role: { in: ['SUPER_ADMIN', 'OPERATIONS'] as any } },
+      select: { id: true },
+    }).then(adminOps => {
+      this.notificationsService.notifyDriverAssigned(
+        driver.user.id,
+        order.clientId,
+        adminOps.map(u => u.id),
+        order.orderNumber,
+        id,
+      ).catch(e => console.error('[Notifications] notifyDriverAssigned error:', e));
+    }).catch(() => {});
+
     return this.findOne(id);
+  }
+
+  private async fireStatusNotifications(
+    newStatus: OrderStatus,
+    orderNumber: string,
+    orderId: string,
+    clientId: string,
+    driverId?: string,
+  ): Promise<void> {
+    const getAdminOps = () =>
+      this.prisma.user.findMany({
+        where: { role: { in: ['SUPER_ADMIN', 'OPERATIONS'] as any } },
+        select: { id: true },
+      });
+
+    const getOps = () =>
+      this.prisma.user.findMany({
+        where: { role: { in: ['OPERATIONS'] as any } },
+        select: { id: true },
+      });
+
+    if (newStatus === OrderStatus.SUBMITTED) {
+      const adminOps = await getAdminOps();
+      await this.notificationsService.notifyOrderSubmitted(
+        adminOps.map(u => u.id),
+        orderNumber,
+        orderId,
+        clientId,
+      );
+    } else if (newStatus === OrderStatus.REJECTED) {
+      const adminOps = await getAdminOps();
+      await this.notificationsService.notifyOrderRejected(
+        clientId,
+        adminOps.map(u => u.id),
+        orderNumber,
+        orderId,
+      );
+    } else if (newStatus === OrderStatus.APPROVED) {
+      const ops = await getOps();
+      await this.notificationsService.notifyOrderApproved(
+        clientId,
+        ops.map(u => u.id),
+        orderNumber,
+        orderId,
+      );
+    } else if (newStatus === OrderStatus.DISPATCH_READY) {
+      const adminOps = await getAdminOps();
+      await this.notificationsService.notifyOrderDispatchReady(
+        adminOps.map(u => u.id),
+        orderNumber,
+        orderId,
+      );
+    } else if (newStatus === OrderStatus.CANCELLED) {
+      await this.notificationsService.notifyOrderStatusChanged(
+        clientId,
+        orderNumber,
+        orderId,
+        newStatus,
+      );
+    }
   }
 
   private async generateOrderNumber(): Promise<string> {

@@ -156,18 +156,144 @@ export class NotificationsService {
     });
   }
 
-  async notifyOrderSubmitted(adminUserIds: string[], orderNumber: string, orderId: string) {
+  async notifyOrderSubmitted(adminUserIds: string[], orderNumber: string, orderId: string, clientUserId?: string) {
+    const notifications: Promise<any>[] = adminUserIds.map(userId =>
+      this.create({
+        userId,
+        type: NotificationType.ORDER_SUBMITTED,
+        title: 'New Order Submitted',
+        message: `Order ${orderNumber} has been submitted and requires approval`,
+        entityId: orderId,
+        entityType: 'ORDER',
+      }),
+    );
+
+    if (clientUserId) {
+      notifications.push(
+        this.create({
+          userId: clientUserId,
+          type: NotificationType.ORDER_SUBMITTED,
+          title: 'Order Submitted',
+          message: `Your order ${orderNumber} has been submitted and is awaiting approval`,
+          entityId: orderId,
+          entityType: 'ORDER',
+        }),
+      );
+    }
+
+    await Promise.all(notifications);
+  }
+
+  async notifyOrderCreated(adminOpsUserIds: string[], orderNumber: string, orderId: string) {
     await Promise.all(
-      adminUserIds.map(userId =>
+      adminOpsUserIds.map(userId =>
         this.create({
           userId,
           type: NotificationType.ORDER_SUBMITTED,
-          title: 'New Order Submitted',
-          message: `Order ${orderNumber} has been submitted and requires approval`,
+          title: 'New Order Created',
+          message: `Order ${orderNumber} has been created and is awaiting review`,
           entityId: orderId,
           entityType: 'ORDER',
         }),
       ),
     );
+  }
+
+  async notifyOrderRejected(clientUserId: string, adminOpsUserIds: string[], orderNumber: string, orderId: string) {
+    await Promise.all([
+      this.create({
+        userId: clientUserId,
+        type: NotificationType.ORDER_REJECTED,
+        title: 'Order Rejected',
+        message: `Your order ${orderNumber} has been rejected`,
+        entityId: orderId,
+        entityType: 'ORDER',
+      }),
+      ...adminOpsUserIds.map(userId =>
+        this.create({
+          userId,
+          type: NotificationType.ORDER_REJECTED,
+          title: 'Order Rejected',
+          message: `Order ${orderNumber} has been rejected`,
+          entityId: orderId,
+          entityType: 'ORDER',
+        }),
+      ),
+    ]);
+  }
+
+  async notifyOrderApproved(clientUserId: string, opsUserIds: string[], orderNumber: string, orderId: string) {
+    await Promise.all([
+      this.create({
+        userId: clientUserId,
+        type: NotificationType.ORDER_APPROVED,
+        title: 'Order Approved',
+        message: `Your order ${orderNumber} has been approved and is being processed`,
+        entityId: orderId,
+        entityType: 'ORDER',
+      }),
+      ...opsUserIds.map(userId =>
+        this.create({
+          userId,
+          type: NotificationType.ORDER_APPROVED,
+          title: 'Order Approved',
+          message: `Order ${orderNumber} has been approved — please begin kitting`,
+          entityId: orderId,
+          entityType: 'ORDER',
+        }),
+      ),
+    ]);
+  }
+
+  async notifyOrderDispatchReady(adminOpsUserIds: string[], orderNumber: string, orderId: string) {
+    await Promise.all(
+      adminOpsUserIds.map(userId =>
+        this.create({
+          userId,
+          type: NotificationType.ORDER_STATUS_CHANGED,
+          title: 'Order Ready for Dispatch',
+          message: `Order ${orderNumber} has completed kitting and is ready for driver assignment`,
+          entityId: orderId,
+          entityType: 'ORDER',
+        }),
+      ),
+    );
+  }
+
+  async notifyDriverAssigned(
+    driverUserId: string,
+    clientUserId: string,
+    adminOpsUserIds: string[],
+    orderNumber: string,
+    orderId: string,
+  ) {
+    await Promise.all([
+      this.create({
+        userId: clientUserId,
+        type: NotificationType.TRIP_ASSIGNED,
+        title: 'Driver Assigned',
+        message: `A driver has been assigned to your order ${orderNumber}`,
+        entityId: orderId,
+        entityType: 'ORDER',
+      }),
+      this.create({
+        userId: driverUserId,
+        type: NotificationType.TRIP_ASSIGNED,
+        title: 'New Trip Assigned',
+        message: `You have been assigned to order ${orderNumber}`,
+        entityId: orderId,
+        entityType: 'ORDER',
+      }),
+      ...adminOpsUserIds.map(userId =>
+        this.create({
+          userId,
+          type: NotificationType.TRIP_ASSIGNED,
+          title: 'Driver Assigned',
+          message: `A driver has been assigned to order ${orderNumber}`,
+          entityId: orderId,
+          entityType: 'ORDER',
+        }),
+      ),
+    ]);
   }
 }

@@ -39,6 +39,7 @@ async function main() {
   await prisma.kittingLog.deleteMany();
   await prisma.pOD.deleteMany();
   await prisma.weightRecord.deleteMany();
+  await prisma.notification.deleteMany();
   await prisma.trip.deleteMany();
   await prisma.orderHandlingTag.deleteMany();
   await prisma.availableHandlingTag.deleteMany();
