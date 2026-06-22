@@ -1,4 +1,8 @@
 services:
+  - type: redis
+    name: industrial-nexus-redis
+    ipAllowList: []
+
   - type: web
     name: industrial-nexus-api
     env: node
@@ -10,7 +14,12 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: REDIS_ENABLED
-        value: "false"
+        value: "true"
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: industrial-nexus-redis
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
