@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useRef, memo } from 'react';
+import { useEffect, useState, memo } from 'react';
 
 const AnalogClock = memo(function AnalogClock() {
-  const hourRef = useRef<SVGLineElement>(null);
-  const minuteRef = useRef<SVGLineElement>(null);
-  const secondRef = useRef<SVGLineElement>(null);
+  const [angles, setAngles] = useState({ h: 0, m: 0, s: 0 });
 
   useEffect(() => {
     const update = () => {
@@ -13,10 +11,11 @@ const AnalogClock = memo(function AnalogClock() {
       const s = now.getSeconds();
       const m = now.getMinutes();
       const h = now.getHours();
-
-      if (hourRef.current)   hourRef.current.style.transform   = `rotate(${h * 30 + m * 0.5}deg)`;
-      if (minuteRef.current) minuteRef.current.style.transform = `rotate(${m * 6 + s * 0.1}deg)`;
-      if (secondRef.current) secondRef.current.style.transform = `rotate(${s * 6}deg)`;
+      setAngles({
+        h: h * 30 + m * 0.5,
+        m: m * 6 + s * 0.1,
+        s: s * 6,
+      });
     };
 
     update();
@@ -25,11 +24,11 @@ const AnalogClock = memo(function AnalogClock() {
   }, []);
 
   return (
-    <div className="relative w-32 h-32">
+    <div className="relative w-24 h-24 sm:w-32 sm:h-32">
       <svg viewBox="0 0 100 100" className="w-full h-full">
         {/* Clock face */}
         <circle cx="50" cy="50" r="48" fill="#f8fafc" className="dark:fill-slate-800" stroke="#3b82f6" strokeWidth="2" />
-        
+
         {/* Hour markers */}
         {[...Array(12)].map((_, i) => {
           const angle = (i * 30 - 90) * (Math.PI / 180);
@@ -52,45 +51,45 @@ const AnalogClock = memo(function AnalogClock() {
         })}
 
         {/* Hour hand */}
-        <line
-          ref={hourRef}
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="30"
-          stroke="#1e293b"
-          className="dark:stroke-gray-200"
-          strokeWidth="3"
-          strokeLinecap="round"
-          style={{ transformOrigin: '50px 50px' }}
-        />
+        <g transform={`rotate(${angles.h}, 50, 50)`}>
+          <line
+            x1="50"
+            y1="50"
+            x2="50"
+            y2="30"
+            stroke="#1e293b"
+            className="dark:stroke-gray-200"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        </g>
 
         {/* Minute hand */}
-        <line
-          ref={minuteRef}
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="20"
-          stroke="#64748b"
-          className="dark:stroke-slate-400"
-          strokeWidth="2"
-          strokeLinecap="round"
-          style={{ transformOrigin: '50px 50px' }}
-        />
+        <g transform={`rotate(${angles.m}, 50, 50)`}>
+          <line
+            x1="50"
+            y1="50"
+            x2="50"
+            y2="20"
+            stroke="#64748b"
+            className="dark:stroke-slate-400"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </g>
 
         {/* Second hand */}
-        <line
-          ref={secondRef}
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="15"
-          stroke="#ef4444"
-          strokeWidth="1"
-          strokeLinecap="round"
-          style={{ transformOrigin: '50px 50px' }}
-        />
+        <g transform={`rotate(${angles.s}, 50, 50)`}>
+          <line
+            x1="50"
+            y1="50"
+            x2="50"
+            y2="15"
+            stroke="#ef4444"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+        </g>
 
         {/* Center dot */}
         <circle cx="50" cy="50" r="3" fill="#ef4444" />
