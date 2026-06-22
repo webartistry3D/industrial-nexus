@@ -473,6 +473,24 @@ export class OrdersService {
         orderId,
         clientId,
       );
+    } else if (newStatus === OrderStatus.DELIVERED) {
+      const adminOps = await getAdminOps();
+      await Promise.all([
+        this.notificationsService.notifyOrderStatusChanged(
+          clientId,
+          orderNumber,
+          orderId,
+          newStatus,
+        ),
+        ...adminOps.map(u =>
+          this.notificationsService.notifyOrderStatusChanged(
+            u.id,
+            orderNumber,
+            orderId,
+            newStatus,
+          ),
+        ),
+      ]);
     } else if (newStatus === OrderStatus.CANCELLED) {
       const adminOps = await getAdminOps();
       await Promise.all([
