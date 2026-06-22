@@ -116,6 +116,17 @@ export class UsersService {
             kycStatus: true,
             status: true,
             availability: true,
+            vehicleId: true,
+            vehicle: {
+              select: {
+                id: true,
+                plateNumber: true,
+                category: true,
+                capacityKg: true,
+                status: true,
+                isPartitioned: true,
+              },
+            },
           },
         },
       },

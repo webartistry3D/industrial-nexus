@@ -170,6 +170,7 @@ export class OrdersController {
       user.role,
       changeStatusDto.notes,
       changeStatusDto.driverId,
+      changeStatusDto.vehicleId,
     );
   }
 }

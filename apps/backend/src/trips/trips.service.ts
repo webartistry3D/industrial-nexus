@@ -101,10 +101,13 @@ export class TripsService {
       data: { status: OrderStatus.ASSIGNED },
     });
 
-    // Update driver availability
+    // Update driver availability and vehicle assignment
     await this.prisma.driver.update({
       where: { id: createTripDto.driverId },
-      data: { availability: DriverAvailability.ON_TRIP },
+      data: {
+        availability: DriverAvailability.ON_TRIP,
+        vehicleId: createTripDto.vehicleId,
+      },
     });
 
     // Create weight record

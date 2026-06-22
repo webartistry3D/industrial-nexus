@@ -27,7 +27,6 @@ export default function Dashboard() {
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [alerts, setAlerts] = useState<WeightAlert[]>([]);
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
-  const [heavyOrdersCount, setHeavyOrdersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liveLocations, setLiveLocations] = useState<Map<string, { lat: number; lng: number; speed?: number }>>(new Map());
@@ -71,12 +70,6 @@ export default function Dashboard() {
       setActiveOrders(activeOrders);
       setAlerts(alertsData || []);
       setPendingOrders(ordersData.data || []);
-      setHeavyOrdersCount(allOrders.filter((o: Order) =>
-        o.handlingTags?.some((tag: string | object) => {
-          const tagStr = typeof tag === 'string' ? tag : JSON.stringify(tag);
-          return tagStr.toUpperCase().includes('HEAVY');
-        }) || o.cargoDescription?.toUpperCase().includes('HEAVY')
-      ).length);
       const fleetLocations = await api.getActiveFleetLocations('IN_TRANSIT').catch(() => []);
       if (Array.isArray(fleetLocations)) {
         const locationsMap = new Map<string, { lat: number; lng: number; speed?: number }>();
@@ -144,7 +137,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <StatCard icon={Truck} label="Active Trips" value={loading ? '...' : activeTripsCount.toString()} trend={stats ? `${stats.onTimeDelivery}% on time` : undefined} color="blue" onClick={() => router.push('/trips?status=IN_TRANSIT')} />
           <StatCard icon={AlertTriangle} label="Delayed" value={loading ? '...' : delayedTripsCount.toString()} trend={delayedTripsCount > 0 ? 'SLA at risk' : 'All on track'} color={delayedTripsCount > 0 ? 'red' : 'green'} onClick={() => router.push('/trips?status=DELAYED')} />
-          <StatCard icon={Scale} label="Weight Alerts" value={loading ? '...' : heavyOrdersCount.toString()} trend={heavyOrdersCount > 0 ? 'Requires attention' : 'All clear'} color={heavyOrdersCount > 0 ? 'yellow' : 'green'} onClick={() => router.push('/orders?cargoType=HEAVY')} />
+          <StatCard icon={Scale} label="Weight Alerts" value={loading ? '...' : alerts.length.toString()} trend={alerts.length > 0 ? 'Requires attention' : 'All clear'} color={alerts.length > 0 ? 'yellow' : 'green'} onClick={() => router.push('/trips?filter=weight-alerts')} />
           <StatCard icon={Package} label="Pending Orders" value={loading ? '...' : pendingOrdersCount.toString()} trend={pendingOrdersCount > 0 ? 'Awaiting dispatch' : 'No pending'} color="purple" onClick={() => router.push('/orders?kittingStatus=PENDING')} />
         </div>
 

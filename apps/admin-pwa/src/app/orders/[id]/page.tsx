@@ -26,7 +26,9 @@ export default function OrderDetailPage() {
   const [actionSuccess, setActionSuccess] = useState(false);
   const [showDriverModal, setShowDriverModal] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState('');
+  const [selectedVehicle, setSelectedVehicle] = useState('');
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
+  const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [timelineEvents, setTimelineEvents] = useState<Array<{
@@ -324,11 +326,12 @@ export default function OrderDetailPage() {
       setActionLoading(true);
       setActionError(null);
       console.log('[Order Detail] Assign Driver - Calling API');
-      await api.assignDriver(orderId, selectedDriver);
+      await api.assignDriver(orderId, selectedDriver, selectedVehicle || undefined);
       console.log('[Order Detail] Assign Driver - API call successful');
       await fetchOrder(true);
       setShowDriverModal(false);
       setSelectedDriver('');
+      setSelectedVehicle('');
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
     } catch (err: any) {
@@ -347,8 +350,12 @@ export default function OrderDetailPage() {
 
   const handleFetchDrivers = async () => {
     try {
-      const drivers = await api.getUsers({ role: 'DRIVER', status: 'ACTIVE' });
+      const [drivers, vehicles] = await Promise.all([
+        api.getUsers({ role: 'DRIVER', status: 'ACTIVE' }),
+        api.getVehicles({ status: 'ACTIVE' }),
+      ]);
       setAvailableDrivers(drivers.data || []);
+      setAvailableVehicles(Array.isArray(vehicles) ? vehicles : (vehicles.data || []));
     } catch (err) {
       console.error('Failed to fetch drivers:', err);
     }
@@ -811,6 +818,24 @@ export default function OrderDetailPage() {
                     {availableDrivers.map((driver) => (
                       <option key={driver.id} value={driver.id}>
                         {driver.firstName} {driver.lastName} ({driver.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Select Vehicle
+                  </label>
+                  <select
+                    value={selectedVehicle}
+                    onChange={(e) => setSelectedVehicle(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white transition-all"
+                  >
+                    <option value="">Select a vehicle...</option>
+                    {availableVehicles.map((vehicle) => (
+                      <option key={vehicle.id} value={vehicle.id}>
+                        {vehicle.plateNumber} — {vehicle.category} ({vehicle.capacityKg} kg)
                       </option>
                     ))}
                   </select>

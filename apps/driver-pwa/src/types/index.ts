@@ -49,6 +49,8 @@ export interface Driver {
   kycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   availability: 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY';
+  vehicleId?: string;
+  vehicle?: Vehicle;
 }
 
 export interface Vehicle {

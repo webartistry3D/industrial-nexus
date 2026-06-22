@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { User, Driver, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
-import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
+import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function ProfilePage() {
@@ -38,7 +38,7 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       const response = await api.getProfile();
-      setDriver(response);
+      setDriver(response.driver || response);
       // Fetch KYC documents
       if (response.id) {
         const kycDocs = await api.getMyKycDocuments();
@@ -213,6 +213,21 @@ export default function ProfilePage() {
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">License Number</p>
                   <p className="font-medium text-gray-900 dark:text-white font-mono">{driver.licenseNumber}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                  <Scale className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Vehicle Weight</p>
+                  {driver.vehicle ? (
+                    <p className="font-medium text-gray-900 dark:text-white font-mono">
+                      {driver.vehicle.capacityKg.toLocaleString()} kg
+                    </p>
+                  ) : (
+                    <p className="font-medium text-gray-400 dark:text-gray-500 italic">No vehicle assigned</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-3">

@@ -12,4 +12,8 @@ export class ChangeStatusDto {
   @IsOptional()
   @IsString()
   driverId?: string;
+
+  @IsOptional()
+  @IsString()
+  vehicleId?: string;
 }

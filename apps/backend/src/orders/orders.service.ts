@@ -283,7 +283,7 @@ export class OrdersService {
     return this.findOne(id);
   }
 
-  async changeStatus(id: string, newStatus: OrderStatus, userId: string, userRole: UserRole, notes?: string, driverId?: string) {
+  async changeStatus(id: string, newStatus: OrderStatus, userId: string, userRole: UserRole, notes?: string, driverId?: string, vehicleId?: string) {
     const order = await this.findOne(id, userId, userRole);
     const currentStatus = order.status;
 
@@ -321,15 +321,25 @@ export class OrdersService {
         throw new BadRequestException('Driver is not active');
       }
 
+      const resolvedVehicleId = vehicleId || driver.vehicleId || null;
+
       // Create trip when assigning driver
       await this.prisma.trip.create({
         data: {
           orderId: id,
           driverId: driver.id,
-          vehicleId: driver.vehicleId || null,
+          vehicleId: resolvedVehicleId,
           status: 'ASSIGNED',
         },
       });
+
+      // Update driver profile with the assigned vehicle (supports reassignment)
+      if (resolvedVehicleId && resolvedVehicleId !== driver.vehicleId) {
+        await this.prisma.driver.update({
+          where: { id: driver.id },
+          data: { vehicleId: resolvedVehicleId },
+        });
+      }
     }
 
     const updatedOrder = await this.prisma.order.update({
@@ -387,12 +397,14 @@ export class OrdersService {
       },
     });
 
+    const resolvedVehicleId = driver.vehicleId || null;
+
     // Create trip
     await this.prisma.trip.create({
       data: {
         orderId: id,
         driverId: driver.id,
-        vehicleId: driver.vehicleId || null,
+        vehicleId: resolvedVehicleId,
         status: 'ASSIGNED',
       },
     });

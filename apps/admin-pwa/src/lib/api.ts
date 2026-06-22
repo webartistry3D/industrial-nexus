@@ -154,12 +154,12 @@ class ApiClient {
     return response.data;
   }
 
-  async assignDriver(id: string, driverId: string) {
+  async assignDriver(id: string, driverId: string, vehicleId?: string) {
     const url = `/orders/${id}/status`;
-    console.log('[API] Assign Driver - URL:', url);
-    console.log('[API] Assign Driver - Payload:', { status: 'ASSIGNED', driverId });
+    const payload: Record<string, unknown> = { status: 'ASSIGNED', driverId };
+    if (vehicleId) payload.vehicleId = vehicleId;
     try {
-      const response = await this.client.post(url, { status: 'ASSIGNED', driverId });
+      const response = await this.client.post(url, payload);
       console.log('[API] Assign Driver - Response:', response.data);
       return response.data;
     } catch (error: any) {
