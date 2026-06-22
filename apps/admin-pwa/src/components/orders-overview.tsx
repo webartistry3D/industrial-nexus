@@ -118,7 +118,9 @@ export function OrdersOverview({ orders, loading = false, onOrderClick }: Orders
               {order.kittingStatus && (
                 <div className="mt-2">
                   <span className={`status-badge ${getKittingStatusColor(order.kittingStatus)}`}>
-                    Kitting: {order.kittingStatus?.replace('_', ' ')}
+                    {order.kittingStatus === 'DISPATCH_READY'
+                      ? 'DISPATCH READY'
+                      : `Kitting: ${order.kittingStatus?.replace('_', ' ')}`}
                   </span>
                 </div>
               )}

@@ -170,9 +170,9 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl border border-blue-200/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/10 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2.5 rounded-xl bg-blue-500">
                 <Truck className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -182,9 +182,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl border border-green-200/50 dark:border-green-700/50 shadow-lg shadow-green-500/10 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+              <div className="p-2.5 rounded-xl bg-green-500">
                 <Clock className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -194,9 +194,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 rounded-xl border border-red-200/50 dark:border-red-700/50 shadow-lg shadow-red-500/10 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
+              <div className="p-2.5 rounded-xl bg-red-500">
                 <AlertCircle className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -206,9 +206,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl border border-purple-200/50 dark:border-purple-700/50 shadow-lg shadow-purple-500/10 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+              <div className="p-2.5 rounded-xl bg-purple-500">
                 <CheckCircle className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -220,20 +220,20 @@ export default function DashboardPage() {
         </div>
 
         {/* SLA Status */}
-        <div className={`rounded-2xl p-5 shadow-xl backdrop-blur-xl ${
+        <div className={`rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-slate-700 ${
           slaStatus === 'good'
-            ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 dark:border-green-500/20'
+            ? 'bg-white dark:bg-slate-800'
             : slaStatus === 'warning'
-            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 dark:border-amber-500/20'
-            : 'bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 dark:border-red-500/20'
+            ? 'bg-white dark:bg-slate-800'
+            : 'bg-white dark:bg-slate-800'
         }`}>
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl shadow-lg ${
+            <div className={`p-3 rounded-xl ${
               slaStatus === 'good'
-                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
+                ? 'bg-green-500 text-white'
                 : slaStatus === 'warning'
-                ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white'
-                : 'bg-gradient-to-br from-red-500 to-red-600 text-white'
+                ? 'bg-amber-500 text-white'
+                : 'bg-red-500 text-white'
             }`}>
               {slaStatus === 'good' && <CheckCircle className="w-6 h-6" />}
               {slaStatus === 'warning' && <AlertCircle className="w-6 h-6" />}
@@ -253,8 +253,8 @@ export default function DashboardPage() {
         {/* Active Shipments and Recent Orders - Side by side on desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Active Shipments */}
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+          <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
               Active Shipments
@@ -266,7 +266,7 @@ export default function DashboardPage() {
               View All
             </button>
           </div>
-          <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+          <div className="divide-y divide-gray-200 dark:divide-slate-700">
             {activeShipments.length === 0 ? (
               <div className="p-4 text-center text-gray-600 dark:text-gray-400">
                 No active shipments
@@ -275,11 +275,11 @@ export default function DashboardPage() {
               activeShipments.slice(0, 3).map((shipment) => (
                 <div
                   key={shipment.id}
-                  className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-transparent dark:hover:from-blue-900/20 dark:hover:to-transparent border-l-4 border-blue-500 dark:border-blue-400 transition-all duration-200"
+                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 border-l-4 border-blue-500 dark:border-blue-400"
                   onClick={() => router.push(`/tracking?shipment=${shipment.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                    <div className="p-2.5 rounded-xl bg-blue-500">
                       <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -306,8 +306,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Orders */}
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-          <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+          <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
               Recent Orders
@@ -319,7 +319,7 @@ export default function DashboardPage() {
               View All
             </button>
           </div>
-          <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+          <div className="divide-y divide-gray-200 dark:divide-slate-700">
             {recentOrders.length === 0 ? (
               <div className="p-4 text-center text-gray-600 dark:text-gray-400">
                 No recent orders
@@ -328,11 +328,11 @@ export default function DashboardPage() {
               recentOrders.slice(0, 3).map((order) => (
                 <div
                   key={order.id}
-                  className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent dark:hover:from-purple-900/20 dark:hover:to-transparent border-l-4 border-gray-400 dark:border-gray-500 transition-all duration-200"
+                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 border-l-4 border-gray-400 dark:border-gray-500"
                   onClick={() => router.push(`/tracking?shipment=${order.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 shadow-md">
+                    <div className="p-2.5 rounded-xl bg-gray-400">
                       <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -366,18 +366,18 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => router.push('/orders/new')}
-              className="group flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+              className="group flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50"
             >
-              <div className="p-2 bg-blue-500 rounded-lg text-white group-hover:scale-110 transition-transform">
+              <div className="p-2 bg-blue-500 rounded-lg text-white">
                 <Plus className="w-4 h-4" />
               </div>
               <span>New Order</span>
             </button>
             <button
               onClick={() => router.push('/tracking')}
-              className="group flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-900/30 dark:to-green-800/20 rounded-xl border border-green-200/50 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300"
+              className="group flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/30 rounded-xl border border-green-200 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:bg-green-100 dark:hover:bg-green-900/50"
             >
-              <div className="p-2 bg-green-500 rounded-lg text-white group-hover:scale-110 transition-transform">
+              <div className="p-2 bg-green-500 rounded-lg text-white">
                 <MapPin className="w-4 h-4" />
               </div>
               <span>Track Order</span>

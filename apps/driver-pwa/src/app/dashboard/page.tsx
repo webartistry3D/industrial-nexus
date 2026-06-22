@@ -170,7 +170,7 @@ export default function Dashboard() {
       <PageHeader />
 
       {/* Main Content */}
-      <main className="pt-20 px-4 pb-4 space-y-6" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <main className="pt-20 px-4 pb-4 space-y-6">
         {/* Greeting */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -193,7 +193,7 @@ export default function Dashboard() {
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-5 text-gray-900 dark:text-white">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2 rounded-xl bg-blue-500">
                 <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <h2 className="font-bold text-sm sm:text-base">Performance</h2>
@@ -210,19 +210,19 @@ export default function Dashboard() {
             </select>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2">
-            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-2 sm:p-3 text-center border border-blue-200/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/10">
+            <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
               <div className="text-2xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400 font-mono">{loading ? '...' : activeTrips.length}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Active</div>
             </div>
-            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-xl p-2 sm:p-3 text-center border border-green-200/50 dark:border-green-700/50 shadow-lg shadow-green-500/10">
+            <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
               <div className="text-2xl sm:text-4xl font-bold text-green-600 dark:text-green-400 font-mono">{loading ? '...' : completedToday}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Today</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl p-2 sm:p-3 text-center border border-purple-200/50 dark:border-purple-700/50 shadow-lg shadow-purple-500/10">
+            <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
               <div className="text-2xl sm:text-4xl font-bold text-purple-600 dark:text-purple-400 font-mono">{loading ? '...' : thisWeekCompleted}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">{dateFilter === 'today' ? 'Today' : dateFilter === 'yesterday' ? 'Yesterday' : dateFilter === 'last_7_days' ? '7 Days' : '30 Days'}</div>
             </div>
-            <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-500/20 dark:to-yellow-600/10 rounded-xl p-2 sm:p-3 text-center border border-yellow-200/50 dark:border-yellow-700/50 shadow-lg shadow-yellow-500/10">
+            <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
               <div className="text-2xl sm:text-4xl font-bold text-yellow-600 dark:text-yellow-400 font-mono">{loading ? '...' : totalCompleted}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Total</div>
             </div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-500">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
@@ -250,7 +250,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-green-500">
                 <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
@@ -315,7 +315,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                <div className="p-1.5 rounded-lg bg-orange-500">
                   <AlertCircle className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="font-bold text-gray-800 dark:text-white">Priority Trip</h2>
@@ -323,7 +323,7 @@ export default function Dashboard() {
               <div className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700/50 px-3 py-1 rounded-full">Highest Priority</div>
             </div>
             
-            <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 dark:from-blue-700 dark:via-blue-800 dark:to-blue-900 rounded-2xl shadow-xl border-l-4 border-orange-400 dark:border-orange-500 p-5 text-white">
+            <div className="bg-blue-600 dark:bg-blue-800 rounded-2xl shadow-sm border-l-4 border-orange-400 dark:border-orange-500 p-5 text-white">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-bold text-lg font-mono">{activeTrips[0].order?.orderNumber}</span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 dark:bg-white/10 border border-white/30 dark:border-white/20">
@@ -347,7 +347,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => router.push(`/trips/${activeTrips[0].id}`)}
-                className="w-full bg-white dark:bg-blue-50 text-blue-600 dark:text-blue-700 py-3 rounded-xl text-sm font-semibold hover:bg-blue-50 dark:hover:bg-blue-100 transition-all duration-200 shadow-md hover:shadow-lg"
+                className="w-full bg-white dark:bg-blue-50 text-blue-600 dark:text-blue-700 py-3 rounded-xl text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-100"
               >
                 {activeTrips[0].status === 'ASSIGNED' ? 'Start Trip' : 'Continue Trip'}
               </button>
@@ -358,7 +358,7 @@ export default function Dashboard() {
         {/* Active Trips List */}
         {activeTrips.length > 0 && (
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
+            <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                 Active Trips
@@ -370,15 +370,15 @@ export default function Dashboard() {
                 View All
               </button>
             </div>
-            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+            <div className="divide-y divide-gray-200 dark:divide-slate-700">
               {activeTrips.slice(0, 3).map((trip) => (
                 <div
                   key={trip.id}
-                  className="p-4 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-transparent dark:hover:from-blue-900/20 dark:hover:to-transparent border-l-4 border-blue-500 dark:border-blue-400 transition-all duration-200"
+                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 border-l-4 border-blue-500 dark:border-blue-400"
                   onClick={() => router.push(`/trips/${trip.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                    <div className="p-2.5 rounded-xl bg-blue-500">
                       <Package className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">

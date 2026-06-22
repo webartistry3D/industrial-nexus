@@ -306,6 +306,18 @@ export class OrdersService {
     if (newStatus === OrderStatus.APPROVED) updateData.approvedAt = new Date();
     if (newStatus === OrderStatus.CANCELLED) updateData.cancelledAt = new Date();
 
+    // Update kittingStatus when order transitions past kitting phase
+    if (
+      newStatus === OrderStatus.DISPATCH_READY ||
+      newStatus === OrderStatus.ASSIGNED ||
+      newStatus === OrderStatus.IN_TRANSIT ||
+      newStatus === OrderStatus.DELIVERED
+    ) {
+      if (order.kittingStatus === KittingStatus.PENDING) {
+        updateData.kittingStatus = KittingStatus.DISPATCH_READY;
+      }
+    }
+
     // Handle driver assignment for ASSIGNED status
     if (newStatus === OrderStatus.ASSIGNED && driverId) {
       // Check if driver exists and is active - look up by userId since frontend passes user IDs
