@@ -109,6 +109,7 @@ export default function DriversPage() {
   });
   const [vehicleSubmitting, setVehicleSubmitting] = useState(false);
   const [vehicleSuccess, setVehicleSuccess] = useState(false);
+  const [vehicleError, setVehicleError] = useState<string | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [showAuditLogs, setShowAuditLogs] = useState(false);
 
@@ -327,6 +328,7 @@ export default function DriversPage() {
   // Vehicle actions
   const handleCreateVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
+    setVehicleError(null);
     try {
       setVehicleSubmitting(true);
       await api.createVehicle(vehicleFormData);
@@ -337,9 +339,10 @@ export default function DriversPage() {
         setVehicleFormData({ plateNumber: '', category: 'MEDIUM', capacityKg: 5000, isPartitioned: false, status: 'ACTIVE' });
         fetchVehicles();
       }, 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create vehicle:', err);
-      alert('Failed to create vehicle. Please try again.');
+      const msg = err?.response?.data?.message || 'Failed to create vehicle. Please try again.';
+      setVehicleError(msg);
     } finally {
       setVehicleSubmitting(false);
     }
@@ -1081,10 +1084,15 @@ export default function DriversPage() {
                     Partitioned
                   </label>
                 </div>
+                {vehicleError && (
+                  <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
+                    {vehicleError}
+                  </div>
+                )}
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowCreateVehicleModal(false)}
+                    onClick={() => { setShowCreateVehicleModal(false); setVehicleError(null); }}
                     className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300"
                   >
                     Cancel

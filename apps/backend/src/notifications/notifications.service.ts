@@ -32,6 +32,7 @@ export class NotificationsService {
     const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User';
 
     // Publish to Redis so the TrackingGateway can push it via WebSocket
+    console.log(`[Notifications] Publishing to Redis for userId=${dto.userId}, type=${dto.type}`);
     await this.redis.publish(
       'notification:new',
       JSON.stringify({
@@ -107,6 +108,12 @@ export class NotificationsService {
   // Convenience factory methods called from other services
 
   async notifyTripAssigned(driverUserId: string, clientUserId: string, orderNumber: string, tripId: string) {
+    const driverUser = await this.prisma.user.findUnique({
+      where: { id: driverUserId },
+      select: { firstName: true, lastName: true },
+    });
+    const driverName = driverUser ? `${driverUser.firstName} ${driverUser.lastName}` : 'A driver';
+
     await Promise.all([
       this.create({
         userId: driverUserId,
@@ -120,7 +127,7 @@ export class NotificationsService {
         userId: clientUserId,
         type: NotificationType.TRIP_ASSIGNED,
         title: 'Driver Assigned',
-        message: `A driver has been assigned to your order ${orderNumber}`,
+        message: `${driverName} has been assigned to your order ${orderNumber}`,
         entityId: tripId,
         entityType: 'TRIP',
       }),
@@ -299,12 +306,20 @@ export class NotificationsService {
     orderNumber: string,
     orderId: string,
   ) {
+    console.log(`[Notifications] notifyDriverAssigned: driverUserId=${driverUserId}, clientUserId=${clientUserId}, adminOpsCount=${adminOpsUserIds.length}`);
+
+    const driverUser = await this.prisma.user.findUnique({
+      where: { id: driverUserId },
+      select: { firstName: true, lastName: true },
+    });
+    const driverName = driverUser ? `${driverUser.firstName} ${driverUser.lastName}` : 'A driver';
+
     await Promise.all([
       this.create({
         userId: clientUserId,
         type: NotificationType.TRIP_ASSIGNED,
         title: 'Driver Assigned',
-        message: `A driver has been assigned to your order ${orderNumber}`,
+        message: `${driverName} has been assigned to your order ${orderNumber}`,
         entityId: orderId,
         entityType: 'ORDER',
       }),
@@ -321,7 +336,7 @@ export class NotificationsService {
           userId,
           type: NotificationType.TRIP_ASSIGNED,
           title: 'Driver Assigned',
-          message: `A driver has been assigned to order ${orderNumber}`,
+          message: `${driverName} has been assigned to order ${orderNumber}`,
           entityId: orderId,
           entityType: 'ORDER',
         }),

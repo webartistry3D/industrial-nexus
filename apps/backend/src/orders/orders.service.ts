@@ -347,6 +347,7 @@ export class OrdersService {
     });
 
     // Fire notifications based on new status
+    console.log(`[Notifications] Firing status notifications: status=${newStatus}, driverId=${driverId}, clientId=${order.clientId}`);
     this.fireStatusNotifications(newStatus, order.orderNumber, id, order.clientId, driverId)
       .catch(e => console.error('[Notifications] fireStatusNotifications error:', e));
 
@@ -435,12 +436,6 @@ export class OrdersService {
         select: { id: true },
       });
 
-    const getOps = () =>
-      this.prisma.user.findMany({
-        where: { role: { in: ['OPERATIONS'] as any } },
-        select: { id: true },
-      });
-
     if (newStatus === OrderStatus.SUBMITTED) {
       const adminOps = await getAdminOps();
       await this.notificationsService.notifyOrderSubmitted(
@@ -458,13 +453,45 @@ export class OrdersService {
         orderId,
       );
     } else if (newStatus === OrderStatus.APPROVED) {
-      const ops = await getOps();
+      const adminOps = await getAdminOps();
       await this.notificationsService.notifyOrderApproved(
         clientId,
-        ops.map(u => u.id),
+        adminOps.map(u => u.id),
         orderNumber,
         orderId,
       );
+    } else if (newStatus === OrderStatus.KITTING) {
+      const adminOps = await getAdminOps();
+      await Promise.all([
+        this.notificationsService.notifyOrderStatusChanged(
+          clientId,
+          orderNumber,
+          orderId,
+          newStatus,
+        ),
+        ...adminOps.map(u =>
+          this.notificationsService.notifyOrderStatusChanged(
+            u.id,
+            orderNumber,
+            orderId,
+            newStatus,
+          ),
+        ),
+      ]);
+    } else if (newStatus === OrderStatus.ASSIGNED && driverId) {
+      console.log(`[Notifications] ASSIGNED case - driverId received: ${driverId}`);
+      const adminOps = await getAdminOps();
+      // driverId is the user ID (from frontend getUsers call)
+      const driverUserId = driverId;
+      console.log(`[Notifications] Sending notifyDriverAssigned to driverUserId=${driverUserId}, clientId=${clientId}, adminOps=${adminOps.map(u => u.id)}`);
+      await this.notificationsService.notifyDriverAssigned(
+        driverUserId,
+        clientId,
+        adminOps.map(u => u.id),
+        orderNumber,
+        orderId,
+      );
+      console.log(`[Notifications] notifyDriverAssigned completed`);
     } else if (newStatus === OrderStatus.DISPATCH_READY) {
       const adminOps = await getAdminOps();
       await this.notificationsService.notifyOrderDispatchReady(

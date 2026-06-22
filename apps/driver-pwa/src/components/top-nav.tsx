@@ -33,15 +33,15 @@ export function TopNav() {
     }
   };
 
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const [page, setPage] = useState(1);
+
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
 
   if (pathname === '/login') return null;
-
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  const [page, setPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(notifications.length / itemsPerPage);
   

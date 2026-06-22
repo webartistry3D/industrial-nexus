@@ -30,28 +30,36 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
     private jwtService: JwtService,
     private redis: RedisService,
   ) {
+    console.log('[TrackingGateway] Constructor called - gateway instantiated');
     this.subscribeToRedis();
   }
 
   async handleConnection(client: Socket) {
     try {
+      console.log('[Tracking] New connection attempt - namespace:', client.nsp.name, 'id:', client.id);
       const token = client.handshake.auth.token || client.handshake.headers.authorization?.replace('Bearer ', '');
+      console.log('[Tracking] Token present:', !!token);
       
       if (!token) {
+        console.log('[Tracking] No token provided, disconnecting');
         client.disconnect();
         return;
       }
 
       const payload = this.jwtService.verify(token);
+      console.log('[Tracking] Token verified - userId:', payload.sub, 'role:', payload.role);
       client.data.userId = payload.sub;
       client.data.role = payload.role;
 
       // Auto-join user to their personal room for targeted notifications
-      client.join(`user:${payload.sub}`);
+      const room = `user:${payload.sub}`;
+      client.join(room);
+      console.log('[Tracking] User joined room:', room);
       
-      console.log(`[Tracking] User ${payload.sub} connected`);
+      console.log(`[Tracking] User ${payload.sub} connected successfully`);
     } catch (error) {
       console.error('[Tracking] Connection error:', error);
+      console.error('[Tracking] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
       client.disconnect();
     }
   }
@@ -135,8 +143,10 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.redis.subscribe('notification:new', (message) => {
       try {
         const data = JSON.parse(message);
+        const room = `user:${data.userId}`;
+        console.log(`[Tracking] Emitting notification to room ${room}`);
         // Each user is joined to a room named "user:<userId>" on connection
-        this.server.to(`user:${data.userId}`).emit('notification:new', data.notification);
+        this.server.to(room).emit('notification:new', data.notification);
       } catch (error) {
         console.error('[Tracking] Error processing notification:', error);
       }

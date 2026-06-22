@@ -40,7 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await axios.get(`${API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(response.data);
+      const data = response.data;
+      setUser({ ...data, userId: data.userId ?? data.id });
     } catch {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');

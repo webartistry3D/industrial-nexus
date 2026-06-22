@@ -63,8 +63,9 @@ class ApiClient {
       async (error: AxiosError) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && originalRequest && !originalRequest.url?.includes('/auth/')) {
-          (originalRequest as unknown as Record<string, unknown>)['_retry'] = true;
+        const reqRecord = originalRequest as unknown as Record<string, unknown>;
+        if (error.response?.status === 401 && originalRequest && !reqRecord['_retry'] && !originalRequest.url?.includes('/auth/')) {
+          reqRecord['_retry'] = true;
 
           const newAccessToken = await refreshAccessToken();
           if (newAccessToken) {

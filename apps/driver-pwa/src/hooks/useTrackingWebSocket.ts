@@ -119,6 +119,8 @@ export function useTrackingWebSocket() {
   };
 
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) return;
     connect();
 
     return () => {
