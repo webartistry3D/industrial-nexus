@@ -474,12 +474,23 @@ export class OrdersService {
         clientId,
       );
     } else if (newStatus === OrderStatus.CANCELLED) {
-      await this.notificationsService.notifyOrderStatusChanged(
-        clientId,
-        orderNumber,
-        orderId,
-        newStatus,
-      );
+      const adminOps = await getAdminOps();
+      await Promise.all([
+        this.notificationsService.notifyOrderStatusChanged(
+          clientId,
+          orderNumber,
+          orderId,
+          newStatus,
+        ),
+        ...adminOps.map(u =>
+          this.notificationsService.notifyOrderStatusChanged(
+            u.id,
+            orderNumber,
+            orderId,
+            newStatus,
+          ),
+        ),
+      ]);
     }
   }
 
