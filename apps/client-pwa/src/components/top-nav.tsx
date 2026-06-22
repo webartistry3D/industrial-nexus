@@ -135,21 +135,21 @@ export function TopNav({ role = 'client' }: TopNavProps) {
                         ))}
                       </div>
                       {totalPages > 1 && (
-                        <div className="px-4 py-2 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between text-xs">
+                        <div className="px-4 py-2 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
                           <button
                             onClick={() => setPage(p => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="px-2 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                           >
                             Previous
                           </button>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {page} / {totalPages}
+                          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                            Page {page} of {totalPages}
                           </span>
                           <button
                             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                             disabled={page === totalPages}
-                            className="px-2 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                           >
                             Next
                           </button>
