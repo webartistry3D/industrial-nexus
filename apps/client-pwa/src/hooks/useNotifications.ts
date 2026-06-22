@@ -20,6 +20,7 @@ export function useNotifications() {
   const socketRef = useRef<Socket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const initialFetchDone = useRef(false);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,6 +38,9 @@ export function useNotifications() {
 
   const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
+  const playNotificationSoundRef = useRef(playNotificationSound);
+  playNotificationSoundRef.current = playNotificationSound;
+
   const fetchNotifications = useCallback(async () => {
     try {
       const data = await api.getNotifications();
@@ -46,14 +50,14 @@ export function useNotifications() {
       setUnreadCount(unread);
       if (!initialFetchDone.current) {
         initialFetchDone.current = true;
-        if (unread > 0) playNotificationSound();
+        if (unread > 0) playNotificationSoundRef.current();
       }
     } catch (err) {
       console.error('[Notifications] Failed to fetch:', err);
     } finally {
       setLoading(false);
     }
-  }, [playNotificationSound]);
+  }, []);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
@@ -90,7 +94,13 @@ export function useNotifications() {
     }
   }, []);
 
+  const fetchNotificationsRef = useRef(fetchNotifications);
+  fetchNotificationsRef.current = fetchNotifications;
+
   useEffect(() => {
+    if (mountedRef.current) return;
+    mountedRef.current = true;
+
     let socket: Socket | null = null;
     let isRefreshing = false;
     let reconnectAttempts = 0;
@@ -120,7 +130,7 @@ export function useNotifications() {
       socket.on('notification:new', (notification: Notification) => {
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
-        playNotificationSound();
+        playNotificationSoundRef.current();
       });
 
       socket.on('connect_error', async (err) => {
@@ -145,14 +155,15 @@ export function useNotifications() {
       socketRef.current = socket;
     };
 
-    fetchNotifications();
+    fetchNotificationsRef.current();
     connectSocket();
 
     return () => {
       socket?.disconnect();
       socketRef.current = null;
+      mountedRef.current = false;
     };
-  }, [fetchNotifications, playNotificationSound]);
+  }, []);
 
   return {
     notifications,
