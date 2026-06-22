@@ -590,6 +590,12 @@ function TripsPageContent() {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-3">
                     <span className="text-gray-500 dark:text-gray-400 font-mono">{trip.vehicle?.plateNumber}</span>
+                    {trip.order?.totalWeight && (
+                      <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400 font-mono">
+                        <Scale className="w-3 h-3" />
+                        {trip.order.totalWeight.toLocaleString()} kg
+                      </span>
+                    )}
                     {trip.eta && (
                       <span className="flex items-center gap-1 text-blue-600 font-mono">
                         <Clock className="w-3 h-3" />
