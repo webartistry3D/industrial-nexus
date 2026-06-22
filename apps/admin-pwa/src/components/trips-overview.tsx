@@ -134,7 +134,7 @@ export function TripsOverview({ trips, loading = false, onTripClick, liveLocatio
           <p className="text-sm">No active trips</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="max-h-[180px] overflow-y-auto space-y-4">
           {trips.map((trip) => {
             const hasValidTripId = trip.id && trip.id !== 'null' && trip.id !== 'undefined';
             const liveLocation = liveLocations?.get(trip.id);

@@ -13,6 +13,7 @@ import {
 import { StatCard } from '@/components/stat-card';
 import { AlertsPanel } from '@/components/alerts-panel';
 import { TripsOverview } from '@/components/trips-overview';
+import { OrdersOverview } from '@/components/orders-overview';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
 
@@ -23,6 +24,7 @@ export default function Dashboard() {
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
+  const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [alerts, setAlerts] = useState<WeightAlert[]>([]);
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
   const [heavyOrdersCount, setHeavyOrdersCount] = useState(0);
@@ -62,8 +64,11 @@ export default function Dashboard() {
         api.getOrders({ limit: 100 }).catch(() => ({ data: [] })),
       ]);
       const allOrders = allOrdersData.data || [];
+      const activeStatuses = ['SUBMITTED', 'APPROVED', 'DISPATCH_READY', 'ASSIGNED', 'IN_TRANSIT'];
+      const activeOrders = allOrders.filter((o: Order) => activeStatuses.includes(o.status)).slice(0, 5);
       setStats(statsData);
       setActiveTrips(tripsData.data || []);
+      setActiveOrders(activeOrders);
       setAlerts(alertsData || []);
       setPendingOrders(ordersData.data || []);
       setHeavyOrdersCount(allOrders.filter((o: Order) =>
@@ -93,6 +98,9 @@ export default function Dashboard() {
   };
   const handleAlertClick = (tripId: string) => {
     if (tripId && tripId !== 'null' && tripId !== 'undefined') router.push(`/trips/${tripId}`);
+  };
+  const handleOrderClick = (orderId: string) => {
+    if (orderId && orderId !== 'null' && orderId !== 'undefined') router.push(`/orders/${orderId}`);
   };
 
   const activeTripsCount = activeTrips.length;
@@ -172,6 +180,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        <OrdersOverview orders={activeOrders} loading={loading} onOrderClick={handleOrderClick} />
         <TripsOverview trips={activeTrips} loading={loading} onTripClick={handleTripClick} liveLocations={liveLocations} />
         <AlertsPanel alerts={alerts} loading={loading} onAlertClick={handleAlertClick} />
 
