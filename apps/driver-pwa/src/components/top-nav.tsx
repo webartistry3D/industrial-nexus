@@ -102,7 +102,7 @@ export function TopNav() {
 
             {showNotifications && (
               <>
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50 left-1/2 md:left-auto -translate-x-1/2 md:translate-x-0">
                   <div className="px-4 py-2 border-b border-gray-100 dark:border-slate-700">
                     <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                   </div>
