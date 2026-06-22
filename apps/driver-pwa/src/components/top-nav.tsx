@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Bell, Moon, Sun, LogOut, User, Truck } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export function TopNav() {
   const router = useRouter();
@@ -39,13 +40,22 @@ export function TopNav() {
 
   if (pathname === '/login') return null;
 
-  const notifications = [
-    { id: 1, title: 'New trip assigned', time: 'Just now', unread: true },
-    { id: 2, title: 'Route update available', time: '15 min ago', unread: true },
-    { id: 3, title: 'Break time reminder', time: '1 hour ago', unread: false },
-  ];
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(notifications.length / itemsPerPage);
+  
+  const paginatedNotifications = notifications.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const formatTime = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
@@ -91,22 +101,65 @@ export function TopNav() {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
-                <div className="px-4 py-2 border-b border-gray-100 dark:border-slate-700">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
-                </div>
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
-                      notification.unread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
-                    }`}
-                  >
-                    <p className="text-sm text-gray-900 dark:text-white font-medium">{notification.title}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{notification.time}</p>
+              <>
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
+                  <div className="px-4 py-2 border-b border-gray-100 dark:border-slate-700">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                   </div>
-                ))}
-              </div>
+                  {unreadCount > 0 && (
+                    <div className="px-4 py-1.5 border-b border-gray-100 dark:border-slate-700 flex justify-end">
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                      >
+                        Mark all read
+                      </button>
+                    </div>
+                  )}
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No notifications</div>
+                  ) : (
+                    <>
+                      <div className="max-h-[180px] overflow-y-auto">
+                        {paginatedNotifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => !notification.isRead && markAsRead(notification.id)}
+                            className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
+                              !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                            }`}
+                          >
+                            <p className="text-sm text-gray-900 dark:text-white font-medium">{notification.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{notification.message}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">{formatTime(notification.createdAt)}</p>
+                          </div>
+                        ))}
+                      </div>
+                      {totalPages > 1 && (
+                        <div className="px-4 py-2 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between text-xs">
+                          <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="px-2 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {page} / {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="px-2 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </>
             )}
           </div>
 

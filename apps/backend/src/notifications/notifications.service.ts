@@ -30,6 +30,7 @@ export class NotificationsService {
         userId: dto.userId,
         notification: {
           id: notification.id,
+          userId: dto.userId,
           type: notification.type,
           title: notification.title,
           message: notification.message,

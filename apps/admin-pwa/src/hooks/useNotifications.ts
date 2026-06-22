@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { api, refreshAccessToken } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Notification {
   id: string;
+  userId?: string;
   type: string;
   title: string;
   message: string;
@@ -21,6 +23,7 @@ export function useNotifications() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const initialFetchDone = useRef(false);
   const mountedRef = useRef(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -129,6 +132,9 @@ export function useNotifications() {
       });
 
       socket.on('notification:new', (notification: Notification) => {
+        if (notification.userId && notification.userId !== user?.userId) {
+          return;
+        }
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
         playNotificationSoundRef.current();

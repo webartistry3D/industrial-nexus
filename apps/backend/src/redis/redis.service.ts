@@ -46,6 +46,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private logger = new Logger(RedisService.name);
   private inMemoryStore = new InMemoryStore();
   private enabled = false;
+  private redisSubscribers = new Map<string, Set<(message: string) => void>>();
 
   constructor(private configService: ConfigService) {}
 
@@ -125,12 +126,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async subscribe(channel: string, callback: (message: string) => void): Promise<void> {
     if (this.enabled) {
       const subscriber = (this as any).subscriber;
-      await subscriber.subscribe(channel);
-      subscriber.on('message', (chan: string, message: string) => {
-        if (chan === channel) {
-          callback(message);
-        }
-      });
+      if (!this.redisSubscribers.has(channel)) {
+        this.redisSubscribers.set(channel, new Set());
+        await subscriber.subscribe(channel);
+        subscriber.on('message', (chan: string, message: string) => {
+          if (chan === channel) {
+            this.redisSubscribers.get(channel)?.forEach(cb => cb(message));
+          }
+        });
+      }
+      this.redisSubscribers.get(channel)!.add(callback);
     } else {
       await this.inMemoryStore.subscribe(channel, callback);
     }

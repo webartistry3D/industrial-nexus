@@ -24,10 +24,12 @@ const options = {
   fullscreenControl: false,
 };
 
+const libraries: ('places')[] = ['places'];
+
 export function GoogleMapWrapper({ center, zoom, children, onLoad }: GoogleMapProps) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries: ['places'],
+    libraries,
   });
 
   if (loadError) {

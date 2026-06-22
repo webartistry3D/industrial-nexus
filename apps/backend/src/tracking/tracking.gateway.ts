@@ -137,7 +137,6 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
         const data = JSON.parse(message);
         // Each user is joined to a room named "user:<userId>" on connection
         this.server.to(`user:${data.userId}`).emit('notification:new', data.notification);
-        console.log(`[Tracking] Notification pushed to user ${data.userId}`);
       } catch (error) {
         console.error('[Tracking] Error processing notification:', error);
       }
