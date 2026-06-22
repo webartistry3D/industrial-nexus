@@ -138,7 +138,12 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
                           >
                             <p className="text-sm text-gray-900 dark:text-white font-medium">{notification.title}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{notification.message}</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">{formatTime(notification.createdAt)}</p>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{formatTime(notification.createdAt)}</p>
+                              {notification.userName && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{notification.userName}</p>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>

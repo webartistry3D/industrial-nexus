@@ -23,6 +23,14 @@ export class NotificationsService {
       },
     });
 
+    // Fetch user info for the notification
+    const user = await this.prisma.user.findUnique({
+      where: { id: dto.userId },
+      select: { firstName: true, lastName: true },
+    });
+
+    const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User';
+
     // Publish to Redis so the TrackingGateway can push it via WebSocket
     await this.redis.publish(
       'notification:new',
@@ -31,6 +39,7 @@ export class NotificationsService {
         notification: {
           id: notification.id,
           userId: dto.userId,
+          userName,
           type: notification.type,
           title: notification.title,
           message: notification.message,
@@ -46,11 +55,25 @@ export class NotificationsService {
   }
 
   async findAllForUser(userId: string) {
-    return this.prisma.notification.findMany({
+    const notifications = await this.prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
+
+    // Fetch user info for all notifications
+    const userIds = [...new Set(notifications.map(n => n.userId))];
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, firstName: true, lastName: true },
+    });
+
+    const userMap = new Map(users.map(u => [u.id, `${u.firstName} ${u.lastName}`]));
+
+    return notifications.map(n => ({
+      ...n,
+      userName: userMap.get(n.userId) || 'Unknown User',
+    }));
   }
 
   async getUnreadCount(userId: string) {

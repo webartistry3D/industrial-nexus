@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 export interface Notification {
   id: string;
   userId?: string;
+  userName?: string;
   type: string;
   title: string;
   message: string;
