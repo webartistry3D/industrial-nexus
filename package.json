@@ -27,5 +27,11 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "overrides": {
+    "next": "^14.2.35"
+  },
+  "dependencies": {
+    "next": "^14.2.35"
   }
 }
