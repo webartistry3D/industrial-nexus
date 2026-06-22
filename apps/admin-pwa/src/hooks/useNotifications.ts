@@ -23,7 +23,7 @@ export function useNotifications() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const initialFetchDone = useRef(false);
   const mountedRef = useRef(false);
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -102,6 +102,11 @@ export function useNotifications() {
 
   // Connect WebSocket and listen for real-time notifications
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     if (mountedRef.current) return;
     mountedRef.current = true;
 
@@ -170,7 +175,7 @@ export function useNotifications() {
       socketRef.current = null;
       mountedRef.current = false;
     };
-  }, []);
+  }, [authLoading, user]);
 
   return {
     notifications,
