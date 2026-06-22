@@ -471,6 +471,7 @@ export class OrdersService {
         adminOps.map(u => u.id),
         orderNumber,
         orderId,
+        clientId,
       );
     } else if (newStatus === OrderStatus.CANCELLED) {
       await this.notificationsService.notifyOrderStatusChanged(

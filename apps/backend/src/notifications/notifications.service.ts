@@ -245,9 +245,9 @@ export class NotificationsService {
     ]);
   }
 
-  async notifyOrderDispatchReady(adminOpsUserIds: string[], orderNumber: string, orderId: string) {
-    await Promise.all(
-      adminOpsUserIds.map(userId =>
+  async notifyOrderDispatchReady(adminOpsUserIds: string[], orderNumber: string, orderId: string, clientUserId?: string) {
+    await Promise.all([
+      ...adminOpsUserIds.map(userId =>
         this.create({
           userId,
           type: NotificationType.ORDER_STATUS_CHANGED,
@@ -257,7 +257,15 @@ export class NotificationsService {
           entityType: 'ORDER',
         }),
       ),
-    );
+      ...(clientUserId ? [this.create({
+        userId: clientUserId,
+        type: NotificationType.ORDER_STATUS_CHANGED,
+        title: 'Order Ready for Dispatch',
+        message: `Your order ${orderNumber} has completed kitting and is ready for dispatch`,
+        entityId: orderId,
+        entityType: 'ORDER',
+      })] : []),
+    ]);
   }
 
   async notifyDriverAssigned(
