@@ -314,10 +314,10 @@ function OrdersPageContent() {
 
               {/* View Toggle Buttons */}
               <div className="flex gap-2 md:w-px md:bg-gray-200 md:dark:bg-slate-700 md:mx-1 hidden md:block"></div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center md:hidden">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`flex-1 md:flex-none md:w-auto p-2.5 rounded-xl transition-all duration-300 ${
+                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'list'
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
@@ -328,7 +328,32 @@ function OrdersPageContent() {
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`flex-1 md:flex-none md:w-auto p-2.5 rounded-xl transition-all duration-300 ${
+                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                    viewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid2x2 className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="hidden md:block w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+              <div className="hidden md:flex gap-2">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    viewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'grid'
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'

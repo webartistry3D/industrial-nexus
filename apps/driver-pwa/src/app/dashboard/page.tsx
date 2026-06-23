@@ -211,19 +211,19 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2">
             <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
-              <div className="text-2xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400 font-mono">{loading ? '...' : activeTrips.length}</div>
+              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 font-mono">{loading ? '...' : activeTrips.length}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Active</div>
             </div>
             <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
-              <div className="text-2xl sm:text-4xl font-bold text-green-600 dark:text-green-400 font-mono">{loading ? '...' : completedToday}</div>
+              <div className="text-4xl font-bold text-green-600 dark:text-green-400 font-mono">{loading ? '...' : completedToday}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Today</div>
             </div>
             <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
-              <div className="text-2xl sm:text-4xl font-bold text-purple-600 dark:text-purple-400 font-mono">{loading ? '...' : thisWeekCompleted}</div>
+              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 font-mono">{loading ? '...' : thisWeekCompleted}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">{dateFilter === 'today' ? 'Today' : dateFilter === 'yesterday' ? 'Yesterday' : dateFilter === 'last_7_days' ? '7 Days' : '30 Days'}</div>
             </div>
             <div className="bg-white dark:bg-slate-700 rounded-xl p-2 sm:p-3 text-center border border-gray-200 dark:border-slate-600 shadow-sm">
-              <div className="text-2xl sm:text-4xl font-bold text-yellow-600 dark:text-yellow-400 font-mono">{loading ? '...' : totalCompleted}</div>
+              <div className="text-4xl font-bold text-yellow-600 dark:text-yellow-400 font-mono">{loading ? '...' : totalCompleted}</div>
               <div className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-200 mt-1">Total</div>
             </div>
           </div>

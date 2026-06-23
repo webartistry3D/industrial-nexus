@@ -115,13 +115,13 @@ export default function TripsPage() {
         {/* Stats - Aligned with Dashboard */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 font-mono">
               {loading ? '...' : activeTripsCount}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Active Trips</div>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 font-mono">
+            <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 font-mono">
               {loading ? '...' : totalCompletedCount}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Total Completed</div>

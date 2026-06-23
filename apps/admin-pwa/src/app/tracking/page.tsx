@@ -301,7 +301,7 @@ export default function TrackingPage() {
                 {fleetLocation.location && (
                   <MapMarker
                     position={{ lat: fleetLocation.location.lat, lng: fleetLocation.location.lng }}
-                    type="current"
+                    type="vehicle"
                   />
                 )}
                 
@@ -313,6 +313,7 @@ export default function TrackingPage() {
                       lng: fleetLocation.trip.order.pickupLocation.lng,
                     }}
                     type="pickup"
+                    label="📦"
                   />
                 )}
                 
@@ -324,6 +325,7 @@ export default function TrackingPage() {
                       lng: fleetLocation.trip.order.deliveryLocation.lng,
                     }}
                     type="delivery"
+                    label="🏠"
                   />
                 )}
               </GoogleMapWrapper>

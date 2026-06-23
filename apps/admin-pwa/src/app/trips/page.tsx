@@ -386,14 +386,14 @@ function TripsPageContent() {
             {/* KPI strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: 'Total Trips', value: analyticsLoading ? '—' : String(totalTripsAll), color: 'text-gray-900 dark:text-white' },
-                { label: 'Delivered', value: analyticsLoading ? '—' : String(totalDelivered), color: 'text-green-600 dark:text-green-400' },
-                { label: 'Fleet On-Time', value: analyticsLoading ? '—' : avgOnTime !== null ? `${avgOnTime}%` : 'N/A', color: onTimeColor(avgOnTime) },
-                { label: 'Delayed', value: analyticsLoading ? '—' : String(totalDelayed), color: 'text-red-600 dark:text-red-400' },
+                { label: 'Total Trips', value: analyticsLoading ? '—' : String(totalTripsAll), color: 'text-4xl text-gray-900 dark:text-white' },
+                { label: 'Delivered', value: analyticsLoading ? '—' : String(totalDelivered), color: 'text-4xl text-green-600 dark:text-green-400' },
+                { label: 'Fleet On-Time', value: analyticsLoading ? '—' : avgOnTime !== null ? `${avgOnTime}%` : 'N/A', color: onTimeColor(avgOnTime), textClass: 'text-4xl' },
+                { label: 'Delayed', value: analyticsLoading ? '—' : String(totalDelayed), color: 'text-4xl text-red-600 dark:text-red-400' },
               ].map(k => (
                 <div key={k.label} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{k.label}</p>
-                  <p className={`text-2xl font-bold font-mono ${k.color}`}>{k.value}</p>
+                  <p className={`text-2xl font-bold font-mono ${k.color} ${k.textClass || ''}`}>{k.value}</p>
                 </div>
               ))}
             </div>

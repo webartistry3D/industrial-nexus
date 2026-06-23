@@ -276,7 +276,7 @@ export default function AnalyticsPage() {
         {/* KPI strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total Trips</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Ttal Trips</p>
             <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">
               {loading ? '—' : totalTrips}
             </p>
