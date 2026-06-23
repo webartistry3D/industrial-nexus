@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "nest build",
+    "build": "npx @nestjs/cli build",
     "dev": "npx -p @nestjs/cli nest start --watch",
     "start": "npx -p @nestjs/cli nest start",
     "start:debug": "npx -p @nestjs/cli nest start --debug --watch",
