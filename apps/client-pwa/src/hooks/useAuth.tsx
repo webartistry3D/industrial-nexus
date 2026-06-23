@@ -41,6 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data;
+      if (data.role !== 'CLIENT') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        return;
+      }
       setUser({ ...data, userId: data.userId ?? data.id });
     } catch {
       localStorage.removeItem('accessToken');
