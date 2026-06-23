@@ -18,89 +18,14 @@ export interface Notification {
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
-// Module-level singleton socket survives React StrictMode double-invoke
-let globalSocket: Socket | null = null;
-let currentToken = '';
-let activeUsers = 0;
-let disconnectGraceTimer: ReturnType<typeof setTimeout> | null = null;
-let isRefreshingGlobal = false;
-let initialFetchDone = false;
-
-function ensureSocket(token: string): Socket {
-  if (disconnectGraceTimer) {
-    clearTimeout(disconnectGraceTimer);
-    disconnectGraceTimer = null;
-  }
-
-  activeUsers++;
-
-  if (globalSocket && currentToken !== token) {
-    globalSocket.disconnect();
-    globalSocket = null;
-  }
-
-  if (globalSocket) {
-    if (!globalSocket.connected) globalSocket.connect();
-    currentToken = token;
-    return globalSocket;
-  }
-
-  currentToken = token;
-  const socket = io(`${WS_URL}/tracking`, {
-    auth: { token },
-    transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionDelay: 5000,
-  });
-
-  socket.on('connect', () => {
-    console.log('[Notifications WS] Connected');
-  });
-
-  socket.on('connect_error', async (err) => {
-    console.error('[Notifications WS] Connection error:', err);
-    const isTokenError = err.message?.includes('jwt expired') ||
-      err.message?.includes('TokenExpiredError') ||
-      err.message?.includes('Unauthorized') ||
-      err.message?.includes('invalid token');
-
-    if (isTokenError && !isRefreshingGlobal && globalSocket) {
-      isRefreshingGlobal = true;
-      const newToken = await refreshAccessToken();
-      isRefreshingGlobal = false;
-      if (newToken && globalSocket) {
-        currentToken = newToken;
-        globalSocket.auth = { token: newToken };
-        globalSocket.disconnect();
-        setTimeout(() => globalSocket?.connect(), 100);
-      }
-    }
-  });
-
-  globalSocket = socket;
-  return socket;
-}
-
-function releaseSocket() {
-  activeUsers = Math.max(0, activeUsers - 1);
-  if (activeUsers === 0) {
-    disconnectGraceTimer = setTimeout(() => {
-      if (activeUsers === 0) {
-        globalSocket?.disconnect();
-        globalSocket = null;
-        currentToken = '';
-        disconnectGraceTimer = null;
-        initialFetchDone = false;
-      }
-    }, 1000);
-  }
-}
-
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const socketRef = useRef<Socket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const initialFetchDone = useRef(false);
+  const mountedRef = useRef(false);
   const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
@@ -127,8 +52,8 @@ export function useNotifications() {
       const unread = list.filter((n: Notification) => !n.isRead).length;
       setNotifications(list);
       setUnreadCount(unread);
-      if (!initialFetchDone) {
-        initialFetchDone = true;
+      if (!initialFetchDone.current) {
+        initialFetchDone.current = true;
         if (unread > 0) playNotificationSoundRef.current();
       }
     } catch (err) {
@@ -182,32 +107,68 @@ export function useNotifications() {
       setLoading(false);
       return;
     }
+    if (mountedRef.current) return;
+    mountedRef.current = true;
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    let socket: Socket | null = null;
+    let isRefreshing = false;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 2;
 
-    const handleNotification = (notification: Notification) => {
-      if (notification.userId && notification.userId !== user?.userId) return;
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
-      playNotificationSoundRef.current();
+    const connectSocket = async (tokenOverride?: string) => {
+      const token = tokenOverride || (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null);
+      if (!token) return;
+
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+      }
+
+      socket = io(`${WS_URL}/tracking`, {
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 5000,
+      });
+
+      socket.on('connect', () => {
+        console.log('[Notifications WS] Connected');
+        reconnectAttempts = 0;
+      });
+
+      socket.on('notification:new', (notification: Notification) => {
+        if (notification.userId && notification.userId !== user?.userId) return;
+        setNotifications(prev => [notification, ...prev]);
+        setUnreadCount(prev => prev + 1);
+        playNotificationSoundRef.current();
+      });
+
+      socket.on('connect_error', async (err) => {
+        console.error('[Notifications WS] Connection error:', err);
+        const isTokenError = err.message?.includes('jwt expired') ||
+          err.message?.includes('TokenExpiredError') ||
+          err.message?.includes('Unauthorized') ||
+          err.message?.includes('invalid token');
+
+        if (isTokenError && !isRefreshing && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts += 1;
+          isRefreshing = true;
+          const newToken = await refreshAccessToken();
+          isRefreshing = false;
+          if (newToken) connectSocket(newToken);
+        }
+      });
+
+      socketRef.current = socket;
     };
 
-    const socket = ensureSocket(token);
-    socket.on('notification:new', handleNotification);
-
-    if (!initialFetchDone) {
-      fetchNotificationsRef.current();
-    } else {
-      setLoading(false);
-    }
+    fetchNotificationsRef.current();
+    connectSocket();
 
     return () => {
-      socket.off('notification:new', handleNotification);
-      releaseSocket();
+      socket?.disconnect();
+      socketRef.current = null;
+      mountedRef.current = false;
     };
   }, [authLoading, user]);
 
