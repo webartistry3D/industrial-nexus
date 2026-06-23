@@ -183,7 +183,7 @@ export default function Dashboard() {
 
         {/* Top Row: Clock & Weather */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-blue-500/10 border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
             <AnalogClock />
           </div>
           <WeatherWidget />
@@ -271,18 +271,18 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push('/trips')}
-            className="group bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:opacity-80 transition-opacity duration-150 border border-blue-500/30 dark:border-blue-400/30"
+            className="bg-blue-500 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-blue-600 border border-blue-600"
           >
-            <div className="p-2 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
+            <div className="p-2 bg-white/20 rounded-xl">
               <Truck className="w-6 h-6" />
             </div>
             <span className="text-sm font-semibold">View All Trips</span>
           </button>
           <button
             onClick={() => router.push('/tracking')}
-            className="group bg-gradient-to-r from-slate-600 to-slate-700 dark:from-slate-700 dark:to-slate-800 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:opacity-80 transition-opacity duration-150 border border-slate-500/30 dark:border-slate-600/30"
+            className="bg-slate-600 dark:bg-slate-700 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-slate-700 border border-slate-700"
           >
-            <div className="p-2 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
+            <div className="p-2 bg-white/20 rounded-xl">
               <MapPin className="w-6 h-6" />
             </div>
             <span className="text-sm font-semibold">Live Tracking</span>
@@ -402,14 +402,14 @@ export default function Dashboard() {
         {/* Empty State */}
         {!loading && activeTrips.length === 0 && (
           <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="p-4 bg-blue-500 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
               <Truck className="w-10 h-10 text-white" />
             </div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-lg">No Active Trips</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">You're all caught up! Great work today.</p>
             <button
               onClick={() => router.push('/trips')}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-6 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+              className="bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-semibold active:bg-blue-600"
             >
               View History
             </button>
