@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, MapPin, Calendar, CheckCircle, Clock, XCircle, ArrowRight, History } from 'lucide-react';
+import { Package, MapPin, Calendar, CheckCircle, Clock, XCircle, ArrowRight, History, List, Grid2x2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 
@@ -9,6 +9,7 @@ type OrderStatus = 'SUBMITTED' | 'APPROVED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIV
 
 interface Order {
   id: string;
+  orderNumber: string;
   cargoDescription: string;
   status: OrderStatus;
   totalWeight: number;
@@ -25,6 +26,7 @@ export default function HistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<OrderStatus | 'ALL'>('ALL');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const { user } = useAuth();
@@ -151,25 +153,103 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {(['ALL', 'DELIVERED', 'IN_TRANSIT', 'SUBMITTED'] as const).map((status) => (
+        {/* Filter Tabs & View Toggle */}
+        <div className="md:flex md:gap-2 md:overflow-x-auto md:pb-2 space-y-2 md:space-y-0">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-none md:flex md:gap-2 w-full md:w-auto">
             <button
-              key={status}
-              onClick={() => setFilter(status)}
+              onClick={() => setFilter('ALL')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
-                filter === status
+                filter === 'ALL'
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
-              {status.replace('_', ' ')}
+              All
             </button>
-          ))}
+            <button
+              onClick={() => setFilter('DELIVERED')}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                filter === 'DELIVERED'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+            >
+              Delivered
+            </button>
+            <button
+              onClick={() => setFilter('IN_TRANSIT')}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                filter === 'IN_TRANSIT'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+            >
+              In Transit
+            </button>
+            <button
+              onClick={() => setFilter('SUBMITTED')}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                filter === 'SUBMITTED'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+            >
+              Submitted
+            </button>
+          </div>
+          <div className="flex gap-2 justify-center md:hidden">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'list'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="List view"
+            >
+              <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'grid'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="Grid view"
+            >
+              <Grid2x2 className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="hidden md:block w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+          <div className="hidden md:flex gap-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'list'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="List view"
+            >
+              <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'grid'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="Grid view"
+            >
+              <Grid2x2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Orders List */}
-        <div className="space-y-3">
+        <div className="max-h-[60vh] overflow-y-auto">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
@@ -177,57 +257,101 @@ export default function HistoryPage() {
               </div>
               <p className="text-gray-600 dark:text-gray-400 font-medium">No orders found</p>
             </div>
+          ) : viewMode === 'list' ? (
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-x-auto">
+              <table className="w-full min-w-[500px]">
+                <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Order #</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Description</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Weight</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                  {filteredOrders.map((order) => {
+                    const StatusIcon = getStatusIcon(order.status);
+                    return (
+                      <tr key={order.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <p className="font-semibold text-gray-900 dark:text-white font-mono text-sm">{order.orderNumber}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">{order.cargoDescription || 'N/A'}</p>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight} kg</p>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            <StatusIcon className="w-3 h-3" />
+                            {order.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{new Date(order.createdAt).toLocaleDateString()}</p>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            filteredOrders.map((order) => {
-              const StatusIcon = getStatusIcon(order.status);
-              return (
-                <div
-                  key={order.id}
-                  className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                        {order.cargoDescription || 'Order #' + order.id.slice(-6)}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight} kg</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}>
-                      <StatusIcon className="w-3 h-3" />
-                      {order.status.replace('_', ' ')}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
-                        <MapPin className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
-                      </div>
+            <div className="space-y-3">
+              {filteredOrders.map((order) => {
+                const StatusIcon = getStatusIcon(order.status);
+                return (
+                  <div
+                    key={order.id}
+                    className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Pickup</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{order.pickupLocation?.address || 'N/A'}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white font-mono mb-1">{order.orderNumber}</p>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                          {order.cargoDescription || 'Order #' + order.id.slice(-6)}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight} kg</p>
                       </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}>
+                        <StatusIcon className="w-3 h-3" />
+                        {order.status.replace('_', ' ')}
+                      </span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-sm">
-                        <MapPin className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Delivery</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{order.deliveryLocation?.address || 'N/A'}</p>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100/50 dark:border-slate-700/50">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+                          <MapPin className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Pickup</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{order.pickupLocation?.address || 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-sm">
+                          <MapPin className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Delivery</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{order.deliveryLocation?.address || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100/50 dark:border-slate-700/50">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
 

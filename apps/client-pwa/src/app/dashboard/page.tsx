@@ -19,6 +19,7 @@ interface DashboardStats {
 interface Shipment {
   id: string;
   orderNumber: string;
+  cargoDescription?: string;
   status: string;
   pickupLocation: { lat: number; lng: number; address: string };
   deliveryLocation: { lat: number; lng: number; address: string };
@@ -284,7 +285,12 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {shipment.cargoDescription && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {shipment.cargoDescription}
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-500 dark:text-gray-500 truncate">
                         {shipment.deliveryLocation.address}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
@@ -337,7 +343,12 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {order.cargoDescription && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {order.cargoDescription}
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-500 dark:text-gray-500 truncate">
                         {order.deliveryLocation.address}
                       </p>
                       <div className="flex items-center gap-2 mt-2">

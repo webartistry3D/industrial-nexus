@@ -197,7 +197,7 @@ export default function Dashboard() {
             </button>
             <button onClick={() => router.push('/drivers')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-orange-800/20 rounded-xl border border-orange-200/50 dark:border-orange-700/50 text-orange-700 dark:text-orange-400 text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-orange-500 rounded-lg text-white group-hover:scale-110 transition-transform"><UserPlus className="w-4 h-4" /></div>
-              <span>Drivers</span>
+              <span>View Drivers</span>
             </button>
           </div>
         </div>

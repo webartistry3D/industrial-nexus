@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WeightWatchService } from './weight-watch.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { WeightStatus, HandlingTagType } from '@prisma/client';
+import { WeightStatus } from '@prisma/client';
 
 describe('WeightWatchService', () => {
   let service: WeightWatchService;
@@ -116,8 +116,8 @@ describe('WeightWatchService', () => {
       mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
 
       const result = await service.validateTripWeight(1000, 'vehicle-1', [
-        HandlingTagType.CHEMICAL,
-        HandlingTagType.HAZARDOUS,
+        'CHEMICAL',
+        'HAZARDOUS',
       ]);
 
       expect(result.canAssign).toBe(false);
@@ -135,8 +135,8 @@ describe('WeightWatchService', () => {
       mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
 
       const result = await service.validateTripWeight(1000, 'vehicle-1', [
-        HandlingTagType.HEAVY,
-        HandlingTagType.FRAGILE,
+        'HEAVY',
+        'FRAGILE',
       ]);
 
       expect(result.canAssign).toBe(false);
@@ -154,8 +154,8 @@ describe('WeightWatchService', () => {
       mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
 
       const result = await service.validateTripWeight(1000, 'vehicle-1', [
-        HandlingTagType.HEAVY,
-        HandlingTagType.FRAGILE,
+        'HEAVY',
+        'FRAGILE',
       ]);
 
       expect(result.canAssign).toBe(true);
@@ -172,8 +172,8 @@ describe('WeightWatchService', () => {
       mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
 
       const result = await service.validateTripWeight(1000, 'vehicle-1', [
-        HandlingTagType.FRAGILE,
-        HandlingTagType.CHEMICAL,
+        'FRAGILE',
+        'CHEMICAL',
       ]);
 
       expect(result.canAssign).toBe(false);
@@ -296,8 +296,8 @@ describe('WeightWatchService', () => {
 
       const result = await service.getWeightAlerts();
 
-      expect(result[0].trip.order.orderNumber).toBe('IN-ORD-2024-000001');
-      expect(result[0].trip.driver.user.firstName).toBe('John');
+      expect(result[0]?.trip?.order?.orderNumber).toBe('IN-ORD-2024-000001');
+      expect(result[0]?.trip?.driver?.user?.firstName).toBe('John');
     });
   });
 });

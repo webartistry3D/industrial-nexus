@@ -3,7 +3,7 @@ import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { OrderStatus, UserRole, Priority, KittingStatus, HandlingTagType } from '@prisma/client';
+import { OrderStatus, UserRole, Priority, KittingStatus } from '@prisma/client';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -88,7 +88,7 @@ describe('OrdersService', () => {
         totalWeight: 1000,
         pickupLocation: { lat: 6.5244, lng: 3.3792, address: 'Lagos' },
         deliveryLocation: { lat: 6.9, lng: 3.5, address: 'Ogun' },
-        handlingTags: [HandlingTagType.FRAGILE, HandlingTagType.HEAVY],
+        handlingTags: ['FRAGILE', 'HEAVY'],
       };
 
       const createdOrder = {
@@ -105,8 +105,8 @@ describe('OrdersService', () => {
 
       expect(mockPrisma.handlingTag.createMany).toHaveBeenCalledWith({
         data: [
-          { orderId: 'order-1', tag: HandlingTagType.FRAGILE },
-          { orderId: 'order-1', tag: HandlingTagType.HEAVY },
+          { orderId: 'order-1', tag: 'FRAGILE' },
+          { orderId: 'order-1', tag: 'HEAVY' },
         ],
       });
     });
@@ -190,7 +190,7 @@ describe('OrdersService', () => {
 
       await service.update(
         'order-1',
-        { handlingTags: [HandlingTagType.HEAVY, HandlingTagType.CHEMICAL] },
+        { handlingTags: ['HEAVY', 'CHEMICAL'] },
         'user-1',
         UserRole.CLIENT,
       );

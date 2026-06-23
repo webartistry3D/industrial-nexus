@@ -95,8 +95,8 @@ class ApiClient {
   }
 
   // Trips - Driver specific
-  async getMyTrips() {
-    const response = await this.client.get('/trips/my-trips');
+  async getMyTrips(params?: { page?: number; limit?: number }) {
+    const response = await this.client.get('/trips/my-trips', { params });
     return response.data;
   }
 

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { Order, PaginatedResponse } from '@/types';
-import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X, Scale } from 'lucide-react';
+import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X, Scale, List, Grid2x2, ChevronDown } from 'lucide-react';
 
 const CARGO_TYPES = [
   { value: '', label: 'All Cargo Types' },
@@ -22,7 +22,7 @@ const KITTING_STATUS_OPTIONS = [
   { value: '', label: 'All Flags' },
   { value: 'PENDING', label: 'Pending' },
   { value: 'AGGREGATION', label: 'Aggregation' },
-  { value: 'TECHNICAL_PACKAGING', label: 'Technical Packaging' },
+  { value: 'TECHNICAL_PACKAGING', label: 'Tech Packaging' },
   { value: 'QUALITY_CHECK', label: 'Quality Check' },
   { value: 'DISPATCH_READY', label: 'Dispatch Ready' },
 ];
@@ -50,6 +50,7 @@ function OrdersPageContent() {
   const [cargoTypeFilter, setCargoTypeFilter] = useState(cargoTypeParam || '');
   const [kittingStatusFilter, setKittingStatusFilter] = useState(kittingStatusParam || '');
   const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
   // Scroll to top on page load
@@ -228,9 +229,9 @@ function OrdersPageContent() {
           </div>
 
           {/* Search & Filters - Responsive Layout */}
-          <div className="flex flex-col md:flex-row gap-2">
-            {/* Search - Full width on mobile, flex-1 on desktop */}
-            <div className="relative w-full md:flex-1">
+          <div className="flex flex-col gap-2">
+            {/* Search - Full width */}
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
@@ -240,10 +241,54 @@ function OrdersPageContent() {
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
               />
             </div>
-            
-            {/* Filters Row - Stack vertically on mobile, inline on desktop */}
-            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-              {/* Cargo Type Filter */}
+
+            {/* Filters Row */}
+            <div className="flex flex-col md:flex-row gap-2 w-full">
+              {/* Status & Flags - Same row on mobile */}
+              <div className="flex gap-1 md:gap-2 w-full md:w-auto overflow-hidden">
+                {/* Status Filter */}
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setStatusFilter(value);
+                    setPage(1);
+                    if (statusParam && value) {
+                      router.push('/orders');
+                    }
+                  }}
+                  className="w-1/2 md:flex-none md:w-auto md:min-w-[140px] px-2 md:px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all truncate"
+                >
+                  <option value="">All Status</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="SUBMITTED">Submitted</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="KITTING">Kitting</option>
+                  <option value="DISPATCH_READY">Dispatch Ready</option>
+                  <option value="ASSIGNED">Assigned</option>
+                  <option value="IN_TRANSIT">In Transit</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+
+                {/* Kitting Status Filter (Flags) */}
+                <select
+                  value={kittingStatusFilter}
+                  onChange={(e) => {
+                    setKittingStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-1/2 md:flex-none md:w-auto md:min-w-[160px] px-2 md:px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all truncate"
+                >
+                  {KITTING_STATUS_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Cargo Type Filter - Full width on mobile, below Status/Flags */}
               <div className="relative w-full md:flex-none md:w-auto md:min-w-[160px]">
                 <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <select
@@ -252,12 +297,11 @@ function OrdersPageContent() {
                     const value = e.target.value;
                     setCargoTypeFilter(value);
                     setPage(1);
-                    // Clear URL param when using dropdown
                     if (cargoTypeParam && value) {
                       router.push('/orders');
                     }
                   }}
-                  className="w-full md:w-auto md:min-w-[160px] pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer focus:shadow-lg focus:shadow-blue-500/10 transition-all"
+                  className="w-full md:w-auto md:min-w-[160px] pl-10 pr-10 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer focus:shadow-lg focus:shadow-blue-500/10 transition-all"
                 >
                   {CARGO_TYPES.map(type => (
                     <option key={type.value} value={type.value}>
@@ -265,49 +309,35 @@ function OrdersPageContent() {
                     </option>
                   ))}
                 </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
-              
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setStatusFilter(value);
-                  setPage(1);
-                  // Clear URL param when using dropdown
-                  if (statusParam && value) {
-                    router.push('/orders');
-                  }
-                }}
-                className="w-full md:flex-none md:w-auto md:min-w-[140px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
-              >
-                <option value="">All Status</option>
-                <option value="DRAFT">Draft</option>
-                <option value="SUBMITTED">Submitted</option>
-                <option value="APPROVED">Approved</option>
-                <option value="KITTING">Kitting</option>
-                <option value="DISPATCH_READY">Dispatch Ready</option>
-                <option value="ASSIGNED">Assigned</option>
-                <option value="IN_TRANSIT">In Transit</option>
-                <option value="DELIVERED">Delivered</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-              
-              {/* Kitting Status Filter (Flags) */}
-              <select
-                value={kittingStatusFilter}
-                onChange={(e) => {
-                  setKittingStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full md:flex-none md:w-auto md:min-w-[160px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
-              >
-                {KITTING_STATUS_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+
+              {/* View Toggle Buttons */}
+              <div className="flex gap-2 md:w-px md:bg-gray-200 md:dark:bg-slate-700 md:mx-1 hidden md:block"></div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex-1 md:flex-none md:w-auto p-2.5 rounded-xl transition-all duration-300 ${
+                    viewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`flex-1 md:flex-none md:w-auto p-2.5 rounded-xl transition-all duration-300 ${
+                    viewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid2x2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
           
@@ -433,8 +463,58 @@ function OrdersPageContent() {
                 </button>
               )}
             </div>
+          ) : viewMode === 'list' ? (
+            // Table View
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Order #</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Description</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Weight</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Priority</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      onClick={() => router.push(`/orders/${order.id}`)}
+                      className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber || `Order ${String(order.id).slice(0, 8)}`}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{order.client?.firstName || ''} {order.client?.lastName || ''}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{order.cargoDescription || 'No description'}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                          {order.status?.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
+                          {order.priority}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            filteredOrders.map((order) => (
+            // Card View (Grid)
+            <div className="space-y-3">
+              {filteredOrders.map((order) => (
               <div
                 key={order.id}
                 onClick={() => router.push(`/orders/${order.id}`)}
@@ -501,7 +581,8 @@ function OrdersPageContent() {
                   </div>
                 )}
               </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
 

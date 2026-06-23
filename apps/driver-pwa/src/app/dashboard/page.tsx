@@ -384,6 +384,9 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        {trip.order?.cargoDescription}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500 truncate">
                         {trip.order?.deliveryLocation?.address}
                       </p>
                       <div className="flex items-center gap-2 mt-2">

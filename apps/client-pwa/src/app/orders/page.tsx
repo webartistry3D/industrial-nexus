@@ -195,7 +195,12 @@ export default function OrdersPage() {
                           {order.status}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {order.cargoDescription && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {order.cargoDescription}
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-500 dark:text-gray-500 truncate">
                         {order.deliveryLocation.address}
                       </p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">

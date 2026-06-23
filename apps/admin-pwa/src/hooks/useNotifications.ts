@@ -54,7 +54,11 @@ export function useNotifications() {
       setUnreadCount(unread);
       if (!initialFetchDone.current) {
         initialFetchDone.current = true;
-        if (unread > 0) playNotificationSoundRef.current();
+        const soundPlayed = sessionStorage.getItem('notificationSoundPlayed');
+        if (!soundPlayed && unread > 0) {
+          playNotificationSoundRef.current();
+          sessionStorage.setItem('notificationSoundPlayed', 'true');
+        }
       }
     } catch (err) {
       console.error('[Notifications] Failed to fetch:', err);
