@@ -11,15 +11,21 @@ interface TopNavProps {
 }
 
 export function TopNav({ role = 'client' }: TopNavProps) {
-  const router = useRouter();
   const pathname = usePathname();
+
+  if (pathname === '/login') return null;
+
+  return <TopNavInner role={role} />;
+}
+
+function TopNavInner({ role }: { role: 'admin' | 'client' | 'driver' }) {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDark, setIsDark] = useState(false);
   
   useEffect(() => {
-    // Check initial theme
     const initialTheme = document.documentElement.classList.contains('dark');
     setIsDark(initialTheme);
   }, []);
@@ -43,13 +49,6 @@ export function TopNav({ role = 'client' }: TopNavProps) {
     return 'Client Portal';
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -66,9 +65,6 @@ export function TopNav({ role = 'client' }: TopNavProps) {
     if (hrs < 24) return `${hrs}h ago`;
     return `${Math.floor(hrs / 24)}d ago`;
   };
-
-  // Hide on login page
-  if (pathname === '/login') return null;
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
