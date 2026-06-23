@@ -59,7 +59,7 @@ describe('OrdersService', () => {
 
       const createdOrder = {
         id: 'order-1',
-        orderNumber: 'ORD-2024-000001',
+        orderNumber: 'IN-ORD-2024-000001',
         ...createOrderDto,
         status: OrderStatus.DRAFT,
         clientId: 'user-1',
@@ -93,7 +93,7 @@ describe('OrdersService', () => {
 
       const createdOrder = {
         id: 'order-1',
-        orderNumber: 'ORD-2024-000001',
+        orderNumber: 'IN-ORD-2024-000001',
         status: OrderStatus.DRAFT,
       };
 

@@ -566,7 +566,7 @@ export class OrdersService {
   private async generateOrderNumber(): Promise<string> {
     const date = new Date();
     const year = date.getFullYear();
-    const prefix = `ORD-${year}`;
+    const prefix = `IN-ORD-${year}`;
     
     const count = await this.prisma.order.count({
       where: {

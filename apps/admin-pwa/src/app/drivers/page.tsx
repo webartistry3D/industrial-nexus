@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { Driver, PaginatedResponse, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
 import { 
   Users, Search, Plus, Mail, Shield, MapPin, CheckCircle, XCircle, AlertCircle,
-  ChevronRight, Filter, UserCheck, UserX, Truck, Edit, Trash2
+  ChevronRight, Filter, UserCheck, UserX, Truck, Edit, Trash2, List, Grid2x2
 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -82,6 +82,7 @@ export default function DriversPage() {
   const [availabilityFilter, setAvailabilityFilter] = useState('');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [driversViewMode, setDriversViewMode] = useState<'list' | 'grid'>('list');
   
   // KYC Review State
   const [showKycModal, setShowKycModal] = useState(false);
@@ -97,6 +98,7 @@ export default function DriversPage() {
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [vehicleStatusFilter, setVehicleStatusFilter] = useState('');
   const [vehicleCategoryFilter, setVehicleCategoryFilter] = useState('');
+  const [vehiclesViewMode, setVehiclesViewMode] = useState<'list' | 'grid'>('list');
   const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
   const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
@@ -477,6 +479,50 @@ export default function DriversPage() {
             </button>
           </div>
 
+          {/* Drivers Stats */}
+          {activeTab === 'drivers' && (
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</p>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+                <p className="text-4xl font-bold text-green-600 font-mono">
+                  {drivers.filter(d => d.status === 'ACTIVE').length}
+                </p>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
+                <p className="text-4xl font-bold text-blue-600 font-mono">
+                  {drivers.filter(d => d.availability === 'ON_TRIP').length}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Vehicles Stats */}
+          {activeTab === 'vehicles' && (
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</p>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+                <p className="text-4xl font-bold text-green-600 font-mono">
+                  {vehicles.filter(v => v.status === 'ACTIVE').length}
+                </p>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Partitioned</p>
+                <p className="text-4xl font-bold text-blue-600 font-mono">
+                  {vehicles.filter(v => v.isPartitioned).length}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Drivers Search & Filters */}
           {activeTab === 'drivers' && (
             <div className="space-y-2">
@@ -531,6 +577,54 @@ export default function DriversPage() {
                   ))}
                 </select>
               </div>
+              <div className="flex gap-2 justify-center md:hidden">
+                <button
+                  onClick={() => setDriversViewMode('list')}
+                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                    driversViewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setDriversViewMode('grid')}
+                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                    driversViewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid2x2 className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="hidden md:flex gap-2 justify-center">
+                <button
+                  onClick={() => setDriversViewMode('list')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    driversViewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setDriversViewMode('grid')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    driversViewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid2x2 className="w-5 h-5" />
+                </button>
+              </div>
               {hasActiveDriverFilters && (
                 <button
                   onClick={clearDriverFilters}
@@ -575,6 +669,54 @@ export default function DriversPage() {
                   ))}
                 </select>
               </div>
+              <div className="flex gap-2 justify-center md:hidden">
+                <button
+                  onClick={() => setVehiclesViewMode('list')}
+                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                    vehiclesViewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setVehiclesViewMode('grid')}
+                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                    vehiclesViewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid2x2 className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="hidden md:flex gap-2 justify-center">
+                <button
+                  onClick={() => setVehiclesViewMode('list')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    vehiclesViewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setVehiclesViewMode('grid')}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    vehiclesViewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <Grid2x2 className="w-5 h-5" />
+                </button>
+              </div>
               {hasActiveVehicleFilters && (
                 <button
                   onClick={clearVehicleFilters}
@@ -590,28 +732,8 @@ export default function DriversPage() {
         {/* Drivers Content */}
         {activeTab === 'drivers' && (
           <>
-            {/* Stats Summary */}
-            <div className="px-4 py-3 grid grid-cols-3 gap-3">
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</p>
-              </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-4xl font-bold text-green-600 font-mono">
-                  {drivers.filter(d => d.status === 'ACTIVE').length}
-                </p>
-              </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
-                <p className="text-4xl font-bold text-blue-600 font-mono">
-                  {drivers.filter(d => d.availability === 'ON_TRIP').length}
-                </p>
-              </div>
-            </div>
-
             {/* Drivers List */}
-            <div className="px-4 space-y-3">
+            <div className="px-4">
               {driversLoading ? (
                 <div className="text-center py-12">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
@@ -641,8 +763,73 @@ export default function DriversPage() {
                     </button>
                   )}
                 </div>
+              ) : driversViewMode === 'list' ? (
+                // Table View
+                <div className="max-h-[60vh] overflow-y-auto">
+                  <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
+                      <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">License</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">KYC</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Availability</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Vehicle</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                        {filteredDrivers.map((driver) => (
+                          <tr
+                            key={driver.id}
+                            onClick={() => router.push(`/drivers/${driver.id}`)}
+                            className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors"
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                  <span className="text-sm font-semibold text-white">
+                                    {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900 dark:text-white">{driver.user?.firstName} {driver.user?.lastName}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">{driver.user?.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">{driver.licenseNumber}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDriverStatusColor(driver.status)}`}>
+                                {driver.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleViewKycDocuments(driver); }}
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getKycColor(driver.kycStatus)} hover:opacity-80 transition-opacity`}
+                              >
+                                {driver.kycStatus}
+                              </button>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(driver.availability)}`}>
+                                {driver.availability.replace('_', ' ')}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">
+                              {driver.vehicle ? `${driver.vehicle.plateNumber}` : 'None'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               ) : (
-                filteredDrivers.map((driver) => (
+                // Grid View (Cards)
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {filteredDrivers.map((driver) => (
                   <div
                     key={driver.id}
                     className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
@@ -726,7 +913,8 @@ export default function DriversPage() {
                       </button>
                     </div>
                   </div>
-                ))
+                ))}
+                </div>
               )}
             </div>
 
@@ -758,28 +946,8 @@ export default function DriversPage() {
         {/* Vehicles Content */}
         {activeTab === 'vehicles' && (
           <>
-            {/* Stats Summary */}
-            <div className="px-4 py-3 grid grid-cols-3 gap-3">
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</p>
-              </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-4xl font-bold text-green-600 font-mono">
-                  {vehicles.filter(v => v.status === 'ACTIVE').length}
-                </p>
-              </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Partitioned</p>
-                <p className="text-4xl font-bold text-blue-600 font-mono">
-                  {vehicles.filter(v => v.isPartitioned).length}
-                </p>
-              </div>
-            </div>
-
             {/* Vehicles List */}
-            <div className="px-4 space-y-3">
+            <div className="px-4">
               {vehiclesLoading ? (
                 <div className="text-center py-12">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
@@ -809,8 +977,57 @@ export default function DriversPage() {
                     </button>
                   )}
                 </div>
+              ) : vehiclesViewMode === 'list' ? (
+                // Table View
+                <div className="max-h-[60vh] overflow-y-auto">
+                  <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
+                      <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Plate Number</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Capacity</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Partitioned</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                        {filteredVehicles.map((vehicle) => (
+                          <tr
+                            key={vehicle.id}
+                            className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors"
+                          >
+                            <td className="px-4 py-3 font-mono text-sm text-gray-900 dark:text-white font-medium">{vehicle.plateNumber}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleCategoryColor(vehicle.category)}`}>
+                                {vehicle.category}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">{vehicle.capacityKg.toLocaleString()} kg</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleStatusColor(vehicle.status)}`}>
+                                {vehicle.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              {vehicle.isPartitioned ? (
+                                <div className="p-1 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm inline-block">
+                                  <CheckCircle className="w-4 h-4 text-white" />
+                                </div>
+                              ) : (
+                                <XCircle className="w-5 h-5 text-gray-400" />
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               ) : (
-                filteredVehicles.map((vehicle) => (
+                // Grid View (Cards)
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {filteredVehicles.map((vehicle) => (
                   <div
                     key={vehicle.id}
                     className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
@@ -873,7 +1090,8 @@ export default function DriversPage() {
                       </button>
                     </div>
                   </div>
-                ))
+                ))}
+                </div>
               )}
             </div>
           </>

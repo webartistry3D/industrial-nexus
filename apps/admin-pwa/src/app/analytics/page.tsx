@@ -155,6 +155,8 @@ export default function AnalyticsPage() {
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
   const [trendDays, setTrendDays] = useState(30);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -173,12 +175,17 @@ export default function AnalyticsPage() {
     if (user) fetchTrends(trendDays);
   }, [trendDays]);
 
+  useEffect(() => {
+    if (user) fetchData();
+  }, [page]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await api.getDriverPerformance();
-      setDrivers(data);
+      setDrivers(data.data || data);
+      setMeta({ page: 1, limit: 10, total: (data.data || data).length, totalPages: 1 });
     } catch (err: any) {
       setError('Failed to load analytics data');
     } finally {
@@ -268,27 +275,27 @@ export default function AnalyticsPage() {
 
         {/* KPI strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Trips</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white font-mono">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total Trips</p>
+            <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">
               {loading ? '—' : totalTrips}
             </p>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Delivered</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400 font-mono">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Delivered</p>
+            <p className="text-4xl font-bold text-green-600 dark:text-green-400 font-mono">
               {loading ? '—' : totalDelivered}
             </p>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fleet On-Time</p>
-            <p className={`text-2xl font-bold font-mono ${onTimeColor(avgOnTime)}`}>
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Fleet On-Time</p>
+            <p className={`text-4xl font-bold font-mono ${onTimeColor(avgOnTime)}`}>
               {loading ? '—' : avgOnTime !== null ? `${avgOnTime}%` : 'N/A'}
             </p>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Delayed</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Delayed</p>
+            <p className="text-4xl font-bold text-red-600 dark:text-red-400 font-mono">
               {loading ? '—' : totalDelayed}
             </p>
           </div>
@@ -342,8 +349,9 @@ export default function AnalyticsPage() {
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="max-h-[60vh] overflow-y-auto">
+                <div className="hidden sm:block overflow-x-auto">
+                  <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 dark:bg-slate-700/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                       {([
@@ -422,6 +430,7 @@ export default function AnalyticsPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* Mobile card list */}
@@ -470,6 +479,27 @@ export default function AnalyticsPage() {
                     )}
                   </div>
                 ))}
+              </div>
+
+              {/* Pagination */}
+              <div className="px-4 py-4 flex items-center justify-between border-t border-gray-100 dark:border-slate-700">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium font-mono">
+                  Page {page}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+                  disabled={page === meta.totalPages}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Next
+                </button>
               </div>
             </>
           )}

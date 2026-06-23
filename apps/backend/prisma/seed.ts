@@ -418,7 +418,7 @@ async function main() {
   const orders = [
     {
       id: id('order-1'),
-      orderNumber: 'ORD-2024-001',
+      orderNumber: 'IN-ORD-2024-000001',
       clientId: id('client-1'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 3500,
@@ -433,7 +433,7 @@ async function main() {
     },
     {
       id: id('order-2'),
-      orderNumber: 'ORD-2024-002',
+      orderNumber: 'IN-ORD-2024-000002',
       clientId: id('client-2'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 8500,
@@ -448,7 +448,7 @@ async function main() {
     },
     {
       id: id('order-3'),
-      orderNumber: 'ORD-2024-003',
+      orderNumber: 'IN-ORD-2024-000003',
       clientId: id('client-3'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 2200,
@@ -463,7 +463,7 @@ async function main() {
     },
     {
       id: id('order-4'),
-      orderNumber: 'ORD-2024-004',
+      orderNumber: 'IN-ORD-2024-000004',
       clientId: id('client-1'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 12000,
@@ -478,7 +478,7 @@ async function main() {
     },
     {
       id: id('order-5'),
-      orderNumber: 'ORD-2024-005',
+      orderNumber: 'IN-ORD-2024-000005',
       clientId: id('client-2'),
       status: OrderStatus.DELIVERED,
       totalWeight: 4800,
@@ -493,7 +493,7 @@ async function main() {
     },
     {
       id: id('order-6'),
-      orderNumber: 'ORD-2024-006',
+      orderNumber: 'IN-ORD-2024-000006',
       clientId: id('client-3'),
       status: OrderStatus.SUBMITTED,
       totalWeight: 6500,
@@ -507,7 +507,7 @@ async function main() {
     },
     {
       id: id('order-7'),
-      orderNumber: 'ORD-2024-007',
+      orderNumber: 'IN-ORD-2024-000007',
       clientId: id('client-1'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 2800,
@@ -523,7 +523,7 @@ async function main() {
     // Additional orders for driver1
     {
       id: id('order-8'),
-      orderNumber: 'ORD-2024-008',
+      orderNumber: 'IN-ORD-2024-000008',
       clientId: id('client-1'),
       status: OrderStatus.ASSIGNED,
       totalWeight: 4200,
@@ -538,7 +538,7 @@ async function main() {
     },
     {
       id: id('order-9'),
-      orderNumber: 'ORD-2024-009',
+      orderNumber: 'IN-ORD-2024-000009',
       clientId: id('client-2'),
       status: OrderStatus.DELIVERED,
       totalWeight: 3100,
@@ -553,7 +553,7 @@ async function main() {
     },
     {
       id: id('order-10'),
-      orderNumber: 'ORD-2024-010',
+      orderNumber: 'IN-ORD-2024-000010',
       clientId: id('client-3'),
       status: OrderStatus.DELIVERED,
       totalWeight: 5500,
@@ -568,7 +568,7 @@ async function main() {
     },
     {
       id: id('order-11'),
-      orderNumber: 'ORD-2024-011',
+      orderNumber: 'IN-ORD-2024-000011',
       clientId: id('client-1'),
       status: OrderStatus.DELIVERED,
       totalWeight: 1800,
@@ -583,7 +583,7 @@ async function main() {
     },
     {
       id: id('order-12'),
-      orderNumber: 'ORD-2024-012',
+      orderNumber: 'IN-ORD-2024-000012',
       clientId: id('client-2'),
       status: OrderStatus.DELIVERED,
       totalWeight: 7200,

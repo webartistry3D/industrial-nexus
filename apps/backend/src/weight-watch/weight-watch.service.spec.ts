@@ -285,7 +285,7 @@ describe('WeightWatchService', () => {
           id: '1',
           status: WeightStatus.WARNING,
           trip: {
-            order: { orderNumber: 'ORD-2024-001' },
+            order: { orderNumber: 'IN-ORD-2024-000001' },
             driver: { user: { firstName: 'John', lastName: 'Doe' } },
             vehicle: { plateNumber: 'ABC123' },
           },
@@ -296,7 +296,7 @@ describe('WeightWatchService', () => {
 
       const result = await service.getWeightAlerts();
 
-      expect(result[0].trip.order.orderNumber).toBe('ORD-2024-001');
+      expect(result[0].trip.order.orderNumber).toBe('IN-ORD-2024-000001');
       expect(result[0].trip.driver.user.firstName).toBe('John');
     });
   });
