@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npx -p @nestjs/cli nest build",
+    "build": "nest build",
     "dev": "npx -p @nestjs/cli nest start --watch",
     "start": "npx -p @nestjs/cli nest start",
     "start:debug": "npx -p @nestjs/cli nest start --debug --watch",
@@ -61,7 +61,9 @@
     "typescript": "^5.4.0"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node ./prisma/seed.ts",
+    "schema": "./prisma/schema.prisma"
+
   },
   "jest": {
     "moduleFileExtensions": [
