@@ -1,13 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
 import { AuthProvider } from '@/hooks/useAuth'
 import { NavWrapper } from '@/components/nav-wrapper'
 import { ScrollToTop } from '@/components/scroll-to-top'
 import { OrientationLock } from '@/components/orientation-lock'
 import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
-const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Industrial Nexus - Client Portal',
@@ -39,7 +35,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50`} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="bg-gray-50" suppressHydrationWarning>
         <OrientationLock />
         <AuthProvider>
           <ScrollToTop />
