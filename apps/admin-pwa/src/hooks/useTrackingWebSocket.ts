@@ -78,6 +78,15 @@ export function useTrackingWebSocket() {
         }
       });
 
+      socket.on('package:location:update', (data) => {
+        if (data?.packageTrackerId) {
+          const handlers = eventHandlersRef.current.get(`package:${data.packageTrackerId}`);
+          if (handlers) {
+            handlers(data);
+          }
+        }
+      });
+
       socketRef.current = socket;
     } catch (err) {
       console.error('[Tracking WebSocket] Connection failed:', err);
@@ -103,6 +112,9 @@ export function useTrackingWebSocket() {
       } else if (eventType.startsWith('trip:')) {
         const tripId = eventType.split(':')[1];
         socketRef.current.emit('subscribe:trip', { tripId });
+      } else if (eventType.startsWith('package:')) {
+        const packageTrackerId = eventType.split(':')[1];
+        socketRef.current.emit('subscribe:package', { packageTrackerId });
       }
     }
   };
@@ -117,6 +129,9 @@ export function useTrackingWebSocket() {
       } else if (eventType.startsWith('trip:')) {
         const tripId = eventType.split(':')[1];
         socketRef.current.emit('unsubscribe:trip', { tripId });
+      } else if (eventType.startsWith('package:')) {
+        const packageTrackerId = eventType.split(':')[1];
+        socketRef.current.emit('unsubscribe:package', { packageTrackerId });
       }
     }
   };

@@ -3,19 +3,26 @@
 import { useEffect, useState, memo } from 'react';
 
 const AnalogClock = memo(function AnalogClock() {
-  const [angles, setAngles] = useState({ h: 0, m: 0, s: 0 });
+  const [time, setTime] = useState('');
+  const [date, setDate] = useState('');
 
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      const s = now.getSeconds();
-      const m = now.getMinutes();
-      const h = now.getHours();
-      setAngles({
-        h: h * 30 + m * 0.5,
-        m: m * 6 + s * 0.1,
-        s: s * 6,
-      });
+      setTime(
+        now.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      );
+      setDate(
+        now.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        })
+      );
     };
 
     update();
@@ -23,77 +30,30 @@ const AnalogClock = memo(function AnalogClock() {
     return () => clearInterval(timer);
   }, []);
 
+  const [main, period] = time.split(' ');
+
   return (
-    <div className="relative w-24 h-24 sm:w-32 sm:h-32">
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        {/* Clock face */}
-        <circle cx="50" cy="50" r="48" fill="#f8fafc" className="dark:fill-slate-800" stroke="#3b82f6" strokeWidth="2" />
-
-        {/* Hour markers */}
-        {[...Array(12)].map((_, i) => {
-          const angle = (i * 30 - 90) * (Math.PI / 180);
-          const x1 = Math.round(50 + 40 * Math.cos(angle));
-          const y1 = Math.round(50 + 40 * Math.sin(angle));
-          const x2 = Math.round(50 + 45 * Math.cos(angle));
-          const y2 = Math.round(50 + 45 * Math.sin(angle));
-          return (
-            <line
-              key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#94a3b8"
-              strokeWidth={i % 3 === 0 ? 2 : 1}
-              className="dark:stroke-slate-500"
-            />
-          );
-        })}
-
-        {/* Hour hand */}
-        <g transform={`rotate(${angles.h}, 50, 50)`}>
-          <line
-            x1="50"
-            y1="50"
-            x2="50"
-            y2="30"
-            stroke="#1e293b"
-            className="dark:stroke-gray-200"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-        </g>
-
-        {/* Minute hand */}
-        <g transform={`rotate(${angles.m}, 50, 50)`}>
-          <line
-            x1="50"
-            y1="50"
-            x2="50"
-            y2="20"
-            stroke="#64748b"
-            className="dark:stroke-slate-400"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </g>
-
-        {/* Second hand */}
-        <g transform={`rotate(${angles.s}, 50, 50)`}>
-          <line
-            x1="50"
-            y1="50"
-            x2="50"
-            y2="15"
-            stroke="#ef4444"
-            strokeWidth="1"
-            strokeLinecap="round"
-          />
-        </g>
-
-        {/* Center dot */}
-        <circle cx="50" cy="50" r="3" fill="#ef4444" />
-      </svg>
+    <div className="w-full flex flex-col items-center justify-center gap-1 py-1">
+      <div className="flex items-baseline gap-1.5">
+        <span
+          className="text-6xl sm:text-5xl md:text-8xl font-semibold tracking-tight text-gray-900 dark:text-white leading-none"
+          style={{ fontFamily: 'JetBrains Mono, monospace' }}
+        >
+          {main}
+        </span>
+        <span
+          className="text-xl sm:text-4xl md:text-6xl font-medium text-blue-500 dark:text-blue-400 leading-none self-end pb-0.5"
+          style={{ fontFamily: 'JetBrains Mono, monospace' }}
+        >
+          {period}
+        </span>
+      </div>
+      <span
+        className="text-base sm:text-xl md:text-2xl font-medium text-gray-400 dark:text-slate-500 tracking-wide uppercase"
+        style={{ fontFamily: 'JetBrains Mono, monospace' }}
+      >
+        {date}
+      </span>
     </div>
   );
 });

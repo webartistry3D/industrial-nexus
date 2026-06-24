@@ -104,6 +104,27 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
     console.log(`[Tracking] User ${client.data.userId} left ${room}`);
   }
 
+  @SubscribeMessage('subscribe:package')
+  async subscribeToPackage(
+    @MessageBody() data: { packageTrackerId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = `package:${data.packageTrackerId}`;
+    client.join(room);
+    console.log(`[Tracking] User ${client.data.userId} joined ${room}`);
+    client.emit('subscribed', { room });
+  }
+
+  @SubscribeMessage('unsubscribe:package')
+  async unsubscribeFromPackage(
+    @MessageBody() data: { packageTrackerId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = `package:${data.packageTrackerId}`;
+    client.leave(room);
+    console.log(`[Tracking] User ${client.data.userId} left ${room}`);
+  }
+
   private subscribeToRedis() {
     // Subscribe to location updates
     this.redis.subscribe('tracking:location', (message) => {
@@ -136,6 +157,18 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
         console.log(`[Tracking] Geofence event broadcast for trip ${data.tripId}: ${data.eventType}`);
       } catch (error) {
         console.error('[Tracking] Error processing geofence event:', error);
+      }
+    });
+
+    // Subscribe to package location updates
+    this.redis.subscribe('tracking:package:location', (message) => {
+      try {
+        const data = JSON.parse(message);
+        const room = `package:${data.packageTrackerId}`;
+        this.server.to(room).emit('package:location:update', data);
+        console.log(`[Tracking] Package location update broadcast for ${data.packageTrackerId}`);
+      } catch (error) {
+        console.error('[Tracking] Error processing package location update:', error);
       }
     });
 

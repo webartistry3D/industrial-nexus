@@ -169,7 +169,64 @@ class ApiClient {
   }
 
   async finishKitting(id: string) {
-    const response = await this.client.post(`/orders/${id}/finish-kitting`);
+    const response = await this.client.post(`/kitting/${id}/complete`);
+    return response.data;
+  }
+
+  async progressKitting(id: string, stage: string, barcodeVerified?: boolean, notes?: string) {
+    const response = await this.client.post(`/kitting/${id}/progress`, {
+      stage,
+      barcodeVerified,
+      notes,
+    });
+    return response.data;
+  }
+
+  async getKittingLogs(id: string) {
+    const response = await this.client.get(`/kitting/${id}/logs`);
+    return response.data;
+  }
+
+  async assignPackageTracker(orderId: string, packageTrackerId: string) {
+    const response = await this.client.post(`/kitting/${orderId}/assign-package-tracker`, {
+      packageTrackerId,
+    });
+    return response.data;
+  }
+
+  async unassignPackageTracker(orderId: string) {
+    const response = await this.client.post(`/kitting/${orderId}/unassign-package-tracker`);
+    return response.data;
+  }
+
+  async getAvailablePackageTrackers() {
+    const response = await this.client.get('/kitting/package-trackers/available');
+    return response.data;
+  }
+
+  // Package Trackers
+  async getPackageTrackers() {
+    const response = await this.client.get('/package-trackers');
+    return response.data;
+  }
+
+  async getPackageTracker(id: string) {
+    const response = await this.client.get(`/package-trackers/${id}`);
+    return response.data;
+  }
+
+  async createPackageTracker(data: { deviceId: string; name?: string }) {
+    const response = await this.client.post('/package-trackers', data);
+    return response.data;
+  }
+
+  async updatePackageTracker(id: string, data: { name?: string; status?: string; batteryLevel?: number }) {
+    const response = await this.client.patch(`/package-trackers/${id}`, data);
+    return response.data;
+  }
+
+  async deletePackageTracker(id: string) {
+    const response = await this.client.delete(`/package-trackers/${id}`);
     return response.data;
   }
 
@@ -448,6 +505,35 @@ class ApiClient {
       lat,
       lng,
       accuracy,
+    });
+    return response.data;
+  }
+
+  async getLivePackageLocation(packageTrackerId: string) {
+    const response = await this.client.get(`/tracking/packages/${packageTrackerId}/live`);
+    return response.data;
+  }
+
+  async getPackageTrackingHistory(packageTrackerId: string, limit?: number) {
+    const response = await this.client.get(`/tracking/packages/${packageTrackerId}/history`, {
+      params: { limit },
+    });
+    return response.data;
+  }
+
+  async getPackageLocationByOrderId(orderId: string) {
+    const response = await this.client.get(`/tracking/orders/${orderId}/package-location`);
+    return response.data;
+  }
+
+  async updatePackageLocation(packageTrackerId: string, lat: number, lng: number, accuracy?: number, speed?: number, heading?: number) {
+    const response = await this.client.post('/tracking/packages/location', {
+      packageTrackerId,
+      lat,
+      lng,
+      accuracy,
+      speed,
+      heading,
     });
     return response.data;
   }

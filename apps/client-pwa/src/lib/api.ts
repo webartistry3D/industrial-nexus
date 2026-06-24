@@ -142,6 +142,18 @@ class ApiClient {
     return response.data;
   }
 
+  async getPackageLocationByOrderId(orderId: string) {
+    const response = await this.client.get(`/tracking/orders/${orderId}/package-location`);
+    return response.data;
+  }
+
+  async getPackageTrackingHistory(packageTrackerId: string, limit?: number) {
+    const response = await this.client.get(`/tracking/packages/${packageTrackerId}/history`, {
+      params: { limit },
+    });
+    return response.data;
+  }
+
   // Notifications
   async getNotifications() {
     const response = await this.client.get('/notifications');

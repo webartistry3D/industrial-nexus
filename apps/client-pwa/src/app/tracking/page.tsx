@@ -7,7 +7,7 @@ import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { TripSimulation } from '@/components/maps/TripSimulation';
-import { Truck, Package, MapPin, Clock, ArrowRight, Play, Square } from 'lucide-react';
+import { Truck, Package, MapPin, Clock, ArrowRight, Play, Square, Navigation, Battery } from 'lucide-react';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 
 interface Shipment {
@@ -38,8 +38,11 @@ export default function TrackingPage() {
   const [geofenceEvents, setGeofenceEvents] = useState<any[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulatedVehiclePosition, setSimulatedVehiclePosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [packageTrackerData, setPackageTrackerData] = useState<any>(null);
+  const [packageLiveLocation, setPackageLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [packageTrail, setPackageTrail] = useState<{ lat: number; lng: number }[]>([]);
   const selectedShipmentRef = useRef<Shipment | null>(null);
-  const { subscribe, isConnected } = useTrackingWebSocket();
+  const { subscribe, unsubscribe, isConnected } = useTrackingWebSocket();
 
   // Scroll to top on page load
   useEffect(() => {
@@ -74,6 +77,27 @@ export default function TrackingPage() {
     }
   }, [selectedShipment]);
 
+  useEffect(() => {
+    if (selectedShipment?.id) {
+      fetchPackageTrackerData(selectedShipment.id);
+    } else {
+      setPackageTrackerData(null);
+      setPackageLiveLocation(null);
+      setPackageTrail([]);
+    }
+  }, [selectedShipment]);
+
+  useEffect(() => {
+    if (isConnected && packageTrackerData?.packageTrackerId) {
+      subscribe(`package:${packageTrackerData.packageTrackerId}`, () => {});
+    }
+    return () => {
+      if (packageTrackerData?.packageTrackerId) {
+        unsubscribe(`package:${packageTrackerData.packageTrackerId}`);
+      }
+    };
+  }, [isConnected, packageTrackerData?.packageTrackerId, subscribe, unsubscribe]);
+
   // WebSocket handlers for live location and geofence events
   useEffect(() => {
     subscribe('location:update', (data: any) => {
@@ -88,7 +112,22 @@ export default function TrackingPage() {
         setGeofenceEvents(prev => [data, ...prev].slice(0, 10));
       }
     });
-  }, [subscribe]);
+    subscribe('package:location:update', (data: any) => {
+      const sel = selectedShipmentRef.current;
+      if (sel?.id && data?.packageTrackerId === packageTrackerData?.packageTrackerId) {
+        setPackageLiveLocation({ lat: data.lat, lng: data.lng });
+        setPackageTrail(prev => [...prev, { lat: data.lat, lng: data.lng }]);
+      }
+    });
+  }, [subscribe, packageTrackerData?.packageTrackerId]);
+
+  useEffect(() => {
+    return () => {
+      if (packageTrackerData?.packageTrackerId) {
+        unsubscribe(`package:${packageTrackerData.packageTrackerId}`);
+      }
+    };
+  }, [packageTrackerData?.packageTrackerId, unsubscribe]);
 
   const fetchShipments = async () => {
     try {
@@ -116,12 +155,37 @@ export default function TrackingPage() {
     }
   };
 
+  const fetchPackageTrackerData = async (orderId: string) => {
+    try {
+      const data = await api.getPackageLocationByOrderId(orderId);
+      if (data?.packageTrackerId) {
+        setPackageTrackerData(data);
+        if (data.location) {
+          setPackageLiveLocation({ lat: data.location.lat, lng: data.location.lng });
+          setPackageTrail(prev => [...prev, { lat: data.location.lat, lng: data.location.lng }]);
+        }
+      } else {
+        setPackageTrackerData(null);
+        setPackageLiveLocation(null);
+        setPackageTrail([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch package tracker data:', err);
+      setPackageTrackerData(null);
+      setPackageLiveLocation(null);
+      setPackageTrail([]);
+    }
+  };
+
   const activeShipments = shipments.filter(s => s.trip?.status === 'IN_TRANSIT').length;
   // Prefer simulated position, then live WebSocket location, then last HTTP-polled location
   const vehiclePosition = simulatedVehiclePosition || liveLocation || (trackingData?.location
     ? { lat: trackingData.location.lat, lng: trackingData.location.lng }
     : null);
-  const mapCenter = vehiclePosition || { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
+  const packagePosition = packageLiveLocation || (packageTrackerData?.location
+    ? { lat: packageTrackerData.location.lat, lng: packageTrackerData.location.lng }
+    : null);
+  const mapCenter = vehiclePosition || packagePosition || { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
 
   // Demo locations for Festac Town simulation
   const demoPickupLocation = { lat: 6.5026, lng: 3.3515, address: 'Surulere, Lagos' };
@@ -270,7 +334,7 @@ export default function TrackingPage() {
                       onVehiclePositionChange={setSimulatedVehiclePosition}
                     />
                   </GoogleMapWrapper>
-                ) : selectedShipment && (trackingData || vehiclePosition) ? (
+                ) : selectedShipment && (trackingData || vehiclePosition || packageTrackerData) ? (
                   <GoogleMapWrapper center={mapCenter} zoom={12}>
                     {vehiclePosition && (
                       <MapMarker
@@ -278,6 +342,16 @@ export default function TrackingPage() {
                         type="vehicle"
                         label="🚚"
                       />
+                    )}
+                    {packageLiveLocation && (
+                      <MapMarker
+                        position={packageLiveLocation}
+                        type="package"
+                        label="📦"
+                      />
+                    )}
+                    {packageTrail.length > 1 && (
+                      <MapPolyline path={packageTrail} color="#a855f7" />
                     )}
                     {trackingData?.route?.polyline && (
                       <MapPolyline path={trackingData.route.polyline} />
@@ -437,6 +511,51 @@ export default function TrackingPage() {
                             {evt.distance > 0 && <span className="text-gray-400 ml-auto text-xs font-mono">{Math.round(evt.distance)}m away</span>}
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {packageTrackerData && (
+                    <div className="pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <Navigation className="w-4 h-4 text-purple-600" />
+                        Package Tracker
+                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Device</span>
+                          <span className="font-medium text-gray-900 dark:text-white font-mono">
+                            {packageTrackerData.packageTracker?.name || packageTrackerData.packageTracker?.deviceId}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Status</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {packageTrackerData.packageTracker?.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                            <Battery className="w-4 h-4" /> Battery
+                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white font-mono">
+                            {packageTrackerData.packageTracker?.batteryLevel ? `${packageTrackerData.packageTracker.batteryLevel}%` : 'N/A'}
+                          </span>
+                        </div>
+                        {packageLiveLocation && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600 dark:text-gray-400">Location</span>
+                            <span className="font-medium text-gray-900 dark:text-white font-mono">
+                              {packageLiveLocation.lat.toFixed(4)}, {packageLiveLocation.lng.toFixed(4)}
+                            </span>
+                          </div>
+                        )}
+                        {packageLiveLocation && (
+                          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                            Live package tracking active
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

@@ -79,6 +79,13 @@ export function useTrackingWebSocket() {
         if (handler) handler(data);
       });
 
+      socket.on('package:location:update', (data) => {
+        if (data?.packageTrackerId) {
+          const handler = eventHandlersRef.current.get(`package:${data.packageTrackerId}`);
+          if (handler) handler(data);
+        }
+      });
+
       socketRef.current = socket;
     } catch (err) {
       console.error('[Tracking WebSocket] Connection failed:', err);
@@ -100,6 +107,8 @@ export function useTrackingWebSocket() {
     if (socketRef.current?.connected) {
       if (eventType.startsWith('trip:')) {
         socketRef.current.emit('subscribe:trip', { tripId: eventType.split(':')[1] });
+      } else if (eventType.startsWith('package:')) {
+        socketRef.current.emit('subscribe:package', { packageTrackerId: eventType.split(':')[1] });
       } else if (eventType === 'location:update') {
         socketRef.current.emit('subscribe:fleet');
       }
@@ -112,6 +121,8 @@ export function useTrackingWebSocket() {
     if (socketRef.current?.connected) {
       if (eventType.startsWith('trip:')) {
         socketRef.current.emit('unsubscribe:trip', { tripId: eventType.split(':')[1] });
+      } else if (eventType.startsWith('package:')) {
+        socketRef.current.emit('unsubscribe:package', { packageTrackerId: eventType.split(':')[1] });
       } else if (eventType === 'location:update') {
         socketRef.current.emit('unsubscribe:fleet');
       }

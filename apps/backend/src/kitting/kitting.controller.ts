@@ -14,19 +14,34 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserRole, KittingStage } from '@prisma/client';
+import { IsString, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 
 class StartKittingDto {
+  @IsString()
   orderId: string;
 }
 
 class ProgressKittingDto {
+  @IsEnum(KittingStage)
   stage: KittingStage;
+
+  @IsBoolean()
+  @IsOptional()
   barcodeVerified?: boolean;
+
+  @IsString()
+  @IsOptional()
   notes?: string;
 }
 
 class VerifyBarcodeDto {
+  @IsString()
   barcode: string;
+}
+
+class AssignPackageTrackerDto {
+  @IsString()
+  packageTrackerId: string;
 }
 
 @Controller('kitting')
@@ -77,5 +92,30 @@ export class KittingController {
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
     return this.kittingService.verifyBarcode(orderId, user.userId, dto.barcode);
+  }
+
+  @Post(':orderId/assign-package-tracker')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  assignPackageTracker(
+    @Param('orderId') orderId: string,
+    @Body() dto: AssignPackageTrackerDto,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.kittingService.assignPackageTracker(orderId, dto.packageTrackerId, user.userId);
+  }
+
+  @Post(':orderId/unassign-package-tracker')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  unassignPackageTracker(
+    @Param('orderId') orderId: string,
+    @CurrentUser() user: { userId: string; role: UserRole },
+  ) {
+    return this.kittingService.unassignPackageTracker(orderId, user.userId);
+  }
+
+  @Get('package-trackers/available')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  getAvailablePackageTrackers() {
+    return this.kittingService.getAvailablePackageTrackers();
   }
 }

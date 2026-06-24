@@ -182,12 +182,15 @@ model Order {
   approvedAt         DateTime?    @map("approved_at")
   cancelledAt        DateTime?    @map("cancelled_at")
 
+  packageTrackerId String?      @map("package_tracker_id")
+
   // Relations
   client         User         @relation("ClientOrders", fields: [clientId], references: [id])
   handlingTags   OrderHandlingTag[]
   kittingLogs    KittingLog[]
   trip           Trip?
   weightRecord   WeightRecord?
+  packageTracker PackageTracker? @relation(fields: [packageTrackerId], references: [id])
 
   @@map("orders")
 }
@@ -288,6 +291,43 @@ model TrackingPoint {
   @@index([tripId])
   @@index([timestamp])
   @@map("tracking_points")
+}
+
+model PackageTracker {
+  id             String               @id @default(uuid())
+  deviceId       String               @unique @map("device_id")
+  name           String?
+  status         PackageTrackerStatus @default(ACTIVE)
+  batteryLevel   Float?               @map("battery_level")
+  lastLat        Float?               @map("last_lat")
+  lastLng        Float?               @map("last_lng")
+  lastSeenAt     DateTime?            @map("last_seen_at")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  // Relations
+  orders          Order[]
+  trackingPoints  PackageTrackingPoint[]
+
+  @@map("package_trackers")
+}
+
+model PackageTrackingPoint {
+  id               String   @id @default(uuid())
+  packageTrackerId String   @map("package_tracker_id")
+  lat              Float
+  lng              Float
+  accuracy         Float?
+  speed            Float?
+  heading          Float?
+  timestamp        DateTime
+  receivedAt       DateTime @default(now()) @map("received_at")
+
+  packageTracker PackageTracker @relation(fields: [packageTrackerId], references: [id], onDelete: Cascade)
+
+  @@index([packageTrackerId])
+  @@index([timestamp])
+  @@map("package_tracking_points")
 }
 
 // ==================== WEIGHT WATCH ====================
@@ -497,6 +537,7 @@ enum KittingStatus {
   AGGREGATION
   TECHNICAL_PACKAGING
   QUALITY_CHECK
+  PACKAGE_TRACKER_ASSIGNMENT
   DISPATCH_READY
   COMPLETED
 }
@@ -505,7 +546,15 @@ enum KittingStage {
   AGGREGATION
   TECHNICAL_PACKAGING
   QUALITY_CHECK
+  PACKAGE_TRACKER_ASSIGNMENT
   DISPATCH_READY
+}
+
+enum PackageTrackerStatus {
+  ACTIVE
+  INACTIVE
+  LOST
+  BROKEN
 }
 
 enum TripStatus {

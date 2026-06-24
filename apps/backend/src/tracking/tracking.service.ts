@@ -180,6 +180,133 @@ export class TrackingService {
     return trackingPoint;
   }
 
+  async getLivePackageLocation(packageTrackerId: string) {
+    const cacheKey = `tracking:package:live:v2:${packageTrackerId}`;
+    const cached = await this.redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    const [trackingPoint, packageTracker] = await Promise.all([
+      this.prisma.packageTrackingPoint.findFirst({
+        where: { packageTrackerId },
+        orderBy: { timestamp: 'desc' },
+      }),
+      this.prisma.packageTracker.findUnique({
+        where: { id: packageTrackerId },
+        select: {
+          id: true,
+          deviceId: true,
+          name: true,
+          status: true,
+        },
+      }),
+    ]);
+
+    if (!trackingPoint) {
+      return null;
+    }
+
+    const result = {
+      packageTrackerId,
+      packageTracker,
+      lat: trackingPoint.lat,
+      lng: trackingPoint.lng,
+      accuracy: trackingPoint.accuracy,
+      speed: trackingPoint.speed,
+      heading: trackingPoint.heading,
+      timestamp: trackingPoint.timestamp,
+    };
+
+    await this.redis.setex(cacheKey, this.CACHE_TTL_SECONDS, JSON.stringify(result));
+    return result;
+  }
+
+  async getPackageTrackingHistory(packageTrackerId: string, limit: number = 100) {
+    const trackingPoints = await this.prisma.packageTrackingPoint.findMany({
+      where: { packageTrackerId },
+      orderBy: { timestamp: 'asc' },
+      take: Number(limit),
+    });
+
+    return trackingPoints.map(point => ({
+      id: point.id,
+      packageTrackerId: point.packageTrackerId,
+      lat: point.lat,
+      lng: point.lng,
+      accuracy: point.accuracy,
+      speed: point.speed,
+      heading: point.heading,
+      timestamp: point.timestamp,
+    }));
+  }
+
+  async processPackageLocationUpdate(
+    packageTrackerId: string,
+    lat: number,
+    lng: number,
+    accuracy?: number,
+    speed?: number,
+    heading?: number,
+  ) {
+    const trackingPoint = await this.prisma.packageTrackingPoint.create({
+      data: {
+        packageTrackerId,
+        lat,
+        lng,
+        accuracy,
+        speed,
+        heading,
+        timestamp: new Date(),
+      },
+    });
+
+    // Update tracker last known location
+    await this.prisma.packageTracker.update({
+      where: { id: packageTrackerId },
+      data: {
+        lastLat: lat,
+        lastLng: lng,
+        lastSeenAt: trackingPoint.timestamp,
+      },
+    });
+
+    // Invalidate cache
+    await this.redis.del(`tracking:package:live:${packageTrackerId}`);
+
+    // Publish to Redis for WebSocket
+    await this.redis.publish('tracking:package:location', JSON.stringify({
+      packageTrackerId,
+      lat,
+      lng,
+      accuracy,
+      speed,
+      heading,
+      timestamp: trackingPoint.timestamp,
+    }));
+
+    return trackingPoint;
+  }
+
+  async getPackageTrackerLocationByOrderId(orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { packageTracker: true },
+    });
+
+    if (!order?.packageTrackerId) {
+      return null;
+    }
+
+    const location = await this.getLivePackageLocation(order.packageTrackerId);
+    return {
+      orderId,
+      packageTrackerId: order.packageTrackerId,
+      packageTracker: order.packageTracker,
+      location,
+    };
+  }
+
   private calculateDistance(
     p1: { lat: number; lng: number },
     p2: { lat: number; lng: number },

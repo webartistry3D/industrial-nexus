@@ -124,6 +124,14 @@ export class OrdersService {
             },
           },
           handlingTags: { include: { tag: true } },
+          packageTracker: {
+            select: {
+              id: true,
+              deviceId: true,
+              name: true,
+              status: true,
+            },
+          },
           trip: {
             select: {
               id: true,
@@ -184,6 +192,14 @@ export class OrdersService {
           },
         },
         handlingTags: { include: { tag: true } },
+        packageTracker: {
+          select: {
+            id: true,
+            deviceId: true,
+            name: true,
+            status: true,
+          },
+        },
         kittingLogs: {
           orderBy: { createdAt: 'desc' },
           include: {

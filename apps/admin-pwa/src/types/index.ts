@@ -13,7 +13,7 @@ export interface Order {
   clientId: string;
   client?: User;
   status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'KITTING' | 'DISPATCH_READY' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED' | 'REJECTED';
-  kittingStatus: 'PENDING' | 'AGGREGATION' | 'TECHNICAL_PACKAGING' | 'QUALITY_CHECK' | 'DISPATCH_READY';
+  kittingStatus: 'PENDING' | 'AGGREGATION' | 'TECHNICAL_PACKAGING' | 'QUALITY_CHECK' | 'PACKAGE_TRACKER_ASSIGNMENT' | 'DISPATCH_READY';
   totalWeight: number;
   priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
   pickupLocation: Location;
@@ -24,6 +24,21 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   trip?: Trip;
+  packageTrackerId?: string;
+  packageTracker?: PackageTracker;
+}
+
+export interface PackageTracker {
+  id: string;
+  deviceId: string;
+  name?: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'LOST' | 'BROKEN';
+  batteryLevel?: number;
+  lastLat?: number;
+  lastLng?: number;
+  lastSeenAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Location {

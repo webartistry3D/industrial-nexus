@@ -84,13 +84,21 @@ export class KittingService {
     const validProgression: Record<KittingStage, KittingStage[]> = {
       [KittingStage.AGGREGATION]: [KittingStage.TECHNICAL_PACKAGING],
       [KittingStage.TECHNICAL_PACKAGING]: [KittingStage.QUALITY_CHECK],
-      [KittingStage.QUALITY_CHECK]: [KittingStage.DISPATCH_READY],
+      [KittingStage.QUALITY_CHECK]: [KittingStage.PACKAGE_TRACKER_ASSIGNMENT],
+      [KittingStage.PACKAGE_TRACKER_ASSIGNMENT]: [KittingStage.DISPATCH_READY],
       [KittingStage.DISPATCH_READY]: [],
     };
 
     if (currentStage && !validProgression[currentStage].includes(nextStage)) {
       throw new BadRequestException(
         `Invalid kitting progression from ${currentStage} to ${nextStage}`,
+      );
+    }
+
+    // Package tracker must be assigned before moving to DISPATCH_READY
+    if (nextStage === KittingStage.DISPATCH_READY && !order.packageTrackerId) {
+      throw new BadRequestException(
+        'A package tracker must be assigned before final inspection / dispatch readiness',
       );
     }
 
@@ -110,6 +118,7 @@ export class KittingService {
       [KittingStage.AGGREGATION]: KittingStatus.AGGREGATION,
       [KittingStage.TECHNICAL_PACKAGING]: KittingStatus.TECHNICAL_PACKAGING,
       [KittingStage.QUALITY_CHECK]: KittingStatus.QUALITY_CHECK,
+      [KittingStage.PACKAGE_TRACKER_ASSIGNMENT]: KittingStatus.PACKAGE_TRACKER_ASSIGNMENT,
       [KittingStage.DISPATCH_READY]: KittingStatus.DISPATCH_READY,
     };
 
@@ -136,6 +145,27 @@ export class KittingService {
   }
 
   async completeKitting(orderId: string, operatorId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { kittingLogs: { orderBy: { createdAt: 'desc' }, take: 1 } },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const currentStage = order.kittingLogs[0]?.stage;
+
+    // If tracker is assigned but the workflow is still at QUALITY_CHECK (e.g. from a previous failed attempt),
+    // progress to PACKAGE_TRACKER_ASSIGNMENT first before completing.
+    if (currentStage === KittingStage.QUALITY_CHECK && order.packageTrackerId) {
+      await this.progressKitting(orderId, operatorId, {
+        stage: KittingStage.PACKAGE_TRACKER_ASSIGNMENT,
+        barcodeVerified: true,
+        notes: 'Package tracker assigned',
+      });
+    }
+
     return this.progressKitting(orderId, operatorId, {
       stage: KittingStage.DISPATCH_READY,
       barcodeVerified: true,
@@ -164,6 +194,129 @@ export class KittingService {
           },
         },
       },
+    });
+  }
+
+  async assignPackageTracker(orderId: string, packageTrackerId: string, operatorId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.status !== OrderStatus.KITTING) {
+      throw new BadRequestException('Order is not in kitting status');
+    }
+
+    const packageTracker = await this.prisma.packageTracker.findUnique({
+      where: { id: packageTrackerId },
+    });
+
+    if (!packageTracker) {
+      throw new NotFoundException('Package tracker not found');
+    }
+
+    if (packageTracker.status !== 'ACTIVE') {
+      throw new BadRequestException(`Package tracker is not active (status: ${packageTracker.status})`);
+    }
+
+    // Check if tracker is already assigned to another active order
+    const existingOrder = await this.prisma.order.findFirst({
+      where: {
+        packageTrackerId,
+        status: { in: [OrderStatus.KITTING, OrderStatus.DISPATCH_READY, OrderStatus.ASSIGNED, OrderStatus.IN_TRANSIT] },
+      },
+    });
+
+    if (existingOrder && existingOrder.id !== orderId) {
+      throw new BadRequestException('Package tracker is already assigned to another active order');
+    }
+
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: { packageTrackerId },
+    });
+
+    await this.auditService.log({
+      userId: operatorId,
+      action: 'UPDATE',
+      entityType: 'ORDER',
+      entityId: orderId,
+      newValue: { packageTrackerId, deviceId: packageTracker.deviceId },
+    });
+
+    // Progress to PACKAGE_TRACKER_ASSIGNMENT stage so the workflow can later reach DISPATCH_READY
+    const latestLog = await this.prisma.kittingLog.findFirst({
+      where: { orderId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (latestLog?.stage === KittingStage.QUALITY_CHECK) {
+      await this.prisma.kittingLog.create({
+        data: {
+          orderId,
+          operatorId,
+          stage: KittingStage.PACKAGE_TRACKER_ASSIGNMENT,
+          barcodeVerified: true,
+          notes: 'Package tracker assigned',
+        },
+      });
+
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { kittingStatus: KittingStatus.PACKAGE_TRACKER_ASSIGNMENT },
+      });
+
+      await this.auditService.log({
+        userId: operatorId,
+        action: 'UPDATE',
+        entityType: 'KITTING_LOG',
+        entityId: orderId,
+        newValue: { orderId, stage: KittingStage.PACKAGE_TRACKER_ASSIGNMENT },
+      });
+    }
+
+    return { assigned: true, packageTracker };
+  }
+
+  async unassignPackageTracker(orderId: string, operatorId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (!order.packageTrackerId) {
+      throw new BadRequestException('Order does not have an assigned package tracker');
+    }
+
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: { packageTrackerId: null },
+    });
+
+    await this.auditService.log({
+      userId: operatorId,
+      action: 'UPDATE',
+      entityType: 'ORDER',
+      entityId: orderId,
+      newValue: { packageTrackerId: null },
+    });
+
+    return { unassigned: true };
+  }
+
+  async getAvailablePackageTrackers() {
+    return this.prisma.packageTracker.findMany({
+      where: {
+        status: 'ACTIVE',
+        orders: { none: {} },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

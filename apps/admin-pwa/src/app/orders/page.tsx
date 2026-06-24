@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { Order, PaginatedResponse } from '@/types';
-import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X, Scale, List, Grid2x2, ChevronDown } from 'lucide-react';
+import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X, Scale, List, Grid2x2, ChevronDown, Navigation } from 'lucide-react';
+import { TrackersTab } from '@/components/trackers-tab';
 
 const CARGO_TYPES = [
   { value: '', label: 'All Cargo Types' },
@@ -24,6 +25,7 @@ const KITTING_STATUS_OPTIONS = [
   { value: 'AGGREGATION', label: 'Aggregation' },
   { value: 'TECHNICAL_PACKAGING', label: 'Tech Packaging' },
   { value: 'QUALITY_CHECK', label: 'Quality Check' },
+  { value: 'PACKAGE_TRACKER_ASSIGNMENT', label: 'Tracker Assignment' },
   { value: 'DISPATCH_READY', label: 'Dispatch Ready' },
 ];
 
@@ -52,6 +54,7 @@ function OrdersPageContent() {
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [activeTab, setActiveTab] = useState<'orders' | 'trackers'>('orders');
 
   // Scroll to top on page load
   useEffect(() => {
@@ -191,22 +194,25 @@ function OrdersPageContent() {
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                <Package className="w-6 h-6 text-white" />
+              <div className={`p-2.5 rounded-xl bg-gradient-to-br shadow-md ${activeTab === 'trackers' ? 'from-blue-800 to-blue-800' : 'from-blue-900 to-blue-900'}`}>
+                {activeTab === 'trackers' ? <Navigation className="w-6 h-6 text-white" /> : <Package className="w-6 h-6 text-white" />}
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {(cargoTypeFilter || cargoTypeParam) ? `${cargoTypeFilter || cargoTypeParam} Orders` : 
-                   (statusFilter || statusParam) ? `${statusFilter || statusParam} Orders` : 
-                   (kittingStatusFilter || kittingStatusParam) ? `${KITTING_STATUS_OPTIONS.find(opt => opt.value === (kittingStatusFilter || kittingStatusParam))?.label} Orders` :
-                   'Orders'}
+                  {activeTab === 'trackers'
+                    ? 'Package Trackers'
+                    : (cargoTypeFilter || cargoTypeParam) ? `${cargoTypeFilter || cargoTypeParam} Orders` : 
+                      (statusFilter || statusParam) ? `${statusFilter || statusParam} Orders` : 
+                      (kittingStatusFilter || kittingStatusParam) ? `${KITTING_STATUS_OPTIONS.find(opt => opt.value === (kittingStatusFilter || kittingStatusParam))?.label} Orders` :
+                      'Orders'}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {(cargoTypeFilter || cargoTypeParam) ? `Filtered by cargo type` :
-                   (statusFilter || statusParam) ? `Filtered by status` :
-                   (kittingStatusFilter || kittingStatusParam) ? `Filtered by flag` :
-                   // 'Manage industrial orders'
-                   ''}
+                  {activeTab === 'trackers'
+                    ? ''
+                    : (cargoTypeFilter || cargoTypeParam) ? `Filtered by cargo type` :
+                      (statusFilter || statusParam) ? `Filtered by status` :
+                      (kittingStatusFilter || kittingStatusParam) ? `Filtered by flag` :
+                      ''}
                 </p>
               </div>
             </div>
@@ -228,7 +234,34 @@ function OrdersPageContent() {
             </div>
           </div>
 
+          {/* Tabs */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                activeTab === 'orders'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              <Package className="w-4 h-4" />
+              Orders
+            </button>
+            <button
+              onClick={() => setActiveTab('trackers')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                activeTab === 'trackers'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              <Navigation className="w-4 h-4" />
+              Trackers
+            </button>
+          </div>
+
           {/* Search & Filters - Responsive Layout */}
+          {activeTab === 'orders' && (
           <div className="flex flex-col gap-2">
             {/* Search - Full width */}
             <div className="relative w-full">
@@ -365,6 +398,7 @@ function OrdersPageContent() {
               </div>
             </div>
           </div>
+          )}
           
           {/* Active Filters */}
           {(search || statusFilter || statusParam || cargoTypeFilter || cargoTypeParam || kittingStatusFilter) && (
@@ -428,6 +462,8 @@ function OrdersPageContent() {
           )}
         </div>
 
+        {activeTab === 'orders' ? (
+          <>
         {/* Error State */}
         {error && (
           <div className="mx-4 mt-4 bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-5 shadow-lg shadow-red-500/10">
@@ -498,6 +534,7 @@ function OrdersPageContent() {
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Client</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Description</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Weight</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Device ID</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Priority</th>
                   </tr>
@@ -520,6 +557,9 @@ function OrdersPageContent() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.packageTracker?.deviceId || '-'}</p>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
@@ -563,6 +603,11 @@ function OrdersPageContent() {
                       {order.priority}
                     </span>
                     <span className="text-gray-500 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</span>
+                    {order.packageTracker?.deviceId ? (
+                      <span className="text-xs text-blue-600 dark:text-blue-400 font-mono">
+                        Tracker: {order.packageTracker?.deviceId}
+                      </span>
+                    ) : null}
                     {order.trip?.eta && (
                       <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                         ETA: {new Date(order.trip.eta).toLocaleDateString()}
@@ -631,6 +676,12 @@ function OrdersPageContent() {
             >
               Next
             </button>
+          </div>
+        )}
+          </>
+        ) : (
+          <div className="p-4">
+            <TrackersTab />
           </div>
         )}
       </main>

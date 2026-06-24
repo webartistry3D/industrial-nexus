@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuditModule } from './audit/audit.module';
 import { OrdersModule } from './orders/orders.module';
 import { KittingModule } from './kitting/kitting.module';
+import { PackageTrackersModule } from './package-trackers/package-trackers.module';
 import { DriversModule } from './drivers/drivers.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { TripsModule } from './trips/trips.module';
@@ -29,6 +30,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     AuditModule,
     OrdersModule,
     KittingModule,
+    PackageTrackersModule,
     DriversModule,
     VehiclesModule,
     TripsModule,

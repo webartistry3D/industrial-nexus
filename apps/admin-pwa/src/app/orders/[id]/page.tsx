@@ -42,9 +42,13 @@ export default function OrderDetailPage() {
     materialsPrepared: false,
     packagingComplete: false,
     qualityCheckPassed: false,
+    packageTrackerAssigned: false,
     finalInspectionPassed: false,
     notes: '',
   });
+  const [availableTrackers, setAvailableTrackers] = useState<any[]>([]);
+  const [selectedPackageTracker, setSelectedPackageTracker] = useState('');
+  const [trackersLoading, setTrackersLoading] = useState(false);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -56,6 +60,24 @@ export default function OrderDetailPage() {
       fetchOrder();
     }
   }, [orderId]);
+
+  useEffect(() => {
+    if (kittingStep === 3 && showKittingModal) {
+      loadAvailableTrackers();
+    }
+  }, [kittingStep, showKittingModal]);
+
+  const loadAvailableTrackers = async () => {
+    try {
+      setTrackersLoading(true);
+      const trackers = await api.getAvailablePackageTrackers();
+      setAvailableTrackers(trackers);
+    } catch (err) {
+      console.error('Failed to load available trackers:', err);
+    } finally {
+      setTrackersLoading(false);
+    }
+  };
 
   const fetchOrder = async (silent = false) => {
     try {
@@ -225,8 +247,28 @@ export default function OrderDetailPage() {
     setKittingStep(0);
   };
 
-  const handleKittingNext = () => {
-    setKittingStep(prev => prev + 1);
+  const handleKittingNext = async () => {
+    setActionError(null);
+    const nextStep = kittingStep + 1;
+
+    try {
+      if (nextStep === 2) {
+        await api.progressKitting(orderId, 'TECHNICAL_PACKAGING');
+      } else if (nextStep === 3) {
+        await api.progressKitting(orderId, 'QUALITY_CHECK');
+      } else if (nextStep === 4) {
+        if (!selectedPackageTracker) {
+          setActionError('Please select a package tracker before continuing');
+          return;
+        }
+        await api.assignPackageTracker(orderId, selectedPackageTracker);
+        setKittingData(prev => ({ ...prev, packageTrackerAssigned: true }));
+      }
+      setKittingStep(nextStep);
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || 'Failed to progress kitting';
+      setActionError(message);
+    }
   };
 
   const handleKittingBack = () => {
@@ -248,6 +290,11 @@ export default function OrderDetailPage() {
       title: 'Quality Check',
       description: 'Perform quality assurance checks on packaged items',
       icon: <CheckCircle2 className="w-6 h-6" />,
+    },
+    {
+      title: 'Package Tracker Assignment',
+      description: 'Attach a physical GPS tracker to the cargo shipment',
+      icon: <MapPin className="w-6 h-6" />,
     },
     {
       title: 'Final Inspection',
@@ -279,6 +326,7 @@ export default function OrderDetailPage() {
         materialsPrepared: false,
         packagingComplete: false,
         qualityCheckPassed: false,
+        packageTrackerAssigned: false,
         finalInspectionPassed: false,
         notes: '',
       });
@@ -709,6 +757,53 @@ export default function OrderDetailPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.email || 'N/A'}</p>
         </div>
 
+        {/* Package Tracker Info */}
+        {order?.packageTracker && (
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                <MapPin className="w-5 h-5 text-white" />
+              </div>
+              Package Tracker
+            </h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Device</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">
+                  {order.packageTracker.name || '-'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Device ID</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">
+                  {order.packageTracker.deviceId || '-'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.packageTracker.status)}`}>
+                  {order.packageTracker.status}
+                </span>
+              </div>
+              {order.packageTracker.lastSeenAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Last Seen</span>
+                  <span className="text-sm text-gray-900 dark:text-white font-mono">
+                    {new Date(order.packageTracker.lastSeenAt).toLocaleString()}
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={() => router.push(`/tracking?packageTrackerId=${order.packageTrackerId}`)}
+                className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 dark:from-purple-600 dark:to-purple-700 dark:hover:from-purple-700 dark:hover:to-purple-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <MapPin className="w-4 h-4" />
+                Track Package
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Trip Info (if assigned) */}
         {order?.trip && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
@@ -1019,7 +1114,44 @@ export default function OrderDetailPage() {
                 )}
 
                 {kittingStep === 3 && (
-                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-xl p-3 sm:p-4 border border-purple-200/50 dark:border-purple-700/50">
+                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-xl p-3 sm:p-4 space-y-4 border border-blue-200/50 dark:border-blue-700/50">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Select Package Tracker
+                      </label>
+                      {trackersLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent" />
+                        </div>
+                      ) : availableTrackers.length === 0 ? (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          No available trackers. Create one in the Package Trackers section first.
+                        </div>
+                      ) : (
+                        <select
+                          value={selectedPackageTracker}
+                          onChange={(e) => setSelectedPackageTracker(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white text-xs sm:text-sm transition-all"
+                        >
+                          <option value="">Choose a tracker...</option>
+                          {availableTrackers.map((tracker) => (
+                            <option key={tracker.id} value={tracker.id}>
+                              {tracker.name || tracker.deviceId} ({tracker.deviceId})
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                    {selectedPackageTracker && (
+                      <div className="text-xs text-green-600 dark:text-green-400">
+                        Tracker will be assigned when you click Next.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {kittingStep === 4 && (
+                  <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-xl p-3 sm:p-4 border border-amber-200/50 dark:border-amber-700/50">
                     <label className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                       <input
                         type="checkbox"
@@ -1032,7 +1164,7 @@ export default function OrderDetailPage() {
                   </div>
                 )}
 
-                {kittingStep === 4 && (
+                {kittingStep === 5 && (
                   <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 dark:from-indigo-500/20 dark:to-indigo-600/10 rounded-xl p-3 sm:p-4 space-y-4 border border-indigo-200/50 dark:border-indigo-700/50">
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1060,9 +1192,11 @@ export default function OrderDetailPage() {
                       materialsPrepared: false,
                       packagingComplete: false,
                       qualityCheckPassed: false,
+                      packageTrackerAssigned: false,
                       finalInspectionPassed: false,
                       notes: '',
                     });
+                    setSelectedPackageTracker('');
                     setActionError(null);
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm sm:text-base"

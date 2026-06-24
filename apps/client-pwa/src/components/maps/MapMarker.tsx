@@ -4,7 +4,7 @@ import { Marker } from '@react-google-maps/api';
 
 interface MapMarkerProps {
   position: { lat: number; lng: number };
-  type?: 'vehicle' | 'pickup' | 'delivery' | 'current' | 'default';
+  type?: 'vehicle' | 'pickup' | 'delivery' | 'package' | 'current' | 'default';
   label?: string;
   onClick?: () => void;
 }

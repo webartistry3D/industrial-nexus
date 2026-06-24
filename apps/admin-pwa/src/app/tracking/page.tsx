@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 import { api } from '@/lib/api';
 import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
-import { Truck, MapPin, Activity, Navigation, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Truck, MapPin, Activity, Navigation, AlertCircle, CheckCircle, Clock, Package, Battery } from 'lucide-react';
 import { Circle } from '@react-google-maps/api';
 
 interface FleetLocation {
@@ -32,10 +32,12 @@ interface GeofenceEvent {
   data: any;
 }
 
-export default function TrackingPage() {
+function TrackingPageContent() {
   const { isConnected, subscribe, unsubscribe } = useTrackingWebSocket();
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const packageTrackerId = searchParams.get('packageTrackerId');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -48,6 +50,8 @@ export default function TrackingPage() {
   const [currentGeofenceStatus, setCurrentGeofenceStatus] = useState<string>('OUTSIDE_ALL_ZONES');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [packageTrackerData, setPackageTrackerData] = useState<any>(null);
+  const [packageLiveLocation, setPackageLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -72,9 +76,60 @@ export default function TrackingPage() {
     };
   }, [isConnected, subscribe, unsubscribe]);
 
+  useEffect(() => {
+    if (packageTrackerId) {
+      fetchPackageTrackerData(packageTrackerId);
+    } else {
+      setPackageTrackerData(null);
+      setPackageLiveLocation(null);
+    }
+  }, [packageTrackerId]);
+
+  useEffect(() => {
+    if (isConnected && packageTrackerId) {
+      subscribe(`package:${packageTrackerId}`, handlePackageLocationUpdate);
+    }
+    return () => {
+      if (packageTrackerId) {
+        unsubscribe(`package:${packageTrackerId}`);
+      }
+    };
+  }, [isConnected, packageTrackerId, subscribe, unsubscribe]);
+
+  const handlePackageLocationUpdate = (data: any) => {
+    console.log('[Tracking] Package location update:', data);
+    setPackageLiveLocation({ lat: data.lat, lng: data.lng });
+    setPackageTrackerData((prev: any) => prev ? {
+      ...prev,
+      location: {
+        ...prev.location,
+        lat: data.lat,
+        lng: data.lng,
+        timestamp: data.timestamp,
+      },
+    } : null);
+  };
+
+  const fetchPackageTrackerData = async (trackerId: string) => {
+    try {
+      const [liveData, trackerDetails] = await Promise.allSettled([
+        api.getLivePackageLocation(trackerId),
+        api.getPackageTracker(trackerId),
+      ]);
+      const live = liveData.status === 'fulfilled' ? liveData.value : null;
+      const tracker = trackerDetails.status === 'fulfilled' ? trackerDetails.value : null;
+      setPackageTrackerData({ ...live, packageTracker: tracker });
+      if (live) {
+        setPackageLiveLocation({ lat: live.lat, lng: live.lng });
+      }
+    } catch (err) {
+      console.error('Failed to fetch package tracker data:', err);
+    }
+  };
+
   const handleLocationUpdate = (data: any) => {
     console.log('[Tracking] Received location update:', data);
-    if (fleetLocation && fleetLocation.tripId === data.tripId) {
+    if (fleetLocation && fleetLocation?.tripId === data.tripId) {
       setFleetLocation((prev) => prev ? {
         ...prev,
         location: {
@@ -192,9 +247,11 @@ export default function TrackingPage() {
     }
   };
 
-  const mapCenter = fleetLocation?.trip?.order?.deliveryLocation?.lat && fleetLocation.trip.order.deliveryLocation.lng
-    ? { lat: fleetLocation.trip.order.deliveryLocation.lat, lng: fleetLocation.trip.order.deliveryLocation.lng }
-    : { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
+  const mapCenter = packageLiveLocation
+    ? { lat: packageLiveLocation.lat, lng: packageLiveLocation.lng }
+    : fleetLocation?.trip?.order?.deliveryLocation?.lat && fleetLocation?.trip.order.deliveryLocation.lng
+      ? { lat: fleetLocation?.trip.order.deliveryLocation.lat, lng: fleetLocation?.trip.order.deliveryLocation.lng }
+      : { lat: 6.502206, lng: 3.305082 }; // TLH Logistics Hub, Ago Palace Way, Okota, Lagos
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
@@ -202,15 +259,17 @@ export default function TrackingPage() {
       <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-              <Navigation className="w-6 h-6 text-white" />
+            <div className={`p-2.5 rounded-xl bg-gradient-to-br shadow-md ${packageTrackerId ? 'from-purple-500 to-purple-600' : 'from-blue-500 to-blue-600'}`}>
+              {packageTrackerId ? <Package className="w-6 h-6 text-white" /> : <Navigation className="w-6 h-6 text-white" />}
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                Live Tracking
+                {packageTrackerId ? 'Package Tracking' : 'Live Tracking'}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Real-time fleet location monitoring
+                {packageTrackerId
+                  ? `Tracking ${packageTrackerData?.packageTracker?.deviceId || packageTrackerId}${packageTrackerData?.packageTracker?.name ? `: ${packageTrackerData.packageTracker.name}` : ''}`
+                  : 'Real-time fleet location monitoring'}
               </p>
             </div>
           </div>
@@ -237,14 +296,14 @@ export default function TrackingPage() {
               <div className="flex items-center justify-center h-full">
                 <p className="text-red-500">{error}</p>
               </div>
-            ) : !fleetLocation ? (
+            ) : !fleetLocation && !packageTrackerData ? (
               <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600 dark:text-gray-400">No active vehicle tracking</p>
+                <p className="text-gray-600 dark:text-gray-400">No active vehicle or package tracking</p>
               </div>
             ) : (
               <GoogleMapWrapper center={mapCenter} zoom={13}>
                 {/* Geofence Radius C - 100m (Arrival Zone) */}
-                {fleetLocation.trip?.order?.deliveryLocation && (
+                {fleetLocation?.trip?.order?.deliveryLocation && (
                   <Circle
                     center={{
                       lat: fleetLocation.trip.order.deliveryLocation.lat,
@@ -262,7 +321,7 @@ export default function TrackingPage() {
                 )}
                 
                 {/* Geofence Radius B - 1km (Approaching Zone) */}
-                {fleetLocation.trip?.order?.deliveryLocation && (
+                {fleetLocation?.trip?.order?.deliveryLocation && (
                   <Circle
                     center={{
                       lat: fleetLocation.trip.order.deliveryLocation.lat,
@@ -280,7 +339,7 @@ export default function TrackingPage() {
                 )}
                 
                 {/* Geofence Radius A - 5km (Early Awareness Zone) */}
-                {fleetLocation.trip?.order?.deliveryLocation && (
+                {fleetLocation?.trip?.order?.deliveryLocation && (
                   <Circle
                     center={{
                       lat: fleetLocation.trip.order.deliveryLocation.lat,
@@ -298,15 +357,24 @@ export default function TrackingPage() {
                 )}
                 
                 {/* Current vehicle location */}
-                {fleetLocation.location && (
+                {fleetLocation?.location && (
                   <MapMarker
                     position={{ lat: fleetLocation.location.lat, lng: fleetLocation.location.lng }}
                     type="vehicle"
                   />
                 )}
+
+                {/* Package tracker location */}
+                {packageLiveLocation && (
+                  <MapMarker
+                    position={{ lat: packageLiveLocation.lat, lng: packageLiveLocation.lng }}
+                    type="package"
+                    label="📦"
+                  />
+                )}
                 
                 {/* Pickup location */}
-                {fleetLocation.trip?.order?.pickupLocation && (
+                {fleetLocation?.trip?.order?.pickupLocation && (
                   <MapMarker
                     position={{
                       lat: fleetLocation.trip.order.pickupLocation.lat,
@@ -318,7 +386,7 @@ export default function TrackingPage() {
                 )}
                 
                 {/* Delivery location */}
-                {fleetLocation.trip?.order?.deliveryLocation && (
+                {fleetLocation?.trip?.order?.deliveryLocation && (
                   <MapMarker
                     position={{
                       lat: fleetLocation.trip.order.deliveryLocation.lat,
@@ -332,6 +400,64 @@ export default function TrackingPage() {
             )}
           </div>
         </div>
+
+        {/* Package Tracker Details */}
+        {packageTrackerData && (
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Package className="w-5 h-5 text-purple-600" />
+              Package Tracker Details
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+                  <Navigation className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Device</p>
+                  <p className="font-medium text-gray-900 dark:text-white font-mono">
+                    {packageTrackerData.packageTracker?.name || packageTrackerData.packageTracker?.deviceId || 'N/A'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Coordinates</p>
+                  <p className="font-medium text-gray-900 dark:text-white font-mono">
+                    {packageLiveLocation
+                      ? `${packageLiveLocation.lat.toFixed(6)}, ${packageLiveLocation.lng.toFixed(6)}`
+                      : 'N/A'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <Battery className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Battery</p>
+                  <p className="font-medium text-gray-900 dark:text-white font-mono">
+                    {packageTrackerData.packageTracker?.batteryLevel ? `${packageTrackerData.packageTracker.batteryLevel}%` : 'N/A'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+                  <Activity className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {packageTrackerData.packageTracker?.status || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Geofence Events Timeline */}
         {fleetLocation && (
@@ -380,7 +506,7 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Driver</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {fleetLocation.trip.driver?.user?.firstName} {fleetLocation.trip.driver?.user?.lastName || 'N/A'}
+                    {fleetLocation?.trip.driver?.user?.firstName} {fleetLocation?.trip.driver?.user?.lastName || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -391,7 +517,7 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Vehicle</p>
                   <p className="font-medium text-gray-900 dark:text-white font-mono">
-                    {fleetLocation.trip.vehicle?.plateNumber || 'N/A'}
+                    {fleetLocation?.trip.vehicle?.plateNumber || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -402,7 +528,7 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {fleetLocation.trip.status}
+                    {fleetLocation?.trip.status}
                   </p>
                 </div>
               </div>
@@ -424,13 +550,13 @@ export default function TrackingPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Pickup</p>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {fleetLocation.trip.order?.pickupLocation?.address || 'N/A'}
+                    {fleetLocation?.trip.order?.pickupLocation?.address || 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Delivery</p>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {fleetLocation.trip.order?.deliveryLocation?.address || 'N/A'}
+                    {fleetLocation?.trip.order?.deliveryLocation?.address || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -439,5 +565,17 @@ export default function TrackingPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function TrackingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent" />
+      </div>
+    }>
+      <TrackingPageContent />
+    </Suspense>
   );
 }
