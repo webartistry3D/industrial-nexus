@@ -456,7 +456,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                     type="checkbox"
                     checked={item.completed}
                     onChange={() => toggleChecklist(item.id)}
-                    className="w-5 h-5 text-blue-600 rounded"
+                    className="w-5 h-5 text-blue-900 rounded"
                   />
                   <span className={`${item.completed ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}>
                     {item.label}
@@ -515,7 +515,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                   {showPODForm && (
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 space-y-4">
                       <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <FileCheck className="w-4 h-4 text-blue-600" />
+                        <FileCheck className="w-4 h-4 text-blue-900" />
                         Proof of Delivery
                       </h3>
 

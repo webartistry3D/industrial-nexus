@@ -99,7 +99,7 @@ export function HeroSection() {
                   backgroundClip: "text",
                 }}
               >
-                Downtime
+                Excellence
               </span>
             </motion.h1>
 

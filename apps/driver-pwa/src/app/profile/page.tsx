@@ -113,7 +113,7 @@ export default function ProfilePage() {
       case KycDocumentStatus.REJECTED:
         return <XCircle className="w-5 h-5 text-red-500" />;
       case KycDocumentStatus.UNDER_REVIEW:
-        return <Clock className="w-5 h-5 text-blue-500" />;
+        return <Clock className="w-5 h-5 text-blue-900" />;
       default:
         return <Clock className="w-5 h-5 text-yellow-500" />;
     }
@@ -146,7 +146,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
         </div>
       </div>
@@ -161,7 +161,7 @@ export default function ProfilePage() {
         <div className="max-w-6xl mx-auto space-y-4">
           {/* Header */}
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
               <UserIcon className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -172,7 +172,7 @@ export default function ProfilePage() {
           {/* Profile Card - Full width on mobile, centered on desktop */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6 md:p-8">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-900 to-blue-900 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                 <UserIcon className="w-10 h-10 md:w-12 md:h-12 text-white" />
               </div>
               <div className="flex-1 text-center md:text-left">
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Driver Information</h3>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                       <Truck className="w-4 h-4 text-white" />
                     </div>
                     <div>
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
                       driver.availability === 'AVAILABLE' ? 'bg-green-500' :
-                      driver.availability === 'ON_TRIP' ? 'bg-blue-500' :
+                      driver.availability === 'ON_TRIP' ? 'bg-blue-900' :
                       'bg-gray-500'
                     }`} />
                     <div>
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                     <Mail className="w-4 h-4 text-white" />
                   </div>
                   <div>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
               <h3 className="font-semibold text-gray-900 dark:text-white">KYC Documents</h3>
               <button
                 onClick={() => setShowKycSection(!showKycSection)}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
               >
                 <Upload className="w-4 h-4" />
                 Upload Document
@@ -346,7 +346,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={uploading || !selectedFile}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {uploading ? 'Uploading...' : 'Upload'}
                   </button>
@@ -363,7 +363,7 @@ export default function ProfilePage() {
                 {kycDocuments.map((doc) => (
                   <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-300">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
                       <div>

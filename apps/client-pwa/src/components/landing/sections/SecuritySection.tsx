@@ -39,7 +39,7 @@ export function SecuritySection() {
         <SectionHeader
           eyebrow="Enterprise Security"
           title="Industrial-Grade Data Security"
-          subtitle="Your operational data, shipment records, and client information are protected by enterprise security architecture built to financial services standards."
+          // subtitle="Your operational data, shipment records, and client information are protected by enterprise security architecture built to financial services standards."
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">

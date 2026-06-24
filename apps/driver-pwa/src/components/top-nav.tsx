@@ -58,7 +58,7 @@ export function TopNav() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-900 via-blue-900 to-blue-900 text-white z-50">
       <div className="h-full px-4 flex items-center justify-between">
         {/* Left: Branding */}
         <div className="flex items-center gap-3">
@@ -110,7 +110,7 @@ export function TopNav() {
                     <div className="px-4 py-1.5 border-b border-gray-100 dark:border-slate-700 flex justify-end">
                       <button
                         onClick={markAllAsRead}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-xs text-blue-600 dark:text-blue-800 hover:underline flex items-center gap-1"
                       >
                         Mark all read
                       </button>

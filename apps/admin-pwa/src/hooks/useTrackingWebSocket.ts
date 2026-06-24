@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { refreshAccessToken } from '@/lib/api';
+import { refreshAccessToken, getAccessToken } from '@/lib/api';
 
 export function useTrackingWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
@@ -17,7 +17,7 @@ export function useTrackingWebSocket() {
 
   const connect = async (tokenOverride?: string) => {
     try {
-      let token = tokenOverride || localStorage.getItem('accessToken');
+      let token = tokenOverride || getAccessToken();
       if (!token) return;
 
       if (socketRef.current) {

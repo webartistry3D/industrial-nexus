@@ -9,6 +9,7 @@ import {
   Users, Search, Plus, Mail, Shield, MapPin, CheckCircle, XCircle, AlertCircle,
   ChevronRight, Filter, UserCheck, UserX, Truck, Edit, Trash2, List, Grid2x2
 } from 'lucide-react';
+import { StatCard } from '@/components/stat-card';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All Status' },
@@ -482,21 +483,20 @@ export default function DriversPage() {
           {/* Drivers Stats */}
           {activeTab === 'drivers' && (
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</p>
+              <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 backdrop-blur-sm rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md inline-flex mb-4"><Users className="w-5 h-5" /></div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Total</div>
               </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-4xl font-bold text-green-600 font-mono">
-                  {drivers.filter(d => d.status === 'ACTIVE').length}
-                </p>
+              <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 backdrop-blur-sm rounded-xl border border-green-200/50 dark:border-green-700/50 p-4 shadow-lg shadow-green-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{drivers.filter(d => d.status === 'ACTIVE').length}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</div>
               </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">On Trip</p>
-                <p className="text-4xl font-bold text-blue-600 font-mono">
-                  {drivers.filter(d => d.availability === 'ON_TRIP').length}
-                </p>
+              <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 backdrop-blur-sm rounded-xl border border-purple-200/50 dark:border-purple-700/50 p-4 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{drivers.filter(d => d.availability === 'ON_TRIP').length}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">On Trip</div>
               </div>
             </div>
           )}
@@ -504,21 +504,20 @@ export default function DriversPage() {
           {/* Vehicles Stats */}
           {activeTab === 'vehicles' && (
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</p>
+              <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 backdrop-blur-sm rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Total</div>
               </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                <p className="text-4xl font-bold text-green-600 font-mono">
-                  {vehicles.filter(v => v.status === 'ACTIVE').length}
-                </p>
+              <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 backdrop-blur-sm rounded-xl border border-green-200/50 dark:border-green-700/50 p-4 shadow-lg shadow-green-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.filter(v => v.status === 'ACTIVE').length}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</div>
               </div>
-              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-3 border border-gray-200/50 dark:border-slate-700/50 shadow-lg">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Partitioned</p>
-                <p className="text-4xl font-bold text-blue-600 font-mono">
-                  {vehicles.filter(v => v.isPartitioned).length}
-                </p>
+              <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 backdrop-blur-sm rounded-xl border border-purple-200/50 dark:border-purple-700/50 p-4 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-md inline-flex mb-4"><Grid2x2 className="w-5 h-5" /></div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.filter(v => v.isPartitioned).length}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Partitioned</div>
               </div>
             </div>
           )}

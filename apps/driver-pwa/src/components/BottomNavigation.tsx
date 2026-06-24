@@ -37,7 +37,7 @@ export default function BottomNavigation() {
               <div 
                 className={`absolute -top-1 w-1 h-1 rounded-full transition-all duration-300 ${
                   isActive 
-                    ? 'bg-blue-600 dark:bg-blue-400 scale-100 opacity-100' 
+                    ? 'bg-blue-900 dark:bg-blue-900 scale-100 opacity-100' 
                     : 'scale-0 opacity-0'
                 }`}
               />
@@ -46,7 +46,7 @@ export default function BottomNavigation() {
               <div 
                 className={`flex items-center justify-center w-12 h-8 rounded-2xl transition-all duration-200 ${
                   isActive 
-                    ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' 
+                    ? 'bg-blue-900/10 dark:bg-blue-900/40 text-blue-900 dark:text-blue-900' 
                     : 'text-gray-400 dark:text-gray-500 group-active:text-gray-600 dark:group-active:text-gray-300'
                 }`}
               >
@@ -57,7 +57,7 @@ export default function BottomNavigation() {
               <span 
                 className={`text-[11px] font-medium mt-1 transition-all duration-200 ${
                   isActive 
-                    ? 'text-blue-600 dark:text-blue-400 font-semibold' 
+                    ? 'text-blue-900 dark:text-blue-900 font-semibold' 
                     : 'text-gray-400 dark:text-gray-500'
                 }`}
               >

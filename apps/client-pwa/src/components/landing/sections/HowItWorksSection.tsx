@@ -63,7 +63,7 @@ export function HowItWorksSection() {
         <SectionHeader
           eyebrow="Simple to Operate"
           title="From Order to Verified Delivery"
-          subtitle="Industrial Nexus enforces operational discipline through technology — not manual supervision or hope."
+          // subtitle="Industrial Nexus enforces operational discipline through technology — not manual supervision or hope."
         />
 
         <div className="relative">

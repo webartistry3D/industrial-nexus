@@ -2,25 +2,46 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+let accessToken: string | null = null;
+let refreshToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
+
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+}
+
+export function setRefreshToken(token: string | null) {
+  refreshToken = token;
+}
+
+export function clearTokens() {
+  accessToken = null;
+  refreshToken = null;
+}
+
+export function getAccessToken() {
+  return accessToken;
+}
+
+export function getRefreshToken() {
+  return refreshToken;
+}
 
 export async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) return null;
 
     try {
       const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
-      const { accessToken } = response.data;
-      localStorage.setItem('accessToken', accessToken);
-      return accessToken;
+      const { accessToken: newAccessToken } = response.data;
+      accessToken = newAccessToken;
+      return newAccessToken;
     } catch (refreshError) {
       const refreshStatus = (refreshError as AxiosError).response?.status;
       if (refreshStatus === 401 || refreshStatus === 403) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        clearTokens();
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
         if (typeof window !== 'undefined' && !currentPath.includes('/login')) {
           window.location.href = '/login';
@@ -49,9 +70,8 @@ class ApiClient {
     // Request interceptor to add JWT token
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (accessToken) {
+          config.headers.Authorization = `Bearer ${accessToken}`;
         }
         return config;
       },
@@ -93,12 +113,11 @@ class ApiClient {
   }
 
   async logout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    clearTokens();
   }
 
-  async getProfile() {
-    const response = await this.client.get('/users/me');
+  async getProfile(timeout?: number) {
+    const response = await this.client.get('/users/me', timeout ? { timeout } : undefined);
     return response.data;
   }
 

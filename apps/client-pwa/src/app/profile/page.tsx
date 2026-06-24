@@ -92,7 +92,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       <main className="p-4 space-y-4">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-6 text-white shadow-lg border border-white/10">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-6 text-white shadow-lg border border-white/10">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
               <UserIcon className="w-10 h-10" />
@@ -207,7 +207,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 disabled:from-blue-400 disabled:to-blue-400 text-white font-semibold py-2.5 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 disabled:from-blue-400 disabled:to-blue-400 text-white font-semibold py-2.5 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? 'Saving...' : 'Save'}
@@ -224,7 +224,7 @@ export default function ProfilePage() {
           ) : (
             <div className="p-4 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                   <Mail className="w-5 h-5 text-white mt-0.5" />
                 </div>
                 <div>
@@ -279,7 +279,7 @@ export default function ProfilePage() {
           </div>
           <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
             <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">

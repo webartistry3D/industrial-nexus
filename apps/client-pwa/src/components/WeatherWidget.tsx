@@ -103,7 +103,7 @@ export default function WeatherWidget() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg shadow-md p-3 sm:p-4 text-white">
+      <div className="bg-gradient-to-br from-blue-600 to-blue-600 dark:from-blue-900 dark:to-blue-950 rounded-lg shadow-md p-3 sm:p-4 text-white">
         <div className="animate-pulse">
           <div className="h-8 bg-white/20 rounded mb-2"></div>
           <div className="h-6 bg-white/20 rounded w-3/4"></div>
@@ -113,7 +113,7 @@ export default function WeatherWidget() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg shadow-md p-3 sm:p-4 text-white">
+    <div className="bg-gradient-to-br from-blue-600 to-blue-600 dark:from-blue-900 dark:to-blue-950 rounded-lg shadow-md p-3 sm:p-4 text-white">
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">

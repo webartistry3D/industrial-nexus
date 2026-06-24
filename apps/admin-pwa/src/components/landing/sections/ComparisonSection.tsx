@@ -11,7 +11,7 @@ const rows = [
     traditional: "Manual, inconsistent, unverifiable",
   },
   {
-    feature: "Vehicle weight & capacity validation",
+    feature: "Vehicle weight & validation",
     nexus: "Automated Weight Watch Engine",
     traditional: "Driver estimation, no validation",
   },
@@ -53,65 +53,57 @@ export function ComparisonSection() {
       <Container>
         <SectionHeader
           eyebrow="Why Industrial Nexus"
-          title="Logistics Infrastructure vs. Logistics Improvisation"
-          subtitle="Traditional logistics services were not built for industrial operational demands. Industrial Nexus was."
+          title="Optimized Logistics Infrastructure as a Service"
         />
 
-        <motion.div
-          className="overflow-x-auto rounded-2xl border border-[rgba(150,180,220,0.12)]"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <table className="w-full border-collapse min-w-[600px]" role="table">
-            <thead>
-              <tr>
-                <th className="text-left px-6 py-4 bg-[#112240] border-b border-[rgba(150,180,220,0.12)] text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8D4E3] w-[35%]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {rows.map((row, i) => (
+            <motion.div
+              key={row.feature}
+              className="bg-[#112240] rounded-2xl border border-[rgba(150,180,220,0.12)] overflow-hidden"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Capability header */}
+              <div className="px-5 py-3.5 bg-[#0D1D35] border-b border-[rgba(150,180,220,0.1)]">
+                <span className="text-xs font-bold uppercase tracking-[0.08em] text-[#C8D4E3]">
                   Capability
-                </th>
-                <th className="text-left px-6 py-4 bg-[#112240] border-b border-[rgba(150,180,220,0.12)] text-[12px] font-bold uppercase tracking-[0.08em] text-[#42A5F5] w-[32%]">
-                  Industrial Nexus
-                </th>
-                <th className="text-left px-6 py-4 bg-[#112240] border-b border-[rgba(150,180,220,0.12)] text-[12px] font-bold uppercase tracking-[0.08em] text-[#8A9BB5] w-[33%]">
-                  Traditional Logistics
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => (
-                <tr
-                  key={row.feature}
-                  className="border-b border-[rgba(150,180,220,0.07)] last:border-0 hover:bg-[rgba(150,180,220,0.03)] transition-colors"
-                >
-                  <td className="px-6 py-4 text-sm font-medium text-[#C8D4E3]">
-                    {row.feature}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-white">
-                    <span className="flex items-start gap-2">
-                      <Check
-                        size={15}
-                        className="text-[#00BFA5] mt-0.5 flex-shrink-0"
-                        aria-hidden="true"
-                      />
+                </span>
+                <p className="text-sm font-semibold text-white mt-1">{row.feature}</p>
+              </div>
+
+              {/* Comparison rows */}
+              <div className="p-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#00BFA5] mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#42A5F5] block mb-1">
+                      Industrial Nexus
+                    </span>
+                    <p className="text-sm text-white flex items-start gap-2">
+                      <Check size={14} className="text-[#00BFA5] mt-0.5 flex-shrink-0" aria-hidden="true" />
                       {row.nexus}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#4A5568] mt-2 flex-shrink-0" />
+                  <div className="flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#8A9BB5] block mb-1">
+                      Traditional Logistics
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-[#8A9BB5]">
-                    <span className="flex items-start gap-2">
-                      <X
-                        size={15}
-                        className="text-[#4A5568] mt-0.5 flex-shrink-0"
-                        aria-hidden="true"
-                      />
+                    <p className="text-sm text-[#8A9BB5] flex items-start gap-2">
+                      <X size={14} className="text-[#4A5568] mt-0.5 flex-shrink-0" aria-hidden="true" />
                       {row.traditional}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </motion.div>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </Container>
     </Section>
   );

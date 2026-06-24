@@ -27,7 +27,7 @@ export function MobileNav() {
               key={link.path}
               onClick={() => router.push(link.path)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg ${
-                isActive ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                isActive ? 'text-blue-900 bg-blue-900/10 dark:bg-blue-900/30 dark:text-blue-900' : 'text-gray-500 dark:text-gray-400'
               }`}
             >
               <Icon className="w-5 h-5" />

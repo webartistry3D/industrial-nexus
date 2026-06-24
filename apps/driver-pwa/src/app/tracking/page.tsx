@@ -148,7 +148,7 @@ export default function TrackingPage() {
       <main className="pt-20 px-4 pb-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
             <MapPin className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -167,7 +167,7 @@ export default function TrackingPage() {
         <div className="h-[50vh] bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
               </div>
             </div>
@@ -238,7 +238,7 @@ export default function TrackingPage() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                     <Navigation className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -250,7 +250,7 @@ export default function TrackingPage() {
                 </div>
                 <button
                   onClick={() => router.push(`/trips/${currentTrip.id}`)}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                  className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
                 >
                   View Details
                 </button>
@@ -287,7 +287,7 @@ export default function TrackingPage() {
                         evt.eventType === 'RADIUS_C_ENTERED' ? 'bg-green-500' :
                         evt.eventType === 'RADIUS_B_ENTERED' ? 'bg-orange-500' :
                         evt.eventType === 'RADIUS_A_ENTERED' ? 'bg-yellow-500' :
-                        'bg-blue-500'
+                        'bg-blue-900'
                       }`} />
                       <span className="text-gray-700 dark:text-gray-300 font-medium">
                         {evt.eventType.replace(/_/g, ' ')}

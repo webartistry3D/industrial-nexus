@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 import { api } from '@/lib/api';
 import { DashboardStats, Trip, WeightAlert, Order } from '@/types';
 import {
@@ -16,10 +15,10 @@ import { TripsOverview } from '@/components/trips-overview';
 import { OrdersOverview } from '@/components/orders-overview';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
+import { FleetTracker } from '@/components/fleet-tracker';
 
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
-  const { isConnected, subscribe, unsubscribe } = useTrackingWebSocket();
   const router = useRouter();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -34,22 +33,9 @@ export default function Dashboard() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   useEffect(() => {
-    if (!authLoading && !user) { router.push('/login'); return; }
+    if (authLoading) return;
     if (user) fetchDashboardData();
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (isConnected) subscribe('location:update', handleLocationUpdate);
-    return () => { if (isConnected) unsubscribe('location:update'); };
-  }, [isConnected]);
-
-  const handleLocationUpdate = (data: any) => {
-    setLiveLocations(prev => {
-      const updated = new Map(prev);
-      updated.set(data.tripId, { lat: data.lat, lng: data.lng, speed: data.speed });
-      return updated;
-    });
-  };
+  }, [user, authLoading]);
 
   const fetchDashboardData = async () => {
     try {
@@ -86,6 +72,14 @@ export default function Dashboard() {
     }
   };
 
+  const handleLocationUpdate = (data: { tripId: string; lat: number; lng: number; speed?: number }) => {
+    setLiveLocations(prev => {
+      const updated = new Map(prev);
+      updated.set(data.tripId, { lat: data.lat, lng: data.lng, speed: data.speed });
+      return updated;
+    });
+  };
+
   const handleTripClick = (tripId: string) => {
     if (tripId && tripId !== 'null' && tripId !== 'undefined') router.push(`/trips/${tripId}`);
   };
@@ -115,10 +109,13 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) { router.push('/login'); return null; }
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+      {user && <FleetTracker onLocationUpdate={handleLocationUpdate} />}
       <main className="p-4 pb-24 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -182,7 +179,7 @@ export default function Dashboard() {
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
             Quick Actions
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button onClick={() => router.push('/orders')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-blue-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Package className="w-4 h-4" /></div>
               <span>View Orders</span>

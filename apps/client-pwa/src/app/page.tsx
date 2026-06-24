@@ -6,7 +6,7 @@ import { Navbar } from '@/components/landing/layout/Navbar';
 import { HeroSection } from '@/components/landing/sections/HeroSection';
 import { StatsBar } from '@/components/landing/sections/StatsBar';
 import { ProblemSection } from '@/components/landing/sections/ProblemSection';
-import { WorkflowSection } from '@/components/landing/sections/WorkflowSection';
+// import { WorkflowSection } from '@/components/landing/sections/WorkflowSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
 import { HowItWorksSection } from '@/components/landing/sections/HowItWorksSection';
 import { KPISection } from '@/components/landing/sections/KPISection';
@@ -34,7 +34,7 @@ export default function Home() {
         <HeroSection />
         <StatsBar />
         <ProblemSection />
-        <WorkflowSection />
+        {/* <WorkflowSection /> */}
         <FeaturesSection />
         <HowItWorksSection />
         <KPISection />

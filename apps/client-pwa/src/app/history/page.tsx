@@ -50,7 +50,7 @@ export default function HistoryPage() {
 
   const getStatusColor = (status: OrderStatus) => {
     const colors: Record<OrderStatus, string> = {
-      SUBMITTED: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      SUBMITTED: 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-300',
       APPROVED: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
       ASSIGNED: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
       IN_TRANSIT: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
@@ -84,7 +84,7 @@ export default function HistoryPage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
             <History className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -109,7 +109,7 @@ export default function HistoryPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                 <Package className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -160,7 +160,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('ALL')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'ALL'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -170,7 +170,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('DELIVERED')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'DELIVERED'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -180,7 +180,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('IN_TRANSIT')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'IN_TRANSIT'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -190,7 +190,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('SUBMITTED')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'SUBMITTED'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -202,7 +202,7 @@ export default function HistoryPage() {
               onClick={() => setViewMode('list')}
               className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
                 viewMode === 'list'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
               aria-label="List view"
@@ -213,7 +213,7 @@ export default function HistoryPage() {
               onClick={() => setViewMode('grid')}
               className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
                 viewMode === 'grid'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
               aria-label="Grid view"
@@ -227,7 +227,7 @@ export default function HistoryPage() {
               onClick={() => setViewMode('list')}
               className={`p-2.5 rounded-xl transition-all duration-300 ${
                 viewMode === 'list'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
               aria-label="List view"
@@ -238,7 +238,7 @@ export default function HistoryPage() {
               onClick={() => setViewMode('grid')}
               className={`p-2.5 rounded-xl transition-all duration-300 ${
                 viewMode === 'grid'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
               aria-label="Grid view"

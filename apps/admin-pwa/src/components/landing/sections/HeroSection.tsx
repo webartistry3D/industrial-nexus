@@ -74,7 +74,7 @@ export function HeroSection() {
             {/* Headline */}
             <motion.h1
               variants={itemVariants}
-              className="text-[2.6rem] sm:text-5xl lg:text-[3.4rem] xl:text-[4rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-white mb-6"
+              className="text-[3.5rem] sm:text-4xl lg:text-[3rem] xl:text-[3rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-white mb-6"
             >
               Industrial Logistics{" "}
               <span className="block">
@@ -87,19 +87,8 @@ export function HeroSection() {
                     backgroundClip: "text",
                   }}
                 >
-                  Operational
+                  Operational Excellence
                 </span>
-              </span>
-              <span
-                style={{
-                  background:
-                    "linear-gradient(135deg, #42A5F5 0%, #1E88E5 55%, #00BFA5 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                Downtime
               </span>
             </motion.h1>
 

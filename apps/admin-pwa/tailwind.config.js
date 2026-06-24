@@ -6,11 +6,25 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    {
+      pattern: /(from|to)-(blue|green|red|purple|amber)-(500|600)\/(5|10|20)/,
+      variants: ['dark'],
+    },
+    {
+      pattern: /(border)-(blue|green|red|purple)-(200|700)\/(50)/,
+      variants: ['dark'],
+    },
+    {
+      pattern: /shadow-(blue|green|red|purple)-500\/(10|20)/,
+      variants: ['dark'],
+    },
+  ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
         primary: {

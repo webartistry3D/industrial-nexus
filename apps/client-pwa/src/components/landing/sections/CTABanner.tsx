@@ -78,7 +78,7 @@ export function CTABanner() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.22 }}
         >
-          <Button variant="primary" size="lg" href="mailto:demo@industrialnexus.io">
+          <Button variant="primary" size="lg" href="https://wa.me/2347017188070">
             <CalendarCheck size={17} />
             Schedule a Demo
           </Button>

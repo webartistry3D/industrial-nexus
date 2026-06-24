@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { api, setAccessToken, setRefreshToken, clearTokens } from '@/lib/api';
 
 interface User {
   userId: string;
@@ -27,24 +25,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      fetchProfile(token);
-    } else {
-      setIsLoading(false);
-    }
+    // Tokens are intentionally not persisted. Every page/session starts logged out.
+    setIsLoading(false);
   }, []);
+
+  const logout = () => {
+    clearTokens();
+    setUser(null);
+  };
 
   const fetchProfile = async (token: string) => {
     try {
-      const response = await axios.get(`${API_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = response.data;
+      setAccessToken(token);
+      const data = await api.getProfile(5000);
       setUser({ ...data, userId: data.userId ?? data.id });
     } catch {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      logout();
       // Redirect to login on auth failure
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
@@ -55,28 +51,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await axios.post(`${API_URL}/auth/login`, {
-      email,
-      password,
-    });
+    const response = await api.login(email, password);
 
-    const { accessToken, refreshToken, user: userData } = response.data;
+    const { accessToken, refreshToken, user: userData } = response;
     
     // Check if user has required role (SUPER_ADMIN or OPERATOR)
     if (userData.role !== 'SUPER_ADMIN' && userData.role !== 'OPERATIONS') {
       throw new Error('Access denied. Only administrators can access this application.');
     }
 
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    setAccessToken(accessToken);
+    setRefreshToken(refreshToken);
 
     await fetchProfile(accessToken);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
   };
 
   return (

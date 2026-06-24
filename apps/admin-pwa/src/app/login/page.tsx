@@ -56,7 +56,7 @@ export default function Login() {
             className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-slate-700"
             aria-label="Go to home"
           >
-            <Home className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <Home className="w-5 h-5 text-blue-900 dark:text-blue-400" />
           </button>
           <button
             onClick={toggleTheme}
@@ -68,7 +68,7 @@ export default function Login() {
         </div>
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900 rounded-2xl mb-4">
             <Truck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Industrial Nexus</h1>
@@ -113,7 +113,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-blue-900 text-white py-3 rounded-lg font-medium hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>

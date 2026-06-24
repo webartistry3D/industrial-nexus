@@ -133,7 +133,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg mb-4">
           <Package className="w-8 h-8 text-white" />
         </div>
         <p className="text-blue-600 font-semibold">Loading order details...</p>
@@ -256,7 +256,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trip Information</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-900 to-blue-900 shadow-sm">
                       <Truck className="w-4 h-4 text-white" />
                     </div>
                     <span>Status: {order.trip.status}</span>
@@ -283,7 +283,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </div>
                 <button
                   onClick={() => router.push(`/tracking?shipment=${order.id}`)}
-                  className="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                  className="mt-4 w-full bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
                 >
                   Track Shipment
                 </button>

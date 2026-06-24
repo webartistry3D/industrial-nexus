@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { api, refreshAccessToken } from '@/lib/api';
+import { api, refreshAccessToken, getAccessToken } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 
 export interface Notification {
@@ -54,11 +54,7 @@ export function useNotifications() {
       setUnreadCount(unread);
       if (!initialFetchDone.current) {
         initialFetchDone.current = true;
-        const soundPlayed = sessionStorage.getItem('notificationSoundPlayed');
-        if (!soundPlayed && unread > 0) {
-          playNotificationSoundRef.current();
-          sessionStorage.setItem('notificationSoundPlayed', 'true');
-        }
+        playNotificationSoundRef.current();
       }
     } catch (err) {
       console.error('[Notifications] Failed to fetch:', err);
@@ -109,6 +105,7 @@ export function useNotifications() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
+      initialFetchDone.current = false;
       setLoading(false);
       return;
     }
@@ -121,7 +118,7 @@ export function useNotifications() {
     const MAX_RECONNECT_ATTEMPTS = 2;
 
     const connectSocket = async (tokenOverride?: string) => {
-      let token = tokenOverride || (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null);
+      let token = tokenOverride || getAccessToken();
       if (!token) return;
 
       if (socket) {

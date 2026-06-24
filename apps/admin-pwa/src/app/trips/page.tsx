@@ -9,6 +9,7 @@ import {
   Truck, Search, MapPin, Clock, ChevronRight, Navigation, AlertTriangle, Scale, X, Plus,
   BarChart2, Users, CheckCircle, TrendingUp, Trophy, ArrowRight, Minus, Calendar,
 } from 'lucide-react';
+import { StatCard } from '@/components/stat-card';
 
 type TabType = 'trips' | 'analytics';
 
@@ -283,7 +284,7 @@ function TripsPageContent() {
         {/* Header */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
               {activeTab === 'trips' ? <Truck className="w-6 h-6 text-white" /> : <BarChart2 className="w-6 h-6 text-white" />}
             </div>
             <div className="flex-1">
@@ -305,7 +306,7 @@ function TripsPageContent() {
             {activeTab === 'trips' && (
               <button
                 onClick={() => router.push('/trips/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Create Trip
@@ -319,7 +320,7 @@ function TripsPageContent() {
               onClick={() => setActiveTab('trips')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'trips'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -330,7 +331,7 @@ function TripsPageContent() {
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'analytics'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -385,17 +386,30 @@ function TripsPageContent() {
 
             {/* KPI strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: 'Total Trips', value: analyticsLoading ? '—' : String(totalTripsAll), color: 'text-4xl text-gray-900 dark:text-white' },
-                { label: 'Delivered', value: analyticsLoading ? '—' : String(totalDelivered), color: 'text-4xl text-green-600 dark:text-green-400' },
-                { label: 'Fleet On-Time', value: analyticsLoading ? '—' : avgOnTime !== null ? `${avgOnTime}%` : 'N/A', color: onTimeColor(avgOnTime), textClass: 'text-4xl' },
-                { label: 'Delayed', value: analyticsLoading ? '—' : String(totalDelayed), color: 'text-4xl text-red-600 dark:text-red-400' },
-              ].map(k => (
-                <div key={k.label} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{k.label}</p>
-                  <p className={`text-2xl font-bold font-mono ${k.color} ${k.textClass || ''}`}>{k.value}</p>
-                </div>
-              ))}
+              <StatCard
+                icon={TrendingUp}
+                label="Total Trips"
+                value={analyticsLoading ? '—' : String(totalTripsAll)}
+                color="blue"
+              />
+              <StatCard
+                icon={CheckCircle}
+                label="Delivered"
+                value={analyticsLoading ? '—' : String(totalDelivered)}
+                color="green"
+              />
+              <StatCard
+                icon={Trophy}
+                label="Fleet On-Time"
+                value={analyticsLoading ? '—' : avgOnTime !== null ? `${avgOnTime}%` : 'N/A'}
+                color={avgOnTime !== null && avgOnTime >= 80 ? 'green' : 'red'}
+              />
+              <StatCard
+                icon={AlertTriangle}
+                label="Delayed"
+                value={analyticsLoading ? '—' : String(totalDelayed)}
+                color={totalDelayed > 0 ? 'red' : 'green'}
+              />
             </div>
 
             {/* Top performer */}
@@ -421,7 +435,7 @@ function TripsPageContent() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-sm">
                     <Users className="w-4 h-4 text-white" />
                   </div>
                   <h2 className="font-semibold text-gray-900 dark:text-white">Driver Performance</h2>
@@ -461,7 +475,7 @@ function TripsPageContent() {
                           <tr key={d.driverId} className="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">{d.name.charAt(0)}</div>
+                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">{d.name.charAt(0)}</div>
                                 <div>
                                   <p className="font-medium text-gray-900 dark:text-white">{d.name}</p>
                                   <p className="text-xs text-gray-400 font-mono">{d.licenseNumber}</p>
@@ -486,7 +500,7 @@ function TripsPageContent() {
                     {sortedDrivers.map(d => (
                       <div key={d.driverId} onClick={() => router.push(`/drivers/${d.driverId}`)} className="p-4 active:bg-gray-50 dark:active:bg-slate-700/30 transition-colors cursor-pointer">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">{d.name.charAt(0)}</div>
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 flex items-center justify-center text-white font-bold flex-shrink-0">{d.name.charAt(0)}</div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-gray-900 dark:text-white truncate">{d.name}</p>
                             <p className="text-xs text-gray-400 font-mono">{d.licenseNumber}</p>
@@ -551,14 +565,14 @@ function TripsPageContent() {
         <div className="p-4 space-y-3">
           {loading ? (
             <div className="text-center py-12 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-              <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="p-4 bg-gradient-to-br from-blue-900 to-blue-900 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Truck className="w-8 h-8 text-white" />
               </div>
               <p className="text-gray-900 dark:text-white font-semibold">Loading trips...</p>
             </div>
           ) : filteredTrips.length === 0 ? (
             <div className="text-center py-12 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-              <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="p-4 bg-gradient-to-br from-blue-900 to-blue-900 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Truck className="w-8 h-8 text-white" />
               </div>
               <p className="text-gray-900 dark:text-white font-semibold mb-2">No trips found</p>

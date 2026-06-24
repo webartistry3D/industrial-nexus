@@ -36,6 +36,48 @@ function BrowserFrame({
   );
 }
 
+function MobileFrame({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      className="flex justify-center items-start"
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div
+        className="relative w-48 rounded-[28px] border-[3px] border-[rgba(150,180,220,0.25)] shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+        style={{ background: "#0A1628" }}
+      >
+        {/* Status bar */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+          <span className="text-[9px] text-[#8A9BB5] font-mono">9:41</span>
+          <div className="w-16 h-3 rounded-full bg-[#0D1D35] border border-[rgba(150,180,220,0.15)]" />
+          <div className="flex items-center gap-1">
+            <span className="text-[9px] text-[#8A9BB5]">●●●</span>
+          </div>
+        </div>
+        {/* URL bar */}
+        <div className="mx-3 mb-2 px-3 py-1 rounded-lg bg-[#0D1D35] border border-[rgba(150,180,220,0.1)] flex items-center gap-1.5">
+          <span className="text-[8px] text-[#00BFA5]">🔒</span>
+          <span className="text-[8px] text-[#8A9BB5] font-mono flex-1 text-center">driver.industrialnexus.io</span>
+        </div>
+        <div className="px-3 pb-4">{children}</div>
+        {/* Home indicator */}
+        <div className="flex justify-center pb-2">
+          <div className="w-20 h-1 rounded-full bg-[rgba(150,180,220,0.2)]" />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function Row({ label, value, color = "#C8D4E3", mono = false }: { label: string; value: string; color?: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between py-1.5 border-b border-[rgba(150,180,220,0.06)] last:border-0">
@@ -105,7 +147,7 @@ export function PlatformSection() {
           </BrowserFrame>
 
           {/* Driver PWA */}
-          <BrowserFrame title="driver.industrialnexus.io — PWA" delay={0.1}>
+          <MobileFrame delay={0.1}>
             <div className="text-center mb-3 pb-3 border-b border-[rgba(150,180,220,0.08)]">
               <div className="text-[9px] text-[#8A9BB5] mb-1">Current Assignment</div>
               <div className="text-sm font-black text-white mb-1 font-mono">NX-2024-0891</div>
@@ -144,7 +186,7 @@ export function PlatformSection() {
             <button className="w-full bg-[#E85D04] text-white text-[10px] font-bold py-2.5 rounded-lg cursor-default">
               Capture Delivery Proof
             </button>
-          </BrowserFrame>
+          </MobileFrame>
 
           {/* Client Portal */}
           <BrowserFrame title="portal.industrialnexus.io" delay={0.2}>

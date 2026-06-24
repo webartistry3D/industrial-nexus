@@ -191,7 +191,7 @@ function OrdersPageContent() {
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                 <Package className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -220,7 +220,7 @@ function OrdersPageContent() {
               </button>
               {/* <button
                 onClick={handleNewOrder}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 New
@@ -319,7 +319,7 @@ function OrdersPageContent() {
                   onClick={() => setViewMode('list')}
                   className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                   }`}
                   aria-label="List view"
@@ -330,7 +330,7 @@ function OrdersPageContent() {
                   onClick={() => setViewMode('grid')}
                   className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                   }`}
                   aria-label="Grid view"
@@ -344,7 +344,7 @@ function OrdersPageContent() {
                   onClick={() => setViewMode('list')}
                   className={`p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                   }`}
                   aria-label="List view"
@@ -355,7 +355,7 @@ function OrdersPageContent() {
                   onClick={() => setViewMode('grid')}
                   className={`p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                   }`}
                   aria-label="Grid view"
@@ -475,7 +475,7 @@ function OrdersPageContent() {
             </>
           ) : filteredOrders.length === 0 ? (
             <div className="text-center py-12 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-              <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="p-4 bg-gradient-to-br from-blue-900 to-blue-900 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Package className="w-8 h-8 text-white" />
               </div>
               <p className="text-gray-900 dark:text-white font-semibold mb-2">No orders found</p>
@@ -638,7 +638,7 @@ function OrdersPageContent() {
       {/* Mobile FAB for New Order */}
       {/* <button
         onClick={handleNewOrder}
-        className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full shadow-lg shadow-blue-500/20 flex items-center justify-center hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all duration-300 md:hidden z-50"
+        className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-blue-900 to-blue-900 text-white rounded-full shadow-lg shadow-blue-500/20 flex items-center justify-center hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all duration-300 md:hidden z-50"
       >
         <Plus className="w-6 h-6" />
       </button> */}

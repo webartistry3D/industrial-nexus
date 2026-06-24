@@ -79,7 +79,7 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
   if (pathname === '/login') return null;
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white border-b-2 border-blue-500 z-50">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-blue-900 text-white z-50">
       <div className="h-full px-4 flex items-center justify-between">
         {/* Left: Title */}
         <div>
@@ -117,7 +117,7 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
                     <div className="px-4 py-1.5 border-b border-gray-100 dark:border-slate-700 flex justify-end">
                       <button
                         onClick={markAllAsRead}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-xs text-blue-900 dark:text-blue-800 hover:underline flex items-center gap-1"
                       >
                         <Check className="w-3 h-3" /> Mark al read
                       </button>

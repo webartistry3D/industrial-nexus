@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp, Plus, MapPin } from 'lucide-react';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
+import { StatCard } from '@/components/stat-card';
 
 interface DashboardStats {
   activeShipments: number;
@@ -171,53 +172,10 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-blue-500">
-                <Truck className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.activeShipments || 0}</p>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-green-500">
-                <Clock className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.inTransit || 0}</p>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">In Transit</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-red-500">
-                <AlertCircle className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delayed || 0}</p>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delayed</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-purple-500">
-                <CheckCircle className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats?.delivered || 0}</p>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Delivered</p>
-              </div>
-            </div>
-          </div>
+          <StatCard icon={Truck} label="Active" value={loading ? '...' : (stats?.activeShipments || 0).toString()} color="blue" />
+          <StatCard icon={Clock} label="In Transit" value={loading ? '...' : (stats?.inTransit || 0).toString()} color="green" />
+          <StatCard icon={AlertCircle} label="Delayed" value={loading ? '...' : (stats?.delayed || 0).toString()} color={(stats?.delayed || 0) > 0 ? 'red' : 'green'} />
+          <StatCard icon={CheckCircle} label="Delivered" value={loading ? '...' : (stats?.delivered || 0).toString()} color="purple" />
         </div>
 
         {/* SLA Status */}

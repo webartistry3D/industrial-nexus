@@ -69,7 +69,7 @@ export default function TripsPage() {
       <main className="pt-20 px-4 pb-4 space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
             <Truck className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -84,7 +84,7 @@ export default function TripsPage() {
             onClick={() => setFilter('active')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'active'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
@@ -94,7 +94,7 @@ export default function TripsPage() {
             onClick={() => setFilter('completed')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'completed'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
@@ -104,7 +104,7 @@ export default function TripsPage() {
             onClick={() => setFilter('all')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'all'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
@@ -115,7 +115,7 @@ export default function TripsPage() {
         {/* Stats - Aligned with Dashboard */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 font-mono">
+            <div className="text-4xl font-bold text-blue-900 dark:text-blue-800 font-mono">
               {loading ? '...' : activeTripsCount}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Active Trips</div>
@@ -131,7 +131,7 @@ export default function TripsPage() {
         {/* Trip List */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg mb-4">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
             </div>
             <p className="text-gray-600 dark:text-gray-400 font-medium">Loading trips...</p>
@@ -177,7 +177,7 @@ export default function TripsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <button className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150">
+                  <button className="flex-1 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white py-2.5 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150">
                     {trip.status === 'ASSIGNED' ? 'Start Trip' : 'View Details'}
                   </button>
                 </div>

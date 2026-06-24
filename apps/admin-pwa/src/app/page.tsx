@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/landing/layout/Navbar';
 import { HeroSection } from '@/components/landing/sections/HeroSection';
 import { StatsBar } from '@/components/landing/sections/StatsBar';
 import { ProblemSection } from '@/components/landing/sections/ProblemSection';
-import { WorkflowSection } from '@/components/landing/sections/WorkflowSection';
+// import { WorkflowSection } from '@/components/landing/sections/WorkflowSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
 import { HowItWorksSection } from '@/components/landing/sections/HowItWorksSection';
 import { KPISection } from '@/components/landing/sections/KPISection';
@@ -18,14 +17,7 @@ import { SecuritySection } from '@/components/landing/sections/SecuritySection';
 import { CTABanner } from '@/components/landing/sections/CTABanner';
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      router.replace('/dashboard');
-    }
-  }, [router]);
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
     <div className="min-h-screen" style={{ background: '#0A1628' }}>
@@ -34,7 +26,7 @@ export default function Home() {
         <HeroSection />
         <StatsBar />
         <ProblemSection />
-        <WorkflowSection />
+        {/* <WorkflowSection /> */}
         <FeaturesSection />
         <HowItWorksSection />
         <KPISection />
