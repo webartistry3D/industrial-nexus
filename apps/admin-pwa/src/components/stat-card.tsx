@@ -24,7 +24,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
           {trend && <span className={trendClasses}>{trend}</span>}
         </div>
         <div className="mt-4 relative z-10">
-          <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{value}</div>
+          <div className="text-4xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{value}</div>
           <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">{label}</div>
         </div>
       </div>
@@ -40,7 +40,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
           {trend && <span className={trendClasses}>{trend}</span>}
         </div>
         <div className="mt-4 relative z-10">
-          <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{value}</div>
+          <div className="text-4xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{value}</div>
           <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">{label}</div>
         </div>
       </div>
@@ -56,7 +56,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
           {trend && <span className={trendClasses}>{trend}</span>}
         </div>
         <div className="mt-4 relative z-10">
-          <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{value}</div>
+          <div className="text-4xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{value}</div>
           <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">{label}</div>
         </div>
       </div>
@@ -72,7 +72,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
           {trend && <span className={trendClasses}>{trend}</span>}
         </div>
         <div className="mt-4 relative z-10">
-          <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{value}</div>
+          <div className="text-4xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{value}</div>
           <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">{label}</div>
         </div>
       </div>

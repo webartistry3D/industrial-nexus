@@ -53,7 +53,7 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
           activeAlerts.length > 0 
             ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' 
             : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-        }`}>
+        }`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
           {activeAlerts.length} active
         </span>
       </div>
@@ -85,7 +85,7 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-800 dark:text-white">
-                    {alert.trip?.order?.orderNumber || String(alert.tripId)} • {alert.utilization?.toFixed ? alert.utilization.toFixed(1) : alert.utilization}% capacity
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.trip?.order?.orderNumber || String(alert.tripId)}</span> • <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.utilization?.toFixed ? alert.utilization.toFixed(1) : alert.utilization}%</span> capacity
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {alert.status} • {formatTimeAgo(alert.checkedAt)}

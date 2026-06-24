@@ -73,7 +73,7 @@ export function OrdersOverview({ orders, loading = false, onOrderClick }: Orders
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-gray-800 dark:text-white">Active Orders</h2>
-        <span className="text-xs text-gray-500 dark:text-gray-400">{orders.length} orders</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{orders.length} orders</span>
       </div>
 
       {orders.length === 0 ? (
@@ -90,7 +90,7 @@ export function OrdersOverview({ orders, loading = false, onOrderClick }: Orders
               className="border border-gray-200 dark:border-slate-700 rounded-lg p-3 bg-gray-50 dark:bg-slate-700/30 cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-sm text-gray-900 dark:text-white font-mono">{order.orderNumber}</span>
+                <span className="font-medium text-sm text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{order.orderNumber}</span>
                 <span className={`status-badge ${getStatusColor(order.status)}`}>
                   {order.status?.replace('_', ' ')}
                 </span>
@@ -103,7 +103,7 @@ export function OrdersOverview({ orders, loading = false, onOrderClick }: Orders
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <Scale className="w-4 h-4" />
-                  <span>{order.totalWeight} kg</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{order.totalWeight} kg</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <MapPin className="w-4 h-4" />
