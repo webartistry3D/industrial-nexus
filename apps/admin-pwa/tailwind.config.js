@@ -23,8 +23,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['var(--font-mono)', 'monospace'],
+        sans: ['Inter', 'var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'var(--font-mono)', 'monospace'],
       },
       colors: {
         primary: {
