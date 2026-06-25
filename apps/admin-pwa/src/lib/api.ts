@@ -205,8 +205,8 @@ class ApiClient {
   }
 
   // Package Trackers
-  async getPackageTrackers() {
-    const response = await this.client.get('/package-trackers');
+  async getPackageTrackers(params?: { page?: number; limit?: number }) {
+    const response = await this.client.get('/package-trackers', { params });
     return response.data;
   }
 

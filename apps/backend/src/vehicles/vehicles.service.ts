@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleFilterDto } from './dto/vehicle-filter.dto';
-import { VehicleStatus } from '@prisma/client';
+import { CreateVehicleDocumentDto, UpdateVehicleDocumentDto, VehicleDocumentFilterDto } from './dto/vehicle-document.dto';
+import { VehicleStatus, VehicleDocumentStatus } from '@prisma/client';
 
 @Injectable()
 export class VehiclesService {
@@ -172,5 +173,156 @@ export class VehiclesService {
 
   async deactivate(id: string, userId: string) {
     return this.update(id, { status: VehicleStatus.INACTIVE }, userId);
+  }
+
+  // Vehicle Document Methods
+  async createVehicleDocument(vehicleId: string, createVehicleDocumentDto: CreateVehicleDocumentDto, userId: string) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    // Check if document type already exists and is not rejected
+    const existingDocument = await this.prisma.vehicleDocument.findFirst({
+      where: {
+        vehicleId,
+        documentType: createVehicleDocumentDto.documentType,
+        status: { in: [VehicleDocumentStatus.PENDING, VehicleDocumentStatus.UNDER_REVIEW, VehicleDocumentStatus.VERIFIED] },
+      },
+    });
+
+    if (existingDocument) {
+      throw new ConflictException(`Document of type ${createVehicleDocumentDto.documentType} already exists and is ${existingDocument.status}`);
+    }
+
+    const vehicleDocument = await this.prisma.vehicleDocument.create({
+      data: {
+        vehicleId,
+        documentType: createVehicleDocumentDto.documentType,
+        fileUrl: createVehicleDocumentDto.fileUrl,
+        fileName: createVehicleDocumentDto.fileName,
+        fileSize: createVehicleDocumentDto.fileSize,
+        mimeType: createVehicleDocumentDto.mimeType,
+        status: VehicleDocumentStatus.PENDING,
+        expiresAt: createVehicleDocumentDto.expiresAt,
+      },
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'CREATE',
+      entityType: 'VEHICLE_DOCUMENT',
+      entityId: vehicleDocument.id,
+      newValue: { documentType: vehicleDocument.documentType, vehicleId },
+    });
+
+    return vehicleDocument;
+  }
+
+  async findVehicleDocuments(vehicleId: string, filterDto?: VehicleDocumentFilterDto) {
+    const where: any = { vehicleId };
+
+    if (filterDto?.status) where.status = filterDto.status;
+    if (filterDto?.documentType) where.documentType = filterDto.documentType;
+
+    const documents = await this.prisma.vehicleDocument.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return documents;
+  }
+
+  async findPendingVehicleDocuments(filterDto?: VehicleDocumentFilterDto) {
+    const where: any = { status: VehicleDocumentStatus.PENDING };
+
+    if (filterDto?.documentType) where.documentType = filterDto.documentType;
+    if (filterDto?.vehicleId) where.vehicleId = filterDto.vehicleId;
+
+    const documents = await this.prisma.vehicleDocument.findMany({
+      where,
+      include: {
+        vehicle: {
+          select: {
+            id: true,
+            plateNumber: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return documents;
+  }
+
+  async updateVehicleDocument(documentId: string, updateVehicleDocumentDto: UpdateVehicleDocumentDto, userId: string) {
+    const document = await this.prisma.vehicleDocument.findUnique({
+      where: { id: documentId },
+      include: { vehicle: true },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Vehicle document not found');
+    }
+
+    const updateData: any = {};
+    if (updateVehicleDocumentDto.status !== undefined) {
+      updateData.status = updateVehicleDocumentDto.status;
+      updateData.reviewedAt = new Date();
+      updateData.reviewedBy = userId;
+    }
+    if (updateVehicleDocumentDto.rejectionReason !== undefined) {
+      updateData.rejectionReason = updateVehicleDocumentDto.rejectionReason;
+    }
+    if (updateVehicleDocumentDto.expiresAt !== undefined) {
+      updateData.expiresAt = updateVehicleDocumentDto.expiresAt;
+    }
+
+    const updatedDocument = await this.prisma.vehicleDocument.update({
+      where: { id: documentId },
+      data: updateData,
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'UPDATE',
+      entityType: 'VEHICLE_DOCUMENT',
+      entityId: documentId,
+      oldValue: { ...document },
+      newValue: updateData,
+    });
+
+    return updatedDocument;
+  }
+
+  async deleteVehicleDocument(documentId: string, userId: string) {
+    const document = await this.prisma.vehicleDocument.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Vehicle document not found');
+    }
+
+    if (document.status === VehicleDocumentStatus.VERIFIED) {
+      throw new BadRequestException('Cannot delete verified documents');
+    }
+
+    await this.prisma.vehicleDocument.delete({
+      where: { id: documentId },
+    });
+
+    await this.auditService.log({
+      userId,
+      action: 'DELETE',
+      entityType: 'VEHICLE_DOCUMENT',
+      entityId: documentId,
+      oldValue: { documentType: document.documentType, vehicleId: document.vehicleId },
+    });
+
+    return { message: 'Vehicle document deleted successfully' };
   }
 }

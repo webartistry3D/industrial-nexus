@@ -43,13 +43,23 @@ CREATE INDEX IF NOT EXISTS "package_tracking_points_package_tracker_id_idx" ON "
 CREATE INDEX IF NOT EXISTS "package_tracking_points_timestamp_idx" ON "package_tracking_points"("timestamp");
 
 -- AddForeignKey (idempotent)
-ALTER TABLE "package_tracking_points" ADD CONSTRAINT IF NOT EXISTS "package_tracking_points_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'package_tracking_points_package_tracker_id_fkey') THEN
+        ALTER TABLE "package_tracking_points" ADD CONSTRAINT "package_tracking_points_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AlterTable (idempotent)
 ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "package_tracker_id" TEXT;
 
 -- AddForeignKey (idempotent)
-ALTER TABLE "orders" ADD CONSTRAINT IF NOT EXISTS "orders_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_package_tracker_id_fkey') THEN
+        ALTER TABLE "orders" ADD CONSTRAINT "orders_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- CreateIndex (idempotent)
 CREATE INDEX IF NOT EXISTS "orders_package_tracker_id_idx" ON "orders"("package_tracker_id");

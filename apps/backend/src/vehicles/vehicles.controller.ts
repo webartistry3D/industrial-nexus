@@ -10,7 +10,14 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { VehiclesService } from './vehicles.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -19,6 +26,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleFilterDto } from './dto/vehicle-filter.dto';
+import { CreateVehicleDocumentDto, UpdateVehicleDocumentDto, VehicleDocumentFilterDto } from './dto/vehicle-document.dto';
 import { UserRole } from '@prisma/client';
 
 @Controller('vehicles')
@@ -72,5 +80,103 @@ export class VehiclesController {
     @CurrentUser() user: { userId: string },
   ) {
     return this.vehiclesService.deactivate(id, user.userId);
+  }
+
+  // Vehicle Document Endpoints
+  @Post(':id/documents/upload')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/vehicle-docs',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = uuidv4();
+        const ext = extname(file.originalname);
+        cb(null, `${uniqueSuffix}${ext}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+      const ext = extname(file.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only PDF, JPG, and PNG files are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+    },
+  }))
+  @HttpCode(HttpStatus.CREATED)
+  async uploadVehicleDocument(
+    @Param('id') vehicleId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('documentType') documentType: string,
+    @Body('expiresAt') expiresAt: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const fileUrl = `/uploads/vehicle-docs/${file.filename}`;
+
+    const createVehicleDocumentDto: CreateVehicleDocumentDto = {
+      documentType: documentType as any,
+      fileUrl,
+      fileName: file.originalname,
+      fileSize: file.size,
+      mimeType: file.mimetype,
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+    };
+
+    return this.vehiclesService.createVehicleDocument(vehicleId, createVehicleDocumentDto, user.userId);
+  }
+
+  @Post(':id/documents')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  @HttpCode(HttpStatus.CREATED)
+  createVehicleDocument(
+    @Param('id') vehicleId: string,
+    @Body() createVehicleDocumentDto: CreateVehicleDocumentDto,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.vehiclesService.createVehicleDocument(vehicleId, createVehicleDocumentDto, user.userId);
+  }
+
+  @Get(':id/documents')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  findVehicleDocuments(
+    @Param('id') vehicleId: string,
+    @Query() filterDto?: VehicleDocumentFilterDto,
+  ) {
+    return this.vehiclesService.findVehicleDocuments(vehicleId, filterDto);
+  }
+
+  @Get('documents/pending')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  findPendingVehicleDocuments(
+    @Query() filterDto?: VehicleDocumentFilterDto,
+  ) {
+    return this.vehiclesService.findPendingVehicleDocuments(filterDto);
+  }
+
+  @Patch('documents/:documentId')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  updateVehicleDocument(
+    @Param('documentId') documentId: string,
+    @Body() updateVehicleDocumentDto: UpdateVehicleDocumentDto,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.vehiclesService.updateVehicleDocument(documentId, updateVehicleDocumentDto, user.userId);
+  }
+
+  @Delete('documents/:documentId')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  deleteVehicleDocument(
+    @Param('documentId') documentId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.vehiclesService.deleteVehicleDocument(documentId, user.userId);
   }
 }

@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { PackageTracker } from '@/types';
 import { 
   Navigation, Plus, Search, Trash2, Edit2, Battery, 
-  Activity, MapPin, XCircle, CheckCircle2, Crosshair 
+  Activity, MapPin, XCircle, CheckCircle2, Crosshair, List, Grid2x2
 } from 'lucide-react';
 
 export function TrackersTab() {
@@ -19,17 +19,25 @@ export function TrackersTab() {
   const [locationTracker, setLocationTracker] = useState<PackageTracker | null>(null);
   const [locationForm, setLocationForm] = useState({ lat: '', lng: '', accuracy: '5' });
   const [formData, setFormData] = useState({ name: '', status: 'ACTIVE', batteryLevel: 100 });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
   useEffect(() => {
     fetchTrackers();
-  }, []);
+  }, [page]);
 
   const fetchTrackers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getPackageTrackers();
-      setTrackers(data);
+      const response = await api.getPackageTrackers({ page, limit: 10 });
+      setTrackers(response.data || response);
+      if (response.meta) {
+        setMeta(response.meta);
+      } else {
+        setMeta({ page, limit: 10, total: response.length || 0, totalPages: 1 });
+      }
     } catch (err) {
       console.error('Failed to fetch trackers:', err);
       setError('Failed to load package trackers');
@@ -152,6 +160,56 @@ export function TrackersTab() {
           <Plus className="w-4 h-4" />
           Add Tracker
         </button>
+        {/* View Toggle Buttons */}
+        <div className="hidden sm:block w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+        <div className="hidden sm:flex gap-2">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2.5 rounded-xl transition-all duration-300 ${
+              viewMode === 'list'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+            }`}
+            aria-label="List view"
+          >
+            <List className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2.5 rounded-xl transition-all duration-300 ${
+              viewMode === 'grid'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+            }`}
+            aria-label="Grid view"
+          >
+            <Grid2x2 className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="flex gap-2 justify-center sm:hidden">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+              viewMode === 'list'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+            }`}
+            aria-label="List view"
+          >
+            <List className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+              viewMode === 'grid'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+            }`}
+            aria-label="Grid view"
+          >
+            <Grid2x2 className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -171,7 +229,78 @@ export function TrackersTab() {
           <Navigation className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">No package trackers found</p>
         </div>
+      ) : viewMode === 'list' ? (
+        // Table View
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-x-auto">
+          <table className="w-full min-w-[600px] text-sm">
+            <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Device ID</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Battery</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Last Seen</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Location</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+              {filteredTrackers.map((tracker) => (
+                <tr key={tracker.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <p className="font-mono text-gray-900 dark:text-white">{tracker.deviceId}</p>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <p className="font-medium text-gray-900 dark:text-white">{tracker.name || '-'}</p>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tracker.status)}`}>
+                      {tracker.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <p className="font-mono text-gray-900 dark:text-white">{tracker.batteryLevel ? `${tracker.batteryLevel}%` : 'N/A'}</p>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <p className="font-mono text-gray-600 dark:text-gray-400">{tracker.lastSeenAt ? new Date(tracker.lastSeenAt).toLocaleString() : 'Never'}</p>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <p className="font-mono text-gray-600 dark:text-gray-400">
+                      {tracker.lastLat ? `${tracker.lastLat.toFixed(4)}, ${tracker.lastLng?.toFixed(4)}` : 'N/A'}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openLocationModal(tracker)}
+                        className="p-2 border border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        title="Update Location"
+                      >
+                        <Crosshair className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => openEditModal(tracker)}
+                        className="p-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(tracker.id)}
+                        className="p-2 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
+        // Grid View (Cards)
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTrackers.map((tracker) => (
             <div
@@ -245,6 +374,29 @@ export function TrackersTab() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && filteredTrackers.length > 0 && (
+        <div className="px-4 py-4 flex items-center justify-between">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            Page {page} of {meta.totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+            disabled={page === meta.totalPages}
+            className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            Next
+          </button>
         </div>
       )}
 

@@ -125,6 +125,32 @@ model KycDocument {
   @@index([documentType])
 }
 
+model VehicleDocument {
+  id              String                @id @default(uuid())
+  vehicleId       String                @map("vehicle_id")
+  documentType    VehicleDocumentType   @map("document_type")
+  fileUrl         String                @map("file_url")
+  fileName        String                @map("file_name")
+  fileSize        Int                   @map("file_size")
+  mimeType        String                @map("mime_type")
+  status          VehicleDocumentStatus @default(PENDING)
+  submittedAt     DateTime              @default(now()) @map("submitted_at")
+  reviewedAt      DateTime?             @map("reviewed_at")
+  reviewedBy      String?               @map("reviewed_by")
+  rejectionReason String?               @map("rejection_reason")
+  expiresAt       DateTime?             @map("expires_at")
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+
+  // Relations
+  vehicle         Vehicle               @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_documents")
+  @@index([vehicleId])
+  @@index([status])
+  @@index([documentType])
+}
+
 model Driver {
   id            String      @id @default(uuid())
   userId        String      @unique @map("user_id")
@@ -156,8 +182,9 @@ model Vehicle {
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  drivers Driver[]
-  trips   Trip[]
+  drivers          Driver[]
+  trips            Trip[]
+  vehicleDocuments VehicleDocument[]
 
   @@map("vehicles")
 }
@@ -471,6 +498,24 @@ enum KycDocumentType {
 }
 
 enum KycDocumentStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum VehicleDocumentType {
+  VEHICLE_REGISTRATION
+  ROAD_WORTHINESS
+  INSURANCE_CERTIFICATE
+  VEHICLE_LICENSE
+  HAULAGE_PERMIT
+  TEMPERATURE_CONTROL_CERTIFICATION
+  HAZARDOUS_MATERIAL_CERTIFICATION
+}
+
+enum VehicleDocumentStatus {
   PENDING
   UNDER_REVIEW
   VERIFIED

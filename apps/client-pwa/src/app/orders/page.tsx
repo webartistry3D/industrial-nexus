@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { Package, Plus, Search } from 'lucide-react';
+import { Package, Plus, Search, List, Grid2x2 } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -32,6 +32,7 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   useEffect(() => {
     fetchOrders();
@@ -126,7 +127,7 @@ export default function OrdersPage() {
           </button>
         </div>
         {/* Search & Filter */}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -149,6 +150,56 @@ export default function OrdersPage() {
             <option value="DELIVERED">Delivered</option>
             <option value="DELAYED">Delayed</option>
           </select>
+          {/* View Toggle Buttons */}
+          <div className="hidden sm:block w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+          <div className="hidden sm:flex gap-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'list'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="List view"
+            >
+              <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'grid'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="Grid view"
+            >
+              <Grid2x2 className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex gap-2 justify-center sm:hidden">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'list'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="List view"
+            >
+              <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                viewMode === 'grid'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+              aria-label="Grid view"
+            >
+              <Grid2x2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -176,7 +227,60 @@ export default function OrdersPage() {
               </div>
               <p className="text-gray-600 dark:text-gray-400 font-medium">No orders found</p>
             </div>
+          ) : viewMode === 'list' ? (
+            // Table View
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Order #</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Priority</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Weight</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Destination</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">ETA</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      onClick={() => router.push(`/orders/${order.id}`)}
+                      className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {order.priority && (
+                          <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
+                            {order.priority}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{order.deliveryLocation.address}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                          {order.trip?.eta ? new Date(order.trip.eta).toLocaleDateString() : '-'}
+                        </p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
+            // Grid View (Cards)
             <div className="space-y-3">
               {filteredOrders.map((order) => (
                 <div
@@ -253,7 +357,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Pagination */}
-        {!loading && (
+        {!loading && filteredOrders.length > 0 && (
           <div className="px-4 py-4 flex items-center justify-between">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}

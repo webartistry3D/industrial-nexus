@@ -36,6 +36,24 @@ export enum KycDocumentStatus {
   EXPIRED = 'EXPIRED',
 }
 
+export enum VehicleDocumentType {
+  VEHICLE_REGISTRATION = 'VEHICLE_REGISTRATION',
+  ROAD_WORTHINESS = 'ROAD_WORTHINESS',
+  INSURANCE_CERTIFICATE = 'INSURANCE_CERTIFICATE',
+  VEHICLE_LICENSE = 'VEHICLE_LICENSE',
+  HAULAGE_PERMIT = 'HAULAGE_PERMIT',
+  TEMPERATURE_CONTROL_CERTIFICATION = 'TEMPERATURE_CONTROL_CERTIFICATION',
+  HAZARDOUS_MATERIAL_CERTIFICATION = 'HAZARDOUS_MATERIAL_CERTIFICATION',
+}
+
+export enum VehicleDocumentStatus {
+  PENDING = 'PENDING',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  VERIFIED = 'VERIFIED',
+  REJECTED = 'REJECTED',
+  EXPIRED = 'EXPIRED',
+}
+
 export enum TripStatus {
   ASSIGNED = 'ASSIGNED',
   SOP_CHECKLIST_PENDING = 'SOP_CHECKLIST_PENDING',
@@ -183,6 +201,37 @@ export interface KycDocument {
   updatedAt: Date;
 }
 
+export interface VehicleDocument {
+  id: string;
+  vehicleId: string;
+  documentType: VehicleDocumentType;
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  status: VehicleDocumentStatus;
+  submittedAt: Date;
+  reviewedAt?: Date;
+  reviewedBy?: string;
+  rejectionReason?: string;
+  expiresAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Vehicle {
+  id: string;
+  plateNumber: string;
+  category: string;
+  capacityKg: number;
+  status: string;
+  isPartitioned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  drivers?: Driver[];
+  vehicleDocuments?: VehicleDocument[];
+}
+
 export interface Driver {
   id: string;
   userId: string;
@@ -194,6 +243,6 @@ export interface Driver {
   createdAt: Date;
   updatedAt: Date;
   user?: User;
-  vehicle?: any;
+  vehicle?: Vehicle;
   kycDocuments?: KycDocument[];
 }

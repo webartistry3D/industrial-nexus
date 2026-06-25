@@ -2,10 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { NotificationType, KycDocumentStatus } from '@prisma/client';
+import { NotificationType, KycDocumentStatus, VehicleDocumentStatus } from '@prisma/client';
 
 const ALERT_WINDOW_DAYS = 90;
 const REMINDER_INTERVAL_DAYS = 30;
+
+interface ExpiryAlertTarget {
+  userId: string;
+  docLabel: string;
+  daysUntilExpiry: number;
+  expiryDateStr: string;
+  docId: string;
+  entityType: 'KYC_DOCUMENT' | 'VEHICLE_DOCUMENT';
+  vehiclePlateNumber?: string;
+}
 
 @Injectable()
 export class DocumentExpiryScheduler {
@@ -26,7 +36,10 @@ export class DocumentExpiryScheduler {
     const recentlyExpiredCutoff = new Date(now);
     recentlyExpiredCutoff.setDate(recentlyExpiredCutoff.getDate() - 7);
 
-    const expiringDocs = await this.prisma.kycDocument.findMany({
+    const alertTargets: ExpiryAlertTarget[] = [];
+
+    // 1. KYC (driver) documents
+    const expiringKycDocs = await this.prisma.kycDocument.findMany({
       where: {
         expiresAt: {
           gte: recentlyExpiredCutoff,
@@ -45,62 +58,129 @@ export class DocumentExpiryScheduler {
       },
     });
 
-    this.logger.log(`[DocumentExpiry] Found ${expiringDocs.length} documents expiring within ${ALERT_WINDOW_DAYS} days`);
-
-    for (const doc of expiringDocs) {
+    for (const doc of expiringKycDocs) {
       const driverUserId = doc.driver?.user?.id;
       if (!driverUserId) continue;
-
-      const daysUntilExpiry = Math.ceil(
-        (doc.expiresAt!.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-      );
-
-      const docLabel = this.getDocTypeLabel(doc.documentType as string);
-      const expiryDateStr = doc.expiresAt!.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
+      alertTargets.push({
+        userId: driverUserId,
+        docLabel: this.getDocTypeLabel(doc.documentType as string),
+        daysUntilExpiry: Math.ceil((doc.expiresAt!.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+        expiryDateStr: this.formatDate(doc.expiresAt!),
+        docId: doc.id,
+        entityType: 'KYC_DOCUMENT',
       });
+    }
 
-      const isDuplicate = await this.hasSentRecentAlert(driverUserId, doc.id, REMINDER_INTERVAL_DAYS);
+    // 2. Vehicle documents
+    const expiringVehicleDocs = await this.prisma.vehicleDocument.findMany({
+      where: {
+        expiresAt: {
+          gte: recentlyExpiredCutoff,
+          lte: alertWindowEnd,
+        },
+        status: {
+          in: [VehicleDocumentStatus.VERIFIED, VehicleDocumentStatus.PENDING, VehicleDocumentStatus.UNDER_REVIEW],
+        },
+      },
+      include: {
+        vehicle: {
+          include: {
+            drivers: {
+              where: { status: 'ACTIVE' },
+              include: {
+                user: { select: { id: true, firstName: true, lastName: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const doc of expiringVehicleDocs) {
+      const drivers = doc.vehicle?.drivers || [];
+      if (drivers.length === 0) continue;
+
+      const daysUntilExpiry = Math.ceil((doc.expiresAt!.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const expiryDateStr = this.formatDate(doc.expiresAt!);
+      const docLabel = this.getVehicleDocTypeLabel(doc.documentType as string);
+      const plateNumber = doc.vehicle?.plateNumber || 'Unknown';
+
+      for (const driver of drivers) {
+        const driverUserId = driver.user?.id;
+        if (!driverUserId) continue;
+        alertTargets.push({
+          userId: driverUserId,
+          docLabel,
+          daysUntilExpiry,
+          expiryDateStr,
+          docId: doc.id,
+          entityType: 'VEHICLE_DOCUMENT',
+          vehiclePlateNumber: plateNumber,
+        });
+      }
+    }
+
+    this.logger.log(`[DocumentExpiry] Found ${alertTargets.length} alert targets expiring within ${ALERT_WINDOW_DAYS} days`);
+
+    for (const target of alertTargets) {
+      const isDuplicate = await this.hasSentRecentAlert(target.userId, target.docId, target.entityType, REMINDER_INTERVAL_DAYS);
       if (isDuplicate) continue;
 
-      let title: string;
-      let message: string;
-
-      if (daysUntilExpiry <= 0) {
-        const daysAgo = Math.abs(daysUntilExpiry);
-        title = `🚨 ${docLabel} Has Expired`;
-        message = `Your ${docLabel} expired on ${expiryDateStr}${daysAgo > 0 ? ` (${daysAgo} day${daysAgo === 1 ? '' : 's'} ago)` : ' today'}. Renew immediately to avoid suspension.`;
-      } else if (daysUntilExpiry <= 7) {
-        title = `⚠️ ${docLabel} Expires in ${daysUntilExpiry} Day${daysUntilExpiry === 1 ? '' : 's'}`;
-        message = `Your ${docLabel} is expiring on ${expiryDateStr}. Please renew it immediately to avoid suspension.`;
-      } else if (daysUntilExpiry <= 30) {
-        title = `${docLabel} Expiring Soon`;
-        message = `Your ${docLabel} expires on ${expiryDateStr} — ${daysUntilExpiry} days remaining. Please renew it.`;
-      } else {
-        title = `${docLabel} Expiry Reminder`;
-        message = `Your ${docLabel} will expire on ${expiryDateStr} (${daysUntilExpiry} days from now). Start the renewal process early.`;
-      }
+      const { title, message } = this.buildAlertMessage(target);
 
       await this.notificationsService.create({
-        userId: driverUserId,
+        userId: target.userId,
         type: NotificationType.DOCUMENT_EXPIRY_ALERT,
         title,
         message,
-        entityId: doc.id,
-        entityType: 'KYC_DOCUMENT',
+        entityId: target.docId,
+        entityType: target.entityType,
       });
 
       this.logger.log(
-        `[DocumentExpiry] Notified driver ${driverUserId} about ${docLabel} expiring in ${daysUntilExpiry} days`,
+        `[DocumentExpiry] Notified user ${target.userId} about ${target.docLabel} (${target.entityType}) expiring in ${target.daysUntilExpiry} days`,
       );
     }
 
     this.logger.log('[DocumentExpiry] Daily check complete');
   }
 
-  private async hasSentRecentAlert(userId: string, docId: string, withinDays: number): Promise<boolean> {
+  private formatDate(date: Date): string {
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  private buildAlertMessage(target: ExpiryAlertTarget) {
+    const { docLabel, daysUntilExpiry, expiryDateStr, entityType, vehiclePlateNumber } = target;
+    const subject = entityType === 'VEHICLE_DOCUMENT' && vehiclePlateNumber
+      ? `${docLabel} for vehicle ${vehiclePlateNumber}`
+      : `Your ${docLabel}`;
+
+    let title: string;
+    let message: string;
+
+    if (daysUntilExpiry <= 0) {
+      const daysAgo = Math.abs(daysUntilExpiry);
+      title = `🚨 ${docLabel} Has Expired`;
+      message = `${subject} expired on ${expiryDateStr}${daysAgo > 0 ? ` (${daysAgo} day${daysAgo === 1 ? '' : 's'} ago)` : ' today'}. Renew immediately to avoid suspension.`;
+    } else if (daysUntilExpiry <= 7) {
+      title = `⚠️ ${docLabel} Expires in ${daysUntilExpiry} Day${daysUntilExpiry === 1 ? '' : 's'}`;
+      message = `${subject} is expiring on ${expiryDateStr}. Please renew it immediately to avoid suspension.`;
+    } else if (daysUntilExpiry <= 30) {
+      title = `${docLabel} Expiring Soon`;
+      message = `${subject} expires on ${expiryDateStr} — ${daysUntilExpiry} days remaining. Please renew it.`;
+    } else {
+      title = `${docLabel} Expiry Reminder`;
+      message = `${subject} will expire on ${expiryDateStr} (${daysUntilExpiry} days from now). Start the renewal process early.`;
+    }
+
+    return { title, message };
+  }
+
+  private async hasSentRecentAlert(userId: string, docId: string, entityType: 'KYC_DOCUMENT' | 'VEHICLE_DOCUMENT', withinDays: number): Promise<boolean> {
     const since = new Date();
     since.setDate(since.getDate() - withinDays);
 
@@ -109,7 +189,7 @@ export class DocumentExpiryScheduler {
         userId,
         type: NotificationType.DOCUMENT_EXPIRY_ALERT,
         entityId: docId,
-        entityType: 'KYC_DOCUMENT',
+        entityType,
         createdAt: { gte: since },
       },
     });
@@ -125,6 +205,19 @@ export class DocumentExpiryScheduler {
       VEHICLE_REGISTRATION: 'Vehicle Registration',
       INSURANCE_CERTIFICATE: 'Insurance Certificate',
       PROFESSIONAL_CERTIFICATION: 'Professional Certification',
+    };
+    return labels[type] || type;
+  }
+
+  private getVehicleDocTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      VEHICLE_REGISTRATION: 'Vehicle Registration',
+      ROAD_WORTHINESS: 'Road Worthiness Certificate',
+      INSURANCE_CERTIFICATE: 'Insurance Certificate',
+      VEHICLE_LICENSE: 'Vehicle License',
+      HAULAGE_PERMIT: 'Haulage Permit',
+      TEMPERATURE_CONTROL_CERTIFICATION: 'Temperature Control Certification',
+      HAZARDOUS_MATERIAL_CERTIFICATION: 'Hazardous Material Certification',
     };
     return labels[type] || type;
   }

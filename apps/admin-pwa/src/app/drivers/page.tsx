@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { Driver, PaginatedResponse, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
 import { 
   Users, Search, Plus, Mail, Shield, MapPin, CheckCircle, XCircle, AlertCircle,
-  ChevronRight, Filter, UserCheck, UserX, Truck, Edit, Trash2, List, Grid2x2
+  ChevronRight, Filter, UserCheck, UserX, Truck, Edit, Trash2, List, Grid2x2, FileText
 } from 'lucide-react';
 import { StatCard } from '@/components/stat-card';
 
@@ -994,6 +994,7 @@ export default function DriversPage() {
                         {filteredVehicles.map((vehicle) => (
                           <tr
                             key={vehicle.id}
+                            onClick={() => router.push(`/vehicles/${vehicle.id}`)}
                             className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors"
                           >
                             <td className="px-4 py-3 font-mono text-sm text-gray-900 dark:text-white font-medium">{vehicle.plateNumber}</td>
@@ -1072,7 +1073,14 @@ export default function DriversPage() {
                       </span>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 gap-2">
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => router.push(`/vehicles/${vehicle.id}`)}
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Docs
+                      </button>
                       <button
                         onClick={() => openEditVehicleModal(vehicle)}
                         className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-300"

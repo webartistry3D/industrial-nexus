@@ -194,6 +194,38 @@ class ApiClient {
     return response.data;
   }
 
+  // Vehicle Documents
+  async getMyVehicleDocuments() {
+    const profile = await this.getProfile();
+    const vehicleId = profile.driver?.vehicle?.id;
+    if (!vehicleId) return [];
+    const response = await this.client.get(`/vehicles/${vehicleId}/documents`);
+    return response.data;
+  }
+
+  async uploadVehicleDocument(file: File, documentType: string, expiresAt?: string) {
+    const profile = await this.getProfile();
+    const vehicleId = profile.driver?.vehicle?.id;
+    if (!vehicleId) throw new Error('No vehicle assigned');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('documentType', documentType);
+    if (expiresAt) formData.append('expiresAt', expiresAt);
+
+    const response = await this.client.post(`/vehicles/${vehicleId}/documents/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+  async deleteVehicleDocument(documentId: string) {
+    const response = await this.client.delete(`/vehicles/documents/${documentId}`);
+    return response.data;
+  }
+
   // Notifications
   async getNotifications() {
     const response = await this.client.get('/notifications');

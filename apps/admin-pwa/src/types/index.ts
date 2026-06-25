@@ -67,6 +67,27 @@ export const KycDocumentStatus = {
 
 export type KycDocumentStatusValue = typeof KycDocumentStatus[keyof typeof KycDocumentStatus];
 
+export const VehicleDocumentType = {
+  VEHICLE_REGISTRATION: 'VEHICLE_REGISTRATION',
+  ROAD_WORTHINESS: 'ROAD_WORTHINESS',
+  INSURANCE_CERTIFICATE: 'INSURANCE_CERTIFICATE',
+  VEHICLE_LICENSE: 'VEHICLE_LICENSE',
+  HAULAGE_PERMIT: 'HAULAGE_PERMIT',
+  TEMPERATURE_CONTROL_CERTIFICATION: 'TEMPERATURE_CONTROL_CERTIFICATION',
+  HAZARDOUS_MATERIAL_CERTIFICATION: 'HAZARDOUS_MATERIAL_CERTIFICATION',
+} as const;
+
+export type VehicleDocumentTypeValue = typeof VehicleDocumentType[keyof typeof VehicleDocumentType];
+
+export const VehicleDocumentStatus = {
+  PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type VehicleDocumentStatusValue = typeof VehicleDocumentStatus[keyof typeof VehicleDocumentStatus];
+
 export interface KycDocument {
   id: string;
   driverId: string;
@@ -75,6 +96,20 @@ export interface KycDocument {
   fileUrl: string;
   fileSize: number;
   status: KycDocumentStatusValue;
+  rejectionReason?: string;
+  submittedAt: string;
+  reviewedAt?: string;
+  expiresAt?: string;
+}
+
+export interface VehicleDocument {
+  id: string;
+  vehicleId: string;
+  documentType: VehicleDocumentTypeValue;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  status: VehicleDocumentStatusValue;
   rejectionReason?: string;
   submittedAt: string;
   reviewedAt?: string;
@@ -116,6 +151,7 @@ export interface Vehicle {
   capacityKg: number;
   status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE';
   isPartitioned: boolean;
+  vehicleDocuments?: VehicleDocument[];
 }
 
 export interface TrackingPoint {
