@@ -175,7 +175,7 @@ export default function Dashboard() {
         {/* Greeting */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {getGreeting()}, <span className="text-blue-500 dark:text-blue-600">{user?.firstName || user?.email?.split('@')[0] || 'Driver'}</span>
+            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:text-blue-400 dark:bg-none">{user?.firstName || user?.email?.split('@')[0] || 'Driver'}</span>
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
             Here's your performance overview for today

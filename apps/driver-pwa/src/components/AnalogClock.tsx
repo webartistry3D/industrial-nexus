@@ -36,20 +36,20 @@ const AnalogClock = memo(function AnalogClock() {
     <div className="w-full flex flex-col items-center justify-center gap-1 py-1">
       <div className="flex items-baseline gap-1.5">
         <span
-          className="text-6xl sm:text-5xl md:text-8xl font-semibold tracking-tight text-gray-900 dark:text-white leading-none"
+          className="text-3xl sm:text-5xl md:text-8xl font-semibold tracking-tight text-gray-900 dark:text-white leading-none"
           style={{ fontFamily: 'JetBrains Mono, monospace' }}
         >
           {main}
         </span>
         <span
-          className="text-xl sm:text-4xl md:text-6xl font-medium text-blue-500 dark:text-blue-400 leading-none self-end pb-0.5"
+          className="text-lg sm:text-4xl md:text-6xl font-medium text-blue-500 dark:text-blue-400 leading-none self-end pb-0.5"
           style={{ fontFamily: 'JetBrains Mono, monospace' }}
         >
           {period}
         </span>
       </div>
       <span
-        className="text-base sm:text-xl md:text-2xl font-medium text-gray-400 dark:text-slate-500 tracking-wide uppercase"
+        className="text-sm sm:text-xl md:text-2xl font-medium text-gray-400 dark:text-slate-500 tracking-wide uppercase"
         style={{ fontFamily: 'JetBrains Mono, monospace' }}
       >
         {date}

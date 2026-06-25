@@ -1,11 +1,15 @@
-import { Controller, Get, Patch, Delete, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Post, Param, UseGuards, Request } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { DocumentExpiryScheduler } from '../scheduler/document-expiry.scheduler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly documentExpiryScheduler: DocumentExpiryScheduler,
+  ) {}
 
   @Get()
   async getMyNotifications(@Request() req: any) {
@@ -30,5 +34,11 @@ export class NotificationsController {
   @Delete(':id')
   async deleteNotification(@Param('id') id: string, @Request() req: any) {
     return this.notificationsService.deleteNotification(id, req.user.userId);
+  }
+
+  @Post('trigger-expiry-check')
+  async triggerExpiryCheck() {
+    await this.documentExpiryScheduler.checkDocumentExpiries();
+    return { success: true, message: 'Document expiry check triggered' };
   }
 }

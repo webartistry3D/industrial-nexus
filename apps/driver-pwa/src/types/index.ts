@@ -39,6 +39,7 @@ export interface KycDocument {
   rejectionReason?: string;
   submittedAt: string;
   reviewedAt?: string;
+  expiresAt?: string;
 }
 
 export interface Driver {

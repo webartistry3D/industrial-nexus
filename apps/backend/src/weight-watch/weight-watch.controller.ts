@@ -4,11 +4,19 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
+import { IsNumber, IsString, IsArray, IsOptional } from 'class-validator';
 
 class ValidateWeightDto {
+  @IsNumber()
   cargoWeight: number;
+
+  @IsString()
   vehicleId: string;
-  handlingTags: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  handlingTags?: string[];
 }
 
 @Controller('weight-watch')
@@ -22,7 +30,7 @@ export class WeightWatchController {
     return this.weightWatchService.validateTripWeight(
       validateDto.cargoWeight,
       validateDto.vehicleId,
-      validateDto.handlingTags,
+      validateDto.handlingTags ?? [],
     );
   }
 

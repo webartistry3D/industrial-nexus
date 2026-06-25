@@ -284,7 +284,7 @@ function TripsPageContent() {
         {/* Header */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 shadow-md">
               {activeTab === 'trips' ? <Truck className="w-6 h-6 text-white" /> : <BarChart2 className="w-6 h-6 text-white" />}
             </div>
             <div className="flex-1">
@@ -320,7 +320,7 @@ function TripsPageContent() {
               onClick={() => setActiveTab('trips')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'trips'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -331,7 +331,7 @@ function TripsPageContent() {
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'analytics'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -435,7 +435,7 @@ function TripsPageContent() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-sm">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 shadow-sm">
                     <Users className="w-4 h-4 text-white" />
                   </div>
                   <h2 className="font-semibold text-gray-900 dark:text-white">Driver Performance</h2>

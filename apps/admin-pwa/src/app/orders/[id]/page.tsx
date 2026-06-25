@@ -29,6 +29,8 @@ export default function OrderDetailPage() {
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
   const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
+  const [vehicleWeightStatus, setVehicleWeightStatus] = useState<{ status: string; utilization: number; canAssign: boolean; reason?: string } | null>(null);
+  const [weightValidating, setWeightValidating] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [timelineEvents, setTimelineEvents] = useState<Array<{
@@ -227,6 +229,17 @@ export default function OrderDetailPage() {
     }
   };
 
+  const getKittingStepFromStage = (stage: string): number => {
+    switch (stage) {
+      case 'AGGREGATION': return 1;
+      case 'TECHNICAL_PACKAGING': return 2;
+      case 'QUALITY_CHECK': return 3;
+      case 'PACKAGE_TRACKER_ASSIGNMENT': return 4;
+      case 'DISPATCH_READY': return 5;
+      default: return 0;
+    }
+  };
+
   const handleStartKitting = async () => {
     if (order?.status === 'APPROVED') {
       try {
@@ -242,7 +255,29 @@ export default function OrderDetailPage() {
       } finally {
         setActionLoading(false);
       }
+      setShowKittingModal(true);
+      setKittingStep(0);
+      return;
     }
+
+    // Order already in KITTING — resume from current stage
+    if (order?.status === 'KITTING') {
+      try {
+        setActionLoading(true);
+        const logs = await api.getKittingLogs(orderId);
+        const latestStage = logs?.[logs.length - 1]?.stage;
+        const resumeStep = getKittingStepFromStage(latestStage);
+        setShowKittingModal(true);
+        setKittingStep(resumeStep);
+      } catch {
+        setShowKittingModal(true);
+        setKittingStep(0);
+      } finally {
+        setActionLoading(false);
+      }
+      return;
+    }
+
     setShowKittingModal(true);
     setKittingStep(0);
   };
@@ -409,9 +444,30 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handleVehicleSelect = async (vehicleId: string) => {
+    setSelectedVehicle(vehicleId);
+    setVehicleWeightStatus(null);
+    if (!vehicleId || !order) return;
+    try {
+      setWeightValidating(true);
+      const result = await api.validateWeight({
+        cargoWeight: order.totalWeight || 0,
+        vehicleId,
+        handlingTags: order.handlingTags || [],
+      });
+      setVehicleWeightStatus(result);
+    } catch (err) {
+      console.error('Weight validation failed:', err);
+    } finally {
+      setWeightValidating(false);
+    }
+  };
+
   useEffect(() => {
     if (showDriverModal) {
       handleFetchDrivers();
+      setVehicleWeightStatus(null);
+      setSelectedVehicle('');
     }
   }, [showDriverModal]);
 
@@ -924,7 +980,7 @@ export default function OrderDetailPage() {
                   </label>
                   <select
                     value={selectedVehicle}
-                    onChange={(e) => setSelectedVehicle(e.target.value)}
+                    onChange={(e) => handleVehicleSelect(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white transition-all"
                   >
                     <option value="">Select a vehicle...</option>
@@ -934,6 +990,34 @@ export default function OrderDetailPage() {
                       </option>
                     ))}
                   </select>
+                  {weightValidating && (
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Checking vehicle capacity...</p>
+                  )}
+                  {!weightValidating && vehicleWeightStatus && (
+                    <div className={`mt-2 p-3 rounded-lg border text-sm ${
+                      vehicleWeightStatus.status === 'OVERLOADED'
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400'
+                        : vehicleWeightStatus.status === 'NEAR_CAPACITY'
+                        ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400'
+                        : vehicleWeightStatus.status === 'WARNING'
+                        ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-400'
+                        : 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-400'
+                    }`}>
+                      <p className="font-medium">
+                        {vehicleWeightStatus.status === 'OVERLOADED' && '🚫 Overloaded — Cannot assign this vehicle'}
+                        {vehicleWeightStatus.status === 'NEAR_CAPACITY' && '⛔ Near Capacity — Cannot assign this vehicle'}
+                        {vehicleWeightStatus.status === 'WARNING' && '⚠️ Warning — Vehicle approaching capacity'}
+                        {vehicleWeightStatus.status === 'SAFE' && '✅ Capacity OK'}
+                      </p>
+                      <p className="mt-0.5 font-mono text-xs">
+                        Utilization: {(vehicleWeightStatus.utilization * 100).toFixed(1)}%
+                        {vehicleWeightStatus.reason && ` • ${vehicleWeightStatus.reason}`}
+                      </p>
+                      {(vehicleWeightStatus.status === 'NEAR_CAPACITY' || vehicleWeightStatus.status === 'OVERLOADED') && (
+                        <p className="mt-1 text-xs">Please select a vehicle with sufficient capacity to proceed.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3">
@@ -949,7 +1033,7 @@ export default function OrderDetailPage() {
                   </button>
                   <button
                     onClick={handleAssignDriver}
-                    disabled={actionLoading || !selectedDriver}
+                    disabled={actionLoading || !selectedDriver || weightValidating || (vehicleWeightStatus !== null && (vehicleWeightStatus.status === 'NEAR_CAPACITY' || vehicleWeightStatus.status === 'OVERLOADED'))}
                     className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {actionLoading ? 'Assigning...' : 'Assign Driver'}

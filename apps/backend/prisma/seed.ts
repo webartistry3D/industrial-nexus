@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, UserStatus, DriverStatus, KycStatus, DriverAvailability, VehicleCategory, VehicleStatus, OrderStatus, Priority, KittingStatus, TripStatus, WeightStatus, GeofenceType, GeofenceEventType } from '@prisma/client';
+import { PrismaClient, UserRole, UserStatus, DriverStatus, KycStatus, DriverAvailability, VehicleCategory, VehicleStatus, OrderStatus, Priority, KittingStatus, TripStatus, WeightStatus, GeofenceType, GeofenceEventType, KycDocumentType, KycDocumentStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { v5 as uuidv5 } from 'uuid';
 
@@ -44,6 +44,7 @@ async function main() {
   await prisma.orderHandlingTag.deleteMany();
   await prisma.availableHandlingTag.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.kycDocument.deleteMany();
   await prisma.driver.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.refreshToken.deleteMany();
@@ -411,6 +412,230 @@ async function main() {
   }
 
   console.log(`✅ Created ${activeDrivers.length} active driver profiles, ${inactiveDrivers.length} inactive driver profiles`);
+
+  // ==================== KYC DOCUMENTS ====================
+  console.log('📄 Creating KYC documents for drivers...');
+
+  const now = new Date();
+  const future = (months: number) => new Date(now.getFullYear(), now.getMonth() + months, now.getDate());
+  const past = (months: number) => new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
+
+  const kycDocuments = [
+    // Driver 1 — fully verified, all docs valid
+    {
+      id: id('kyc-d1-license'),
+      driverId: id('driver-profile-1'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d1-license.pdf',
+      fileName: 'drivers_license_olamide.pdf',
+      fileSize: 512000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 864000000),
+      expiresAt: future(18),
+    },
+    {
+      id: id('kyc-d1-govid'),
+      driverId: id('driver-profile-1'),
+      documentType: KycDocumentType.GOVERNMENT_ID,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d1-govid.jpg',
+      fileName: 'national_id_olamide.jpg',
+      fileSize: 204800,
+      mimeType: 'image/jpeg',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 864000000),
+      expiresAt: future(36),
+    },
+    {
+      id: id('kyc-d1-insurance'),
+      driverId: id('driver-profile-1'),
+      documentType: KycDocumentType.INSURANCE_CERTIFICATE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d1-insurance.pdf',
+      fileName: 'vehicle_insurance_olamide.pdf',
+      fileSize: 389000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 432000000),
+      expiresAt: future(10),
+    },
+    // Driver 2 — verified license, insurance expiring soon (within 30 days)
+    {
+      id: id('kyc-d2-license'),
+      driverId: id('driver-profile-2'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d2-license.pdf',
+      fileName: 'drivers_license_ibrahim.pdf',
+      fileSize: 476000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 2592000000),
+      expiresAt: future(24),
+    },
+    {
+      id: id('kyc-d2-insurance'),
+      driverId: id('driver-profile-2'),
+      documentType: KycDocumentType.INSURANCE_CERTIFICATE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d2-insurance.pdf',
+      fileName: 'vehicle_insurance_ibrahim.pdf',
+      fileSize: 301000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 2592000000),
+      expiresAt: future(0),
+    },
+    {
+      id: id('kyc-d2-registration'),
+      driverId: id('driver-profile-2'),
+      documentType: KycDocumentType.VEHICLE_REGISTRATION,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d2-registration.pdf',
+      fileName: 'vehicle_registration_ibrahim.pdf',
+      fileSize: 220000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 2592000000),
+      expiresAt: future(14),
+    },
+    // Driver 3 — license verified, vehicle registration expired
+    {
+      id: id('kyc-d3-license'),
+      driverId: id('driver-profile-3'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d3-license.pdf',
+      fileName: 'drivers_license_chisom.pdf',
+      fileSize: 524000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 1296000000),
+      expiresAt: future(30),
+    },
+    {
+      id: id('kyc-d3-registration'),
+      driverId: id('driver-profile-3'),
+      documentType: KycDocumentType.VEHICLE_REGISTRATION,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d3-registration.pdf',
+      fileName: 'vehicle_registration_chisom.pdf',
+      fileSize: 195000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 8640000000),
+      expiresAt: past(2),
+    },
+    // Driver 4 — all docs verified, no expiry concerns
+    {
+      id: id('kyc-d4-license'),
+      driverId: id('driver-profile-4'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d4-license.pdf',
+      fileName: 'drivers_license_kunle.pdf',
+      fileSize: 489000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 1728000000),
+      expiresAt: future(42),
+    },
+    {
+      id: id('kyc-d4-govid'),
+      driverId: id('driver-profile-4'),
+      documentType: KycDocumentType.GOVERNMENT_ID,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d4-govid.jpg',
+      fileName: 'national_id_kunle.jpg',
+      fileSize: 310000,
+      mimeType: 'image/jpeg',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 1728000000),
+      expiresAt: future(48),
+    },
+    {
+      id: id('kyc-d4-certification'),
+      driverId: id('driver-profile-4'),
+      documentType: KycDocumentType.PROFESSIONAL_CERTIFICATION,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d4-cert.pdf',
+      fileName: 'hazmat_certification_kunle.pdf',
+      fileSize: 672000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 1728000000),
+      expiresAt: future(12),
+    },
+    // Driver 5 — license pending review, proof of address verified
+    {
+      id: id('kyc-d5-license'),
+      driverId: id('driver-profile-5'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d5-license.pdf',
+      fileName: 'drivers_license_ngozi.pdf',
+      fileSize: 445000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.UNDER_REVIEW,
+      expiresAt: future(20),
+    },
+    {
+      id: id('kyc-d5-address'),
+      driverId: id('driver-profile-5'),
+      documentType: KycDocumentType.PROOF_OF_ADDRESS,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d5-address.pdf',
+      fileName: 'utility_bill_ngozi.pdf',
+      fileSize: 180000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 432000000),
+      expiresAt: future(6),
+    },
+    // Driver 6 — inactive, license verified but expired
+    {
+      id: id('kyc-d6-license'),
+      driverId: id('driver-profile-6'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d6-license.pdf',
+      fileName: 'drivers_license_tunde.pdf',
+      fileSize: 398000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.VERIFIED,
+      reviewedAt: new Date(Date.now() - 15552000000),
+      expiresAt: past(3),
+    },
+    // Driver 7 — suspended, rejected document
+    {
+      id: id('kyc-d7-license'),
+      driverId: id('driver-profile-7'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d7-license.pdf',
+      fileName: 'drivers_license_bola.pdf',
+      fileSize: 512000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.REJECTED,
+      reviewedAt: new Date(Date.now() - 2592000000),
+      rejectionReason: 'Document appears tampered. Please resubmit a clear, unaltered copy.',
+    },
+    // Driver 8 — pending, just submitted
+    {
+      id: id('kyc-d8-license'),
+      driverId: id('driver-profile-8'),
+      documentType: KycDocumentType.DRIVERS_LICENSE,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d8-license.pdf',
+      fileName: 'drivers_license_yemi.pdf',
+      fileSize: 461000,
+      mimeType: 'application/pdf',
+      status: KycDocumentStatus.PENDING,
+      expiresAt: future(28),
+    },
+    {
+      id: id('kyc-d8-govid'),
+      driverId: id('driver-profile-8'),
+      documentType: KycDocumentType.GOVERNMENT_ID,
+      fileUrl: 'https://storage.industrialnexus.com/kyc/d8-govid.jpg',
+      fileName: 'national_id_yemi.jpg',
+      fileSize: 275000,
+      mimeType: 'image/jpeg',
+      status: KycDocumentStatus.PENDING,
+    },
+  ];
+
+  for (const doc of kycDocuments) {
+    await prisma.kycDocument.create({ data: doc });
+  }
+
+  console.log(`✅ Created ${kycDocuments.length} KYC documents across all drivers`);
 
   // ==================== ORDERS ====================
   console.log('📦 Creating orders...');

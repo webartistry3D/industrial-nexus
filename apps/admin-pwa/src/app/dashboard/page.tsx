@@ -119,7 +119,7 @@ export default function Dashboard() {
       <main className="p-4 pb-24 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.firstName}</span>
+            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:text-blue-400 dark:bg-none">{user?.firstName}</span>
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your operations update</p>
         </div>

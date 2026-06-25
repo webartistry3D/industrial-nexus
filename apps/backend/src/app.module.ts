@@ -17,6 +17,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { TrackingModule } from './tracking/tracking.module';
 import { SettingsModule } from './settings/settings.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     TrackingModule,
     SettingsModule,
     NotificationsModule,
+    SchedulerModule,
   ],
 })
 export class AppModule {}

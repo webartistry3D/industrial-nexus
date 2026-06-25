@@ -103,7 +103,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       <main className="p-4 space-y-4">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-6 text-white shadow-lg border border-white/10">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-800 dark:to-blue-800 rounded-2xl p-6 text-white shadow-lg border border-white/10">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
               <UserIcon className="w-10 h-10" />

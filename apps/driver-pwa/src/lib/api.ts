@@ -219,6 +219,11 @@ class ApiClient {
     const response = await this.client.delete(`/notifications/${id}`);
     return response.data;
   }
+
+  async triggerDocumentExpiryCheck() {
+    const response = await this.client.post('/notifications/trigger-expiry-check');
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

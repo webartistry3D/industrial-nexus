@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { User, Driver, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
-import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale } from 'lucide-react';
+import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale, CalendarClock, BadgeCheck, AlertTriangle } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function ProfilePage() {
@@ -136,6 +136,21 @@ export default function ProfilePage() {
       default:
         return type;
     }
+  };
+
+  const getExpiryState = (expiresAt?: string): 'valid' | 'expiring' | 'expired' | 'unknown' => {
+    if (!expiresAt) return 'unknown';
+    const expiry = new Date(expiresAt);
+    const now = new Date();
+    const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysLeft < 0) return 'expired';
+    if (daysLeft <= 30) return 'expiring';
+    return 'valid';
+  };
+
+  const formatExpiry = (expiresAt?: string) => {
+    if (!expiresAt) return 'No expiry date';
+    return new Date(expiresAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   const handleLogout = () => {
@@ -287,6 +302,82 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* Documentation + KYC grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          {/* Driver Documentation Section */}
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-md">
+                <FileText className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Driver Documentation</h3>
+            </div>
+
+            {kycDocuments.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">No documents on file</p>
+            ) : (
+              <div className="space-y-3">
+                {kycDocuments.map((doc) => {
+                  const expiryState = getExpiryState(doc.expiresAt);
+                  return (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-700/50 rounded-xl border border-gray-200/50 dark:border-slate-600/50"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`p-2 rounded-lg shadow-sm flex-shrink-0 ${
+                          doc.status === KycDocumentStatus.VERIFIED
+                            ? 'bg-gradient-to-br from-green-500 to-green-600'
+                            : doc.status === KycDocumentStatus.REJECTED
+                            ? 'bg-gradient-to-br from-red-500 to-red-600'
+                            : 'bg-gradient-to-br from-yellow-500 to-yellow-600'
+                        }`}>
+                          <FileText className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {getDocumentTypeLabel(doc.documentType)}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">
+                            {doc.fileName}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 ml-3 flex-shrink-0">
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                          doc.status === KycDocumentStatus.VERIFIED
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : doc.status === KycDocumentStatus.REJECTED
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {doc.status === KycDocumentStatus.VERIFIED && <BadgeCheck className="w-3 h-3" />}
+                          {doc.status === KycDocumentStatus.REJECTED && <XCircle className="w-3 h-3" />}
+                          {doc.status !== KycDocumentStatus.VERIFIED && doc.status !== KycDocumentStatus.REJECTED && <Clock className="w-3 h-3" />}
+                          {doc.status}
+                        </span>
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-mono ${
+                          expiryState === 'expired' ? 'text-red-500 dark:text-red-400' :
+                          expiryState === 'expiring' ? 'text-orange-500 dark:text-orange-400' :
+                          expiryState === 'valid' ? 'text-green-600 dark:text-green-400' :
+                          'text-gray-400 dark:text-gray-500'
+                        }`}>
+                          {expiryState === 'expired' && <AlertTriangle className="w-3 h-3" />}
+                          {expiryState === 'expiring' && <AlertTriangle className="w-3 h-3" />}
+                          {expiryState === 'valid' && <CalendarClock className="w-3 h-3" />}
+                          {expiryState === 'unknown' && <CalendarClock className="w-3 h-3" />}
+                          {expiryState === 'expired' ? 'Expired' : expiryState === 'expiring' ? 'Expiring soon' : ''}
+                          {' '}{formatExpiry(doc.expiresAt)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* KYC Documents Section */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
@@ -396,6 +487,8 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+
+          </div>{/* end Documentation + KYC grid */}
 
           {/* Actions */}
           <div className="space-y-2">

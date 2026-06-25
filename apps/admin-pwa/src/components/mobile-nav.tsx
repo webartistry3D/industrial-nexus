@@ -58,7 +58,7 @@ export function MobileNav({ role }: MobileNavProps) {
               <div 
                 className={`flex items-center justify-center w-12 h-8 rounded-2xl transition-all duration-200 ${
                   isActive 
-                    ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-900 dark:text-blue-800' 
+                    ? 'text-blue-800 dark:text-blue-400' 
                     : 'text-gray-400 dark:text-gray-500 group-active:text-gray-600 dark:group-active:text-gray-300'
                 }`}
               >
@@ -69,7 +69,7 @@ export function MobileNav({ role }: MobileNavProps) {
               <span 
                 className={`text-[11px] font-medium mt-1 transition-all duration-200 ${
                   isActive 
-                    ? 'text-blue-900 dark:text-blue-800 font-semibold' 
+                    ? 'text-blue-900 dark:text-blue-600 font-semibold' 
                     : 'text-gray-400 dark:text-gray-500'
                 }`}
               >
