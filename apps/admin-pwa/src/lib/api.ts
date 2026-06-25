@@ -406,6 +406,39 @@ class ApiClient {
     return response.data;
   }
 
+  // Vehicle Documents
+  async getVehicleDocuments(vehicleId: string, params?: { status?: string; documentType?: string }) {
+    const response = await this.client.get(`/vehicles/${vehicleId}/documents`, { params });
+    return response.data;
+  }
+
+  async getPendingVehicleDocuments(params?: { documentType?: string; vehicleId?: string }) {
+    const response = await this.client.get('/vehicles/documents/pending', { params });
+    return response.data;
+  }
+
+  async uploadVehicleDocument(vehicleId: string, file: File, documentType: string, expiresAt?: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('documentType', documentType);
+    if (expiresAt) formData.append('expiresAt', expiresAt);
+
+    const response = await this.client.post(`/vehicles/${vehicleId}/documents/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
+  async updateVehicleDocument(documentId: string, data: { status?: string; rejectionReason?: string }) {
+    const response = await this.client.patch(`/vehicles/documents/${documentId}`, data);
+    return response.data;
+  }
+
+  async deleteVehicleDocument(documentId: string) {
+    const response = await this.client.delete(`/vehicles/documents/${documentId}`);
+    return response.data;
+  }
+
   // Vehicles
   async getVehicles(params?: { status?: string; category?: string }) {
     const response = await this.client.get('/vehicles', { params });
@@ -460,8 +493,8 @@ class ApiClient {
     return response.data;
   }
 
-  async getDriverPerformance() {
-    const response = await this.client.get('/analytics/drivers');
+  async getDriverPerformance(params?: { page?: number; limit?: number }) {
+    const response = await this.client.get('/analytics/drivers', { params });
     return response.data;
   }
 

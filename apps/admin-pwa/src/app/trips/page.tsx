@@ -8,6 +8,7 @@ import { Trip, PaginatedResponse, WeightAlert } from '@/types';
 import {
   Truck, Search, MapPin, Clock, ChevronRight, Navigation, AlertTriangle, Scale, X, Plus,
   BarChart2, Users, CheckCircle, TrendingUp, Trophy, ArrowRight, Minus, Calendar,
+  List, Grid2x2,
 } from 'lucide-react';
 import { StatCard } from '@/components/stat-card';
 
@@ -104,6 +105,7 @@ function TripsPageContent() {
   const [statusFilter, setStatusFilter] = useState(statusParam || '');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // ── Analytics state ────────────────────────────────────────────────────────
   const [drivers, setDrivers] = useState<DriverStat[]>([]);
@@ -111,6 +113,8 @@ function TripsPageContent() {
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<keyof DriverStat>('delivered');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [driverPage, setDriverPage] = useState(1);
+  const [driverMeta, setDriverMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [trendsLoading, setTrendsLoading] = useState(false);
   const [trendDays, setTrendDays] = useState(30);
@@ -126,11 +130,11 @@ function TripsPageContent() {
   }, [page, statusFilter, filterParam]);
 
   useEffect(() => {
-    if (activeTab === 'analytics' && drivers.length === 0) {
+    if (activeTab === 'analytics') {
       fetchAnalytics();
       fetchTrends(trendDays);
     }
-  }, [activeTab]);
+  }, [activeTab, driverPage]);
 
   useEffect(() => {
     if (activeTab === 'analytics') fetchTrends(trendDays);
@@ -166,8 +170,13 @@ function TripsPageContent() {
     try {
       setAnalyticsLoading(true);
       setAnalyticsError(null);
-      const data = await api.getDriverPerformance();
-      setDrivers(data);
+      const response = await api.getDriverPerformance({ page: driverPage, limit: 10 });
+      setDrivers(response.data || response);
+      if (response.meta) {
+        setDriverMeta(response.meta);
+      } else {
+        setDriverMeta({ page: driverPage, limit: 10, total: response.length || 0, totalPages: 1 });
+      }
     } catch {
       setAnalyticsError('Failed to load analytics data');
     } finally {
@@ -342,8 +351,9 @@ function TripsPageContent() {
 
           {/* Search & Filter — trips tab only */}
           {activeTab === 'trips' && (
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
+            <div className="flex flex-col gap-2">
+              {/* Search - Full width */}
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
@@ -353,22 +363,79 @@ function TripsPageContent() {
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all"
                 />
               </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setStatusFilter(value);
-                  if ((filterParam || statusParam) && value) router.push('/trips');
-                }}
-                className="px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 transition-all"
-              >
-                <option value="">All Status</option>
-                <option value="ASSIGNED">Assigned</option>
-                <option value="IN_TRANSIT">In Transit</option>
-                <option value="ARRIVED">Arrived</option>
-                <option value="DELIVERED">Delivered</option>
-                <option value="DELAYED">Delayed (Past ETA)</option>
-              </select>
+
+              {/* Filters Row */}
+              <div className="flex gap-2 w-full">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setStatusFilter(value);
+                    if ((filterParam || statusParam) && value) router.push('/trips');
+                  }}
+                  className="flex-none w-auto min-w-[140px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 transition-all"
+                >
+                  <option value="">All Status</option>
+                  <option value="ASSIGNED">Assigned</option>
+                  <option value="IN_TRANSIT">In Transit</option>
+                  <option value="ARRIVED">Arrived</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="DELAYED">Delayed (Past ETA)</option>
+                </select>
+
+                {/* View Toggle Buttons */}
+                <div className="ml-auto flex gap-2">
+                  <div className="hidden md:block w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+                  <div className="hidden md:flex gap-2">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2.5 rounded-xl transition-all duration-300 ${
+                        viewMode === 'list'
+                          ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                      }`}
+                      aria-label="List view"
+                    >
+                      <List className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2.5 rounded-xl transition-all duration-300 ${
+                        viewMode === 'grid'
+                          ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                      }`}
+                      aria-label="Grid view"
+                    >
+                      <Grid2x2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="flex gap-2 justify-center md:hidden">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                        viewMode === 'list'
+                          ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                      }`}
+                      aria-label="List view"
+                    >
+                      <List className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
+                        viewMode === 'grid'
+                          ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                      }`}
+                      aria-label="Grid view"
+                    >
+                      <Grid2x2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -455,7 +522,7 @@ function TripsPageContent() {
               ) : (
                 <>
                   {/* Desktop table */}
-                  <div className="hidden sm:block overflow-x-auto">
+                  <div className="hidden sm:block overflow-x-auto max-h-[400px] overflow-y-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-gray-50 dark:bg-slate-700/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -496,7 +563,7 @@ function TripsPageContent() {
                   </div>
 
                   {/* Mobile card list */}
-                  <div className="sm:hidden divide-y divide-gray-100 dark:divide-slate-700">
+                  <div className="sm:hidden divide-y divide-gray-100 dark:divide-slate-700 max-h-[400px] overflow-y-auto">
                     {sortedDrivers.map(d => (
                       <div key={d.driverId} onClick={() => router.push(`/drivers/${d.driverId}`)} className="p-4 active:bg-gray-50 dark:active:bg-slate-700/30 transition-colors cursor-pointer">
                         <div className="flex items-center gap-3 mb-3">
@@ -525,6 +592,29 @@ function TripsPageContent() {
                 </>
               )}
             </div>
+
+            {/* Pagination for Driver Performance */}
+            {!analyticsLoading && drivers.length > 0 && (
+              <div className="px-4 py-4 flex items-center justify-between">
+                <button
+                  onClick={() => setDriverPage(p => Math.max(1, p - 1))}
+                  disabled={driverPage === 1}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                  Page {driverPage} of {driverMeta.totalPages}
+                </span>
+                <button
+                  onClick={() => setDriverPage(p => Math.min(driverMeta.totalPages, p + 1))}
+                  disabled={driverPage === driverMeta.totalPages}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
 
             {/* Delivery Trends Chart */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
@@ -577,8 +667,64 @@ function TripsPageContent() {
               </div>
               <p className="text-gray-900 dark:text-white font-semibold mb-2">No trips found</p>
             </div>
+          ) : viewMode === 'list' ? (
+            // Table View
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Trip #</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Driver</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Vehicle</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Destination</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Weight</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">ETA</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                  {filteredTrips.map((trip) => (
+                    <tr
+                      key={trip.id}
+                      onClick={() => handleTripClick(trip.id)}
+                      className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="font-semibold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber || 'N/A'}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {trip.driver?.user?.firstName || ''} {trip.driver?.user?.lastName || ''}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{trip.vehicle?.plateNumber || '-'}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{trip.order?.deliveryLocation?.address || 'N/A'}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{trip.order?.totalWeight || 0} kg</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
+                          {trip.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                          {trip.eta ? new Date(trip.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            filteredTrips.map((trip) => (
+            // Card View (Grid)
+            <div className="space-y-3">
+              {filteredTrips.map((trip) => (
               <div
                 key={trip.id}
                 onClick={() => handleTripClick(trip.id)}
@@ -627,7 +773,8 @@ function TripsPageContent() {
                   </div>
                 )}
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
 

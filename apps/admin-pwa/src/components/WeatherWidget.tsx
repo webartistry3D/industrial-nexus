@@ -256,18 +256,9 @@ export default function WeatherWidget() {
             </div>
             <div className="text-xs sm:text-sm text-blue-100 dark:text-blue-200">{weather.condition}</div>
           </div>
-          <div className="text-right ml-2 flex flex-col items-end gap-0.5">
-            <div className="text-[10px] sm:text-xs text-blue-200 dark:text-blue-300 flex items-center gap-1">
-              <LocateFixed className="w-3 h-3" />
-              <span>{locationName}</span>
-            </div>
-            {usingFallback && (
-              <div className="text-[9px] text-blue-300/70">Default location</div>
-            )}
-          </div>
         </div>
         <div className="text-[10px] sm:text-xs text-blue-100 dark:text-blue-200 mb-2 sm:mb-3 font-medium">
-          {currentDate}
+          {locationName}
         </div>
         <div className="grid grid-cols-2 gap-2 pt-2 sm:pt-3 border-t border-white/20 dark:border-white/30">
           <div className="flex items-center gap-1.5 sm:gap-2">
