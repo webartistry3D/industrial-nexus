@@ -51,13 +51,14 @@ export default function Login() {
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-slate-700">
         {/* Theme Toggle and Home Button - Centered */}
         <div className="flex justify-center gap-3 mb-6">
-          <button
+          {/* Home button hidden */}
+          {/* <button
             onClick={() => router.push('/')}
             className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-slate-700"
             aria-label="Go to home"
           >
             <Home className="w-5 h-5 text-blue-900 dark:text-blue-400" />
-          </button>
+          </button> */}
           <button
             onClick={toggleTheme}
             className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-slate-700"
