@@ -90,7 +90,7 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                     Order <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.trip?.order?.orderNumber || String(alert.tripId)}</span>
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.cargoWeight}kg</span> cargo / <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.vehicleCapacity}kg</span> vehicle capacity • <span style={{ fontFamily: 'JetBrains Mono, monospace }}>{Math.round(alert.utilization * 100)}%</span> utilized
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.cargoWeight}kg</span> cargo / <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.vehicleCapacity}kg</span> vehicle capacity • <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(alert.utilization * 100)}%</span> utilized
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {alert.status} • {formatTimeAgo(alert.checkedAt)}
