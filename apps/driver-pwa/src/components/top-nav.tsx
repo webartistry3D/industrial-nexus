@@ -92,7 +92,7 @@ export function TopNav() {
               className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors relative"
               aria-label="Notifications"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-5 h-5 dark:text-lime-400" />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                   {unreadCount}
@@ -174,7 +174,7 @@ export function TopNav() {
             className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"
             aria-label="Toggle theme"
           >
-            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {isDarkMode ? <Sun className="w-5 h-5 dark:text-lime-400" /> : <Moon className="w-5 h-5 dark:text-lime-400" />}
           </button>
 
           {/* Profile */}
@@ -187,7 +187,7 @@ export function TopNav() {
               className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"
               aria-label="Profile"
             >
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5 dark:text-lime-400" />
             </button>
 
             {showProfile && (

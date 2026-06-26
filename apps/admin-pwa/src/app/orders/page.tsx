@@ -251,7 +251,7 @@ function OrdersPageContent() {
               onClick={() => setActiveTab('trackers')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'trackers'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-400 dark:to-lime-400 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >

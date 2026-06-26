@@ -266,7 +266,7 @@ describe('WeightWatchService', () => {
   });
 
   describe('getWeightAlerts', () => {
-    it('should return alerts for WARNING, NEAR_CAPACITY, and OVERLOADED', async () => {
+    it('should query records with utilization above 0.7 and recalculate status', async () => {
       const mockAlerts = [
         { id: '1', status: WeightStatus.WARNING, utilization: 0.85 },
         { id: '2', status: WeightStatus.NEAR_CAPACITY, utilization: 0.98 },
@@ -278,12 +278,13 @@ describe('WeightWatchService', () => {
       const result = await service.getWeightAlerts();
 
       expect(result).toHaveLength(3);
+      expect(result[0].status).toBe(WeightStatus.WARNING);
+      expect(result[1].status).toBe(WeightStatus.OVERLOADED);
+      expect(result[2].status).toBe(WeightStatus.OVERLOADED);
       expect(mockPrisma.weightRecord.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            status: {
-              in: [WeightStatus.WARNING, WeightStatus.NEAR_CAPACITY, WeightStatus.OVERLOADED],
-            },
+            utilization: { gt: 0.7 },
           },
           orderBy: { checkedAt: 'desc' },
           take: 50,
@@ -291,11 +292,42 @@ describe('WeightWatchService', () => {
       );
     });
 
+    it('should upgrade old NEAR_CAPACITY records to OVERLOADED when utilization > 94%', async () => {
+      const mockAlerts = [
+        { id: '1', status: WeightStatus.NEAR_CAPACITY, utilization: 1.44 },
+        { id: '2', status: WeightStatus.NEAR_CAPACITY, utilization: 1.1 },
+      ];
+
+      mockPrisma.weightRecord.findMany.mockResolvedValue(mockAlerts);
+
+      const result = await service.getWeightAlerts();
+
+      expect(result).toHaveLength(2);
+      expect(result[0].status).toBe(WeightStatus.OVERLOADED);
+      expect(result[1].status).toBe(WeightStatus.OVERLOADED);
+    });
+
+    it('should filter out records that are now SAFE after recalculation', async () => {
+      const mockAlerts = [
+        { id: '1', status: WeightStatus.WARNING, utilization: 0.65 },
+        { id: '2', status: WeightStatus.WARNING, utilization: 0.85 },
+      ];
+
+      mockPrisma.weightRecord.findMany.mockResolvedValue(mockAlerts);
+
+      const result = await service.getWeightAlerts();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('2');
+      expect(result[0].status).toBe(WeightStatus.WARNING);
+    });
+
     it('should include trip details in alerts', async () => {
       const mockAlerts = [
         {
           id: '1',
           status: WeightStatus.WARNING,
+          utilization: 0.85,
           trip: {
             order: { orderNumber: 'IN-ORD-2024-000001' },
             driver: { user: { firstName: 'John', lastName: 'Doe' } },

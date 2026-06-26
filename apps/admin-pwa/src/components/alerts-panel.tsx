@@ -60,48 +60,50 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
         </span>
       </div>
 
-      {activeAlerts.length === 0 ? (
-        <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-          <Scale className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No active alerts</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {activeAlerts.map((alert) => {
-            const hasValidTripId = alert.tripId && alert.tripId !== 'null' && alert.tripId !== 'undefined';
-            return (
-            <div
-                key={alert.id}
-                onClick={() => hasValidTripId && onAlertClick?.(alert.tripId)}
-                className={`p-3 rounded-lg border transition-shadow ${
-                  getAlertSeverity(alert.status) === 'critical'
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                    : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                } ${hasValidTripId ? 'cursor-pointer hover:shadow-md' : 'cursor-default opacity-80'}`}
-              >
-              <div className="flex items-start gap-3">
-                {alert.status === 'OVERLOADED' ? (
-                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-                ) : (
-                  <Scale className="w-5 h-5 text-yellow-600 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800 dark:text-white">
-                    Order <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.trip?.order?.orderNumber || String(alert.tripId)}</span>
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.cargoWeight}kg</span> cargo / <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.vehicleCapacity}kg</span> vehicle capacity • <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(alert.utilization * 100)}%</span> utilized
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {alert.status} • {formatTimeAgo(alert.checkedAt)}
-                  </p>
+      <div className="max-h-[300px] overflow-y-auto pr-1">
+        {activeAlerts.length === 0 ? (
+          <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+            <Scale className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No active alerts</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {activeAlerts.map((alert) => {
+              const hasValidTripId = alert.tripId && alert.tripId !== 'null' && alert.tripId !== 'undefined';
+              return (
+              <div
+                  key={alert.id}
+                  onClick={() => hasValidTripId && onAlertClick?.(alert.tripId)}
+                  className={`p-3 rounded-lg border transition-shadow ${
+                    getAlertSeverity(alert.status) === 'critical'
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                      : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                  } ${hasValidTripId ? 'cursor-pointer hover:shadow-md' : 'cursor-default opacity-80'}`}
+                >
+                <div className="flex items-start gap-3">
+                  {alert.status === 'OVERLOADED' ? (
+                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                  ) : (
+                    <Scale className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white">
+                      Order <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.trip?.order?.orderNumber || String(alert.tripId)}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.cargoWeight}kg</span> cargo / <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.vehicleCapacity}kg</span> vehicle capacity • <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(alert.utilization * 100)}%</span> utilized
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {alert.status} • {formatTimeAgo(alert.checkedAt)}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -122,10 +122,17 @@ export class WeightWatchService {
     });
   }
 
+  private calculateStatus(utilization: number): WeightStatus {
+    if (utilization <= 0.7) return WeightStatus.SAFE;
+    if (utilization <= 0.85) return WeightStatus.WARNING;
+    if (utilization <= 0.94) return WeightStatus.NEAR_CAPACITY;
+    return WeightStatus.OVERLOADED;
+  }
+
   async getWeightAlerts() {
-    return this.prisma.weightRecord.findMany({
+    const records = await this.prisma.weightRecord.findMany({
       where: {
-        status: { in: [WeightStatus.WARNING, WeightStatus.NEAR_CAPACITY, WeightStatus.OVERLOADED] },
+        utilization: { gt: 0.7 },
       },
       include: {
         trip: {
@@ -152,6 +159,13 @@ export class WeightWatchService {
       orderBy: { checkedAt: 'desc' },
       take: 50,
     });
+
+    return records
+      .map(record => ({
+        ...record,
+        status: this.calculateStatus(record.utilization),
+      }))
+      .filter(record => record.status !== WeightStatus.SAFE);
   }
 
   private checkCargoCompatibility(handlingTags: string[]): { 
