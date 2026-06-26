@@ -6,8 +6,8 @@
 
 UPDATE weight_records
 SET status = CASE
-  WHEN utilization <= 0.7 THEN 'SAFE'
-  WHEN utilization <= 0.85 THEN 'WARNING'
-  WHEN utilization <= 0.94 THEN 'NEAR_CAPACITY'
-  ELSE 'OVERLOADED'
+  WHEN utilization <= 0.7 THEN 'SAFE'::"WeightStatus"
+  WHEN utilization <= 0.85 THEN 'WARNING'::"WeightStatus"
+  WHEN utilization <= 0.94 THEN 'NEAR_CAPACITY'::"WeightStatus"
+  ELSE 'OVERLOADED'::"WeightStatus"
 END;
