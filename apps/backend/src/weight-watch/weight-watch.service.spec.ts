@@ -32,7 +32,23 @@ describe('WeightWatchService', () => {
   });
 
   describe('validateTripWeight', () => {
-    it('should return SAFE for utilization <= 80%', async () => {
+    it('should return SAFE for utilization <= 70%', async () => {
+      const mockVehicle = {
+        id: 'vehicle-1',
+        capacityKg: 5000,
+        isPartitioned: false,
+      };
+
+      mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
+
+      const result = await service.validateTripWeight(3500, 'vehicle-1', []);
+
+      expect(result.canAssign).toBe(true);
+      expect(result.status).toBe(WeightStatus.SAFE);
+      expect(result.utilization).toBe(0.7);
+    });
+
+    it('should return WARNING for utilization 71-85%', async () => {
       const mockVehicle = {
         id: 'vehicle-1',
         capacityKg: 5000,
@@ -44,11 +60,11 @@ describe('WeightWatchService', () => {
       const result = await service.validateTripWeight(4000, 'vehicle-1', []);
 
       expect(result.canAssign).toBe(true);
-      expect(result.status).toBe(WeightStatus.SAFE);
+      expect(result.status).toBe(WeightStatus.WARNING);
       expect(result.utilization).toBe(0.8);
     });
 
-    it('should return WARNING for utilization 81-95%', async () => {
+    it('should block dispatch when NEAR_CAPACITY 86-94%', async () => {
       const mockVehicle = {
         id: 'vehicle-1',
         capacityKg: 5000,
@@ -59,28 +75,12 @@ describe('WeightWatchService', () => {
 
       const result = await service.validateTripWeight(4500, 'vehicle-1', []);
 
-      expect(result.canAssign).toBe(true);
-      expect(result.status).toBe(WeightStatus.WARNING);
-      expect(result.utilization).toBe(0.9);
-    });
-
-    it('should return NEAR_CAPACITY for utilization 96-100%', async () => {
-      const mockVehicle = {
-        id: 'vehicle-1',
-        capacityKg: 5000,
-        isPartitioned: false,
-      };
-
-      mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
-
-      const result = await service.validateTripWeight(5000, 'vehicle-1', []);
-
-      expect(result.canAssign).toBe(true);
+      expect(result.canAssign).toBe(false);
       expect(result.status).toBe(WeightStatus.NEAR_CAPACITY);
-      expect(result.utilization).toBe(1.0);
+      expect(result.reason).toContain('exceeds the safe limit');
     });
 
-    it('should block dispatch when OVERLOADED > 100%', async () => {
+    it('should block dispatch when OVERLOADED > 94%', async () => {
       const mockVehicle = {
         id: 'vehicle-1',
         capacityKg: 5000,
@@ -89,11 +89,11 @@ describe('WeightWatchService', () => {
 
       mockPrisma.vehicle.findUnique.mockResolvedValue(mockVehicle);
 
-      const result = await service.validateTripWeight(6000, 'vehicle-1', []);
+      const result = await service.validateTripWeight(4750, 'vehicle-1', []);
 
       expect(result.canAssign).toBe(false);
       expect(result.status).toBe(WeightStatus.OVERLOADED);
-      expect(result.reason).toContain('exceeds vehicle capacity');
+      expect(result.reason).toContain('exceeds the safe limit');
     });
 
     it('should return error when vehicle not found', async () => {
@@ -197,31 +197,31 @@ describe('WeightWatchService', () => {
   });
 
   describe('createWeightRecord', () => {
-    it('should create weight record with correct status', async () => {
+    it('should create SAFE record for <= 70% utilization', async () => {
       const mockRecord = {
         id: 'record-1',
         tripId: 'trip-1',
         orderId: 'order-1',
-        cargoWeight: 4000,
+        cargoWeight: 3500,
         vehicleCapacity: 5000,
-        utilization: 0.8,
+        utilization: 0.7,
         status: WeightStatus.SAFE,
       };
 
       mockPrisma.weightRecord.create.mockResolvedValue(mockRecord);
 
-      const result = await service.createWeightRecord('trip-1', 'order-1', 4000, 5000);
+      const result = await service.createWeightRecord('trip-1', 'order-1', 3500, 5000);
 
       expect(result.status).toBe(WeightStatus.SAFE);
-      expect(result.utilization).toBe(0.8);
+      expect(result.utilization).toBe(0.7);
       expect(mockPrisma.weightRecord.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             tripId: 'trip-1',
             orderId: 'order-1',
-            cargoWeight: 4000,
+            cargoWeight: 3500,
             vehicleCapacity: 5000,
-            utilization: 0.8,
+            utilization: 0.7,
             status: WeightStatus.SAFE,
           }),
         }),
@@ -240,14 +240,26 @@ describe('WeightWatchService', () => {
       expect(result.status).toBe(WeightStatus.WARNING);
     });
 
-    it('should create OVERLOADED record for >100% utilization', async () => {
+    it('should create NEAR_CAPACITY record for 94% utilization', async () => {
+      mockPrisma.weightRecord.create.mockResolvedValue({
+        id: 'record-1',
+        status: WeightStatus.NEAR_CAPACITY,
+        utilization: 0.94,
+      });
+
+      const result = await service.createWeightRecord('trip-1', 'order-1', 4700, 5000);
+
+      expect(result.status).toBe(WeightStatus.NEAR_CAPACITY);
+    });
+
+    it('should create OVERLOADED record for > 94% utilization', async () => {
       mockPrisma.weightRecord.create.mockResolvedValue({
         id: 'record-1',
         status: WeightStatus.OVERLOADED,
-        utilization: 1.2,
+        utilization: 0.95,
       });
 
-      const result = await service.createWeightRecord('trip-1', 'order-1', 6000, 5000);
+      const result = await service.createWeightRecord('trip-1', 'order-1', 4750, 5000);
 
       expect(result.status).toBe(WeightStatus.OVERLOADED);
     });

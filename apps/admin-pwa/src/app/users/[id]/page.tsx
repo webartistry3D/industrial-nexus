@@ -218,15 +218,6 @@ export default function UserDetailPage() {
   return (
     <RoleGuard userRole={currentUser?.role}>
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
-        {/* Debug Info */}
-        <div className="bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 p-4 m-4 rounded-lg">
-          <h3 className="font-bold text-sm">Debug Info:</h3>
-          <p className="text-xs">User ID: {userId}</p>
-          <p className="text-xs">User Data: {user ? JSON.stringify(user) : 'NULL'}</p>
-          <p className="text-xs">Loading: {loading.toString()}</p>
-          <p className="text-xs">Error: {error || 'NONE'}</p>
-        </div>
-
         {/* Header */}
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-6">
           <div className="flex items-center gap-4">
@@ -242,13 +233,14 @@ export default function UserDetailPage() {
                 View and manage user information
               </p>
             </div>
-            <button
+            {/* Edit User button hidden */}
+            {/* <button
               onClick={() => router.push(`/settings?tab=users&edit=${userId}`)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               <Edit2 className="w-4 h-4" />
               Edit User
-            </button>
+            </button> */}
           </div>
         </div>
 

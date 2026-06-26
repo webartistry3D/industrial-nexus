@@ -38,11 +38,11 @@ export class WeightWatchService {
     const utilization = cargoWeight / vehicle.capacityKg;
     let status: WeightStatus;
 
-    if (utilization <= 0.8) {
+    if (utilization <= 0.7) {
       status = WeightStatus.SAFE;
-    } else if (utilization <= 0.95) {
+    } else if (utilization <= 0.85) {
       status = WeightStatus.WARNING;
-    } else if (utilization <= 1.0) {
+    } else if (utilization <= 0.94) {
       status = WeightStatus.NEAR_CAPACITY;
     } else {
       status = WeightStatus.OVERLOADED;
@@ -76,10 +76,10 @@ export class WeightWatchService {
       };
     }
 
-    if (status === WeightStatus.OVERLOADED) {
+    if (status === WeightStatus.NEAR_CAPACITY || status === WeightStatus.OVERLOADED) {
       return {
         canAssign: false,
-        reason: `Cargo weight (${cargoWeight}kg) exceeds vehicle capacity (${vehicle.capacityKg}kg)`,
+        reason: `Cargo weight (${cargoWeight}kg) at ${(utilization * 100).toFixed(1)}% utilization exceeds the safe limit for vehicle capacity (${vehicle.capacityKg}kg)`,
         utilization,
         status,
         cargoCompatibility: 'COMPATIBLE',
@@ -105,9 +105,9 @@ export class WeightWatchService {
     const utilization = cargoWeight / vehicleCapacity;
     
     let status: WeightStatus;
-    if (utilization <= 0.8) status = WeightStatus.SAFE;
-    else if (utilization <= 0.95) status = WeightStatus.WARNING;
-    else if (utilization <= 1.0) status = WeightStatus.NEAR_CAPACITY;
+    if (utilization <= 0.7) status = WeightStatus.SAFE;
+    else if (utilization <= 0.85) status = WeightStatus.WARNING;
+    else if (utilization <= 0.94) status = WeightStatus.NEAR_CAPACITY;
     else status = WeightStatus.OVERLOADED;
 
     return this.prisma.weightRecord.create({

@@ -43,7 +43,9 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
     );
   }
 
-  const activeAlerts = alerts.filter(a => a.status === 'WARNING' || a.status === 'OVERLOADED');
+  const activeAlerts = alerts.filter(
+    a => a.status === 'WARNING' || a.status === 'NEAR_CAPACITY' || a.status === 'OVERLOADED'
+  );
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
@@ -85,9 +87,12 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-800 dark:text-white">
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.trip?.order?.orderNumber || String(alert.tripId)}</span> • <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.utilization?.toFixed ? alert.utilization.toFixed(1) : alert.utilization}%</span> capacity
+                    Order <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.trip?.order?.orderNumber || String(alert.tripId)}</span>
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.cargoWeight}kg</span> cargo / <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.vehicleCapacity}kg</span> vehicle capacity • <span style={{ fontFamily: 'JetBrains Mono, monospace }}>{Math.round(alert.utilization * 100)}%</span> utilized
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {alert.status} • {formatTimeAgo(alert.checkedAt)}
                   </p>
                 </div>
