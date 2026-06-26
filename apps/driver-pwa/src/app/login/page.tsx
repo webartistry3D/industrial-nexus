@@ -68,9 +68,7 @@ export default function Login() {
         </div>
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900 rounded-2xl mb-4">
-            <Truck className="w-8 h-8 text-white" />
-          </div>
+          <img src="/icon.png" alt="Industrial Nexus" className="w-16 h-16 rounded-2xl mb-4 mx-auto" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Industrial Nexus</h1>
           <p className="text-gray-600 dark:text-gray-400">Driver</p>
         </div>

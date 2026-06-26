@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "fast-glob": "^3.3.2",
+    "sharp": "^0.35.2",
     "turbo": "^1.13.0",
     "typescript": "^5.4.0"
   },
