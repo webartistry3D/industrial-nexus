@@ -43,3 +43,6 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/*/migration_lock.toml
+
+# Uploaded files (avatars, KYC docs, vehicle docs)
+apps/backend/uploads/

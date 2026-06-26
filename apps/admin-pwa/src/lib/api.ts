@@ -121,6 +121,20 @@ class ApiClient {
     return response.data;
   }
 
+  async updateMyProfile(data: { firstName?: string; lastName?: string; phoneNumber?: string }) {
+    const response = await this.client.patch('/users/me', data);
+    return response.data;
+  }
+
+  async uploadProfileImage(file: File) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const response = await this.client.post('/users/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
   // Orders
   async getOrders(params?: { status?: string; kittingStatus?: string; page?: number; limit?: number }) {
     const response = await this.client.get('/orders', { params });

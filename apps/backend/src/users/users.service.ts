@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateMyProfileDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 
 @Injectable()
@@ -96,7 +96,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await (this.prisma.user as any).findUnique({
       where: { id },
       select: {
         id: true,
@@ -104,6 +104,7 @@ export class UsersService {
         firstName: true,
         lastName: true,
         phoneNumber: true,
+        profileImageUrl: true,
         role: true,
         status: true,
         createdAt: true,
@@ -196,6 +197,34 @@ export class UsersService {
     }
 
     return this.sanitizeUser(user);
+  }
+
+  async updateMyProfile(userId: string, dto: UpdateMyProfileDto) {
+    const updateData: any = {};
+    if (dto.firstName !== undefined) updateData.firstName = dto.firstName;
+    if (dto.lastName !== undefined) updateData.lastName = dto.lastName;
+    if (dto.phoneNumber !== undefined) updateData.phoneNumber = dto.phoneNumber;
+    if (dto.profileImageUrl !== undefined) updateData.profileImageUrl = dto.profileImageUrl;
+
+    const user = await (this.prisma.user as any).update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phoneNumber: true,
+        profileImageUrl: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+      },
+    });
+
+    return user;
   }
 
   async deactivate(id: string, currentUserId: string) {

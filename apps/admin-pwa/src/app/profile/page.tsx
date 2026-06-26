@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { User, Mail, Phone, Shield, Key, Bell, Globe, Clock, Edit2, Save, X, Camera } from 'lucide-react';
+import { User as UserIcon, Mail, Phone, Shield, Key, Bell, Globe, Clock, Edit2, Save, X, Camera } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -22,6 +22,9 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications'>('profile');
   const [editingProfile, setEditingProfile] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile data state - initialize with current user data
   const [profileData, setProfileData] = useState({
@@ -68,12 +71,37 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  // Fetch full profile to get profileImageUrl
+  useEffect(() => {
+    const fetchFullProfile = async () => {
+      if (user) {
+        try {
+          setLoading(true);
+          const fullProfile = await api.getProfile();
+          console.log('[Avatar] Full profile fetched:', JSON.stringify(fullProfile));
+          console.log('[Avatar] profileImageUrl from profile fetch:', fullProfile.profileImageUrl);
+          if (fullProfile.profileImageUrl) {
+            setProfileImageUrl(fullProfile.profileImageUrl);
+          }
+          if (fullProfile.phoneNumber) {
+            setProfileData(prev => ({ ...prev, phoneNumber: fullProfile.phoneNumber || '' }));
+          }
+        } catch (err) {
+          console.error('[Avatar] Failed to fetch full profile:', err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchFullProfile();
+  }, [user]);
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSaving(true);
       setError(null);
-      await api.updateUser(user?.userId || '', {
+      await api.updateMyProfile({
         firstName: profileData.firstName,
         lastName: profileData.lastName,
         phoneNumber: profileData.phoneNumber,
@@ -82,13 +110,45 @@ export default function ProfilePage() {
       setEditingProfile(false);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      // Fallback: update local state if API fails
-      setSuccess(true);
-      setEditingProfile(false);
-      setTimeout(() => setSuccess(false), 3000);
+      setError(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log('[Avatar] File selected:', file?.name, file?.size, file?.type);
+    if (!file) return;
+    try {
+      setUploadingImage(true);
+      setError(null);
+      console.log('[Avatar] Uploading to POST /users/me/avatar...');
+      const updated = await api.uploadProfileImage(file);
+      console.log('[Avatar] Upload response:', JSON.stringify(updated));
+      console.log('[Avatar] profileImageUrl from response:', updated.profileImageUrl);
+      setProfileImageUrl(updated.profileImageUrl || null);
+      console.log('[Avatar] profileImageUrl state set to:', updated.profileImageUrl || null);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      console.error('[Avatar] Upload error:', err);
+      console.error('[Avatar] Error response:', err.response?.data);
+      setError(err.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const getAvatarUrl = () => {
+    console.log('[Avatar] getAvatarUrl called, profileImageUrl state:', profileImageUrl);
+    if (profileImageUrl) {
+      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const fullUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${base}${profileImageUrl}`;
+      console.log('[Avatar] Resolved URL:', fullUrl);
+      return fullUrl;
+    }
+    return null;
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -174,12 +234,15 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your account settings and preferences</p>
-      </div>
-
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
       {/* Success Message */}
       {success && (
         <div className="mx-4 mt-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-4 text-green-800 dark:text-green-300">
@@ -194,70 +257,71 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* Profile Overview Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-6">
-          <div className="flex items-center gap-6">
+      <div className="max-w-4xl mx-auto px-4 py-4 md:py-6">
+        {/* Profile Header */}
+        <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-800 dark:to-blue-800 rounded-2xl p-4 md:p-6 text-white shadow-lg border border-white/10 mb-4 md:mb-6">
+          <div className="flex items-center gap-3 md:gap-4">
             <div className="relative">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                {profileData.firstName?.[0]}{profileData.lastName?.[0]}
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                {getAvatarUrl() ? (
+                  <img src={getAvatarUrl()!} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <UserIcon className="w-10 h-10" />
+                )}
               </div>
-              <button className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors">
-                <Camera className="w-4 h-4" />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-blue-900 rounded-full flex items-center justify-center shadow-md hover:bg-blue-50 transition-colors"
+              >
+                {uploadingImage ? <div className="w-3 h-3 border border-blue-900 border-t-transparent rounded-full animate-spin" /> : <Camera className="w-3 h-3" />}
               </button>
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {profileData.firstName} {profileData.lastName}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">{profileData.email}</p>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold">{profileData.firstName} {profileData.lastName}</h1>
+              <p className="text-blue-100 dark:text-slate-300 text-sm">{profileData.email}</p>
               <div className="flex gap-2 mt-2">
-                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getRoleColor(profileData.role)}`}>
+                <span className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
                   <Shield className="w-3 h-3 mr-1" />
                   {profileData.role}
                 </span>
-                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(profileData.status)}`}>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(profileData.status).replace('bg-', 'bg-opacity-80 bg-')}`}>
                   {profileData.status}
                 </span>
               </div>
             </div>
-            <button
-              onClick={() => setEditingProfile(!editingProfile)}
-              className="p-2 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
-            >
-              {editingProfile ? <X className="w-5 h-5" /> : <Edit2 className="w-5 h-5" />}
-            </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 overflow-x-auto md:overflow-x-visible -mx-4 px-4 md:mx-0 md:px-0 hide-scrollbar mb-4">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'profile'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                ? 'bg-blue-900 dark:bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
             }`}
           >
             Profile Information
           </button>
           <button
             onClick={() => setActiveTab('security')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'security'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                ? 'bg-blue-900 dark:bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
             }`}
           >
             Security
           </button>
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === 'notifications'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                ? 'bg-blue-900 dark:bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
             }`}
           >
             Notifications
@@ -266,9 +330,9 @@ export default function ProfilePage() {
 
         {/* Profile Information Tab */}
         {activeTab === 'profile' && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 md:p-6">
             <form onSubmit={handleProfileUpdate}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
                   <input
@@ -317,9 +381,9 @@ export default function ProfilePage() {
               </div>
 
               {/* Account Information */}
-              <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Account Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-gray-200 dark:border-slate-700">
+                <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4">Account Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
                     <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-100 dark:bg-slate-600">
@@ -381,12 +445,12 @@ export default function ProfilePage() {
 
         {/* Security Tab */}
         {activeTab === 'security' && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2">
               <Key className="w-5 h-5" />
               Change Password
             </h3>
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <form onSubmit={handlePasswordChange} className="space-y-4 md:space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Password</label>
                 <input
@@ -434,13 +498,13 @@ export default function ProfilePage() {
 
         {/* Notifications Tab */}
         {activeTab === 'notifications' && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2">
               <Bell className="w-5 h-5" />
               Notification Preferences
             </h3>
-            <form onSubmit={handleNotificationUpdate} className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+            <form onSubmit={handleNotificationUpdate} className="space-y-3 md:space-y-4">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email Notifications</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Receive notifications via email</p>
@@ -459,7 +523,7 @@ export default function ProfilePage() {
                   />
                 </button>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">SMS Notifications</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Receive notifications via SMS</p>
@@ -478,7 +542,7 @@ export default function ProfilePage() {
                   />
                 </button>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Push Notifications</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Receive push notifications</p>
@@ -497,7 +561,7 @@ export default function ProfilePage() {
                   />
                 </button>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Order Alerts</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Alerts for order updates</p>
@@ -516,7 +580,7 @@ export default function ProfilePage() {
                   />
                 </button>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Trip Alerts</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Alerts for trip updates</p>
@@ -535,7 +599,7 @@ export default function ProfilePage() {
                   />
                 </button>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+              <div className="flex items-center justify-between p-3 md:p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">System Alerts</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Alerts for system updates</p>

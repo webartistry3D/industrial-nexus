@@ -38,8 +38,13 @@ async function bootstrap() {
   });
 
   // Serve static files for uploaded documents
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  // __dirname resolves to dist/src at runtime, so go two levels up to reach backend root
+  app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
     prefix: '/uploads/',
+    setHeaders: (res) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
   });
 
   const port = configService.get<number>('PORT', 3001);

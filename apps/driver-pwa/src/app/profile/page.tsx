@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { User, Driver, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue, VehicleDocument, VehicleDocumentType, VehicleDocumentTypeValue, VehicleDocumentStatus, VehicleDocumentStatusValue } from '@/types';
-import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale, CalendarClock, BadgeCheck, AlertTriangle } from 'lucide-react';
+import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale, CalendarClock, BadgeCheck, AlertTriangle, Camera, Edit2, Save, X } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function ProfilePage() {
@@ -24,6 +24,42 @@ export default function ProfilePage() {
   const [selectedVehicleDocType, setSelectedVehicleDocType] = useState<VehicleDocumentTypeValue>(VehicleDocumentType.VEHICLE_REGISTRATION);
   const [vehicleDocExpiry, setVehicleDocExpiry] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', phoneNumber: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log('[Avatar] File selected:', file?.name, file?.size, file?.type);
+    if (!file) return;
+    try {
+      setUploadingImage(true);
+      setError(null);
+      const updated = await api.uploadProfileImage(file);
+      console.log('[Avatar] Upload response:', JSON.stringify(updated));
+      console.log('[Avatar] profileImageUrl from response:', updated.profileImageUrl);
+      setProfileImageUrl(updated.profileImageUrl || null);
+    } catch (err: any) {
+      console.error('[Avatar] Upload error:', err.response?.data);
+      setError(err.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const getAvatarUrl = () => {
+    if (profileImageUrl) {
+      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const fullUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${base}${profileImageUrl}`;
+      console.log('[Avatar] Resolved URL:', fullUrl);
+      return fullUrl;
+    }
+    return null;
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -45,6 +81,15 @@ export default function ProfilePage() {
       const response = await api.getProfile();
       const driverData = response.driver || response;
       setDriver(driverData);
+      // Set profile image URL if present
+      if (response.profileImageUrl) {
+        setProfileImageUrl(response.profileImageUrl);
+      }
+      setFormData({
+        firstName: response.firstName || '',
+        lastName: response.lastName || '',
+        phoneNumber: response.phoneNumber || '',
+      });
       // Fetch KYC documents
       if (driverData?.id) {
         const kycDocs = await api.getMyKycDocuments();
@@ -59,6 +104,22 @@ export default function ProfilePage() {
       console.error('Failed to fetch profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      setError(null);
+      await api.updateMyProfile(formData);
+      setEditingProfile(false);
+      setSuccess('Profile updated successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -257,44 +318,43 @@ export default function ProfilePage() {
       <PageHeader />
 
       <main className="pt-20 px-4 pb-4">
-        <div className="max-w-6xl mx-auto space-y-4">
-          {/* Header */}
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-              <UserIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">My Profile</h1>
-            </div>
+        {success && (
+          <div className="max-w-6xl mx-auto mt-2 mb-0 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl p-3 text-green-800 dark:text-green-300 text-sm">
+            {success}
           </div>
-
-          {/* Profile Card - Full width on mobile, centered on desktop */}
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6 md:p-8">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-900 to-blue-900 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <UserIcon className="w-10 h-10 md:w-12 md:h-12 text-white" />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-1">
-                  {user?.firstName} {user?.lastName}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
-              </div>
-              <div className="flex flex-col gap-2 w-full md:w-auto">
-                <div className="flex items-center justify-center md:justify-start gap-3 text-sm">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                    <Shield className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Role: <span className="font-medium text-gray-900 dark:text-white">{user?.role}</span>
-                  </span>
+        )}
+        {error && (
+          <div className="max-w-6xl mx-auto mt-2 mb-0 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-3 text-red-800 dark:text-red-300 text-sm">
+            {error}
+          </div>
+        )}
+        <div className="max-w-6xl mx-auto space-y-4">
+          {/* Profile Header */}
+          <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-800 dark:to-blue-800 rounded-2xl p-6 text-white shadow-lg border border-white/10">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                  {getAvatarUrl() ? (
+                    <img src={getAvatarUrl()!} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-10 h-10" />
+                  )}
                 </div>
-                <div className="flex items-center justify-center md:justify-start gap-3 text-sm">
-                  <div className={`w-2 h-2 rounded-full ${(user as any)?.status === 'ACTIVE' ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Status: <span className="font-medium text-gray-900 dark:text-white">{(user as any)?.status || 'ACTIVE'}</span>
-                  </span>
-                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-blue-900 rounded-full flex items-center justify-center shadow-md hover:bg-blue-50 transition-colors"
+                >
+                  {uploadingImage ? <div className="w-3 h-3 border border-blue-900 border-t-transparent rounded-full animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold">{user?.firstName} {user?.lastName}</h1>
+                <p className="text-blue-100 dark:text-slate-300 truncate">{user?.email}</p>
+                <span className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
+                  {user?.role}
+                </span>
               </div>
             </div>
           </div>
@@ -362,27 +422,107 @@ export default function ProfilePage() {
 
             {/* Contact Information */}
             <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h3>
-              <div className="space-y-4 text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                    <Phone className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">Phone Number</p>
-                    <p className="font-medium text-gray-900 dark:text-white font-mono">{(user as any)?.phoneNumber || 'Not provided'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                    <Mail className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">Email Address</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{user?.email}</p>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Personal Information</h3>
+                {!editingProfile && (
+                  <button
+                    onClick={() => setEditingProfile(true)}
+                    className="text-blue-600 dark:text-blue-400 text-sm font-semibold flex items-center gap-1 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    Edit
+                  </button>
+                )}
               </div>
+              {editingProfile ? (
+                <form onSubmit={handleProfileUpdate} className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">First Name</label>
+                    <input
+                      type="text"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Last Name</label>
+                    <input
+                      type="text"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={formData.phoneNumber}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      value={user?.email || ''}
+                      disabled
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl bg-gray-100 dark:bg-slate-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="flex-1 bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingProfile(false)}
+                      className="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
+                      <UserIcon className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs">Full Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{formData.firstName || user?.firstName} {formData.lastName || user?.lastName}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                      <Phone className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs">Phone Number</p>
+                      <p className="font-medium text-gray-900 dark:text-white font-mono">{formData.phoneNumber || 'Not provided'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                      <Mail className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs">Email Address</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -103,6 +103,9 @@ export default function SettingsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [userPage, setUserPage] = useState(1);
+  const [userLimit] = useState(10);
+  const [userTotalPages, setUserTotalPages] = useState(1);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -134,7 +137,7 @@ export default function SettingsPage() {
     if (activeTab === 'tags') {
       fetchHandlingTags();
     }
-  }, [activeTab, searchTerm, roleFilter, statusFilter]);
+  }, [activeTab, searchTerm, roleFilter, statusFilter, userPage]);
 
   const fetchSettings = async () => {
     try {
@@ -160,14 +163,27 @@ export default function SettingsPage() {
         search: searchTerm || undefined,
         role: roleFilter || undefined,
         status: statusFilter || undefined,
+        page: userPage,
+        limit: userLimit,
       });
       setUsers(response.data || []);
+      setUserTotalPages(response.meta?.totalPages || 1);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch users');
     } finally {
       setUsersLoading(false);
     }
   };
+
+  const handleFilterChange = () => {
+    setUserPage(1);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      handleFilterChange();
+    }
+  }, [searchTerm, roleFilter, statusFilter]);
 
   const fetchHandlingTags = async () => {
     try {
@@ -256,16 +272,36 @@ export default function SettingsPage() {
   // Tag management functions
   const handleAddTag = async () => {
     const trimmedTag = newTag.trim().toUpperCase();
-    if (trimmedTag && !handlingTags.includes(trimmedTag)) {
-      try {
-        await api.createHandlingTag(trimmedTag);
-        setNewTag('');
-        await fetchHandlingTags();
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      } catch (err: any) {
-        setError(err.message || 'Failed to create tag');
-      }
+    
+    if (!trimmedTag) {
+      setError('Tag name cannot be empty');
+      return;
+    }
+    
+    if (trimmedTag.length < 2) {
+      setError('Tag name must be at least 2 characters');
+      return;
+    }
+    
+    if (!/^[A-Z0-9_]+$/.test(trimmedTag)) {
+      setError('Tag name can only contain letters, numbers, and underscores');
+      return;
+    }
+    
+    if (handlingTags.includes(trimmedTag)) {
+      setError(`Tag "${trimmedTag}" already exists`);
+      return;
+    }
+    
+    try {
+      await api.createHandlingTag(trimmedTag);
+      setNewTag('');
+      await fetchHandlingTags();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to create tag';
+      setError(errorMessage);
     }
   };
 
@@ -385,6 +421,15 @@ export default function SettingsPage() {
 
   return (
     <RoleGuard userRole={user?.role}>
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
         {/* Header */}
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-6">
@@ -401,12 +446,12 @@ export default function SettingsPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto md:overflow-x-visible -mx-4 px-4 md:mx-0 md:px-0 hide-scrollbar">
             <button
               onClick={() => setActiveTab('general')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'general'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-900 dark:bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -414,9 +459,9 @@ export default function SettingsPage() {
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'users'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-900 dark:bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -424,9 +469,9 @@ export default function SettingsPage() {
             </button>
             <button
               onClick={() => setActiveTab('tags')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'tags'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-900 dark:bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -526,6 +571,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Notification Settings */}
+          {/*}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
@@ -666,8 +712,10 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+          */}
 
           {/* Security Settings */}
+          {/*}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
@@ -744,8 +792,10 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
+          */}
 
           {/* Operations Settings */}
+          {/*}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
@@ -860,6 +910,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+          */}
 
           {/* Warning Section */}
           <div className="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
@@ -884,10 +935,10 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setShowCreateUserModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                  className="bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  Add User
+                  User
                 </button>
               </div>
 
@@ -937,8 +988,9 @@ export default function SettingsPage() {
                   <p className="text-gray-600 dark:text-gray-400">No users found</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div>
+                  <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                    <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-slate-700">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
@@ -1014,12 +1066,36 @@ export default function SettingsPage() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination */}
+                {!usersLoading && userTotalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <button
+                      onClick={() => setUserPage(p => Math.max(1, p - 1))}
+                      disabled={userPage === 1}
+                      className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                      Page {userPage} of {userTotalPages}
+                    </span>
+                    <button
+                      onClick={() => setUserPage(p => Math.min(userTotalPages, p + 1))}
+                      disabled={userPage === userTotalPages}
+                      className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+                </div>
               )}
             </div>
           </div>
         ) : activeTab === 'tags' ? (
           <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
                   <TagIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -1033,7 +1109,7 @@ export default function SettingsPage() {
               {/* Add New Tag */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Add New Tag</label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={newTag}
@@ -1043,7 +1119,7 @@ export default function SettingsPage() {
                   />
                   <button
                     onClick={handleAddTag}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                    className="bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add Tag
@@ -1066,17 +1142,17 @@ export default function SettingsPage() {
                             type="text"
                             value={editedTagValue}
                             onChange={(e) => setEditedTagValue(e.target.value)}
-                            className="flex-1 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm"
+                            className="flex-1 px-2 py-2 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm min-h-[40px]"
                           />
                           <button
                             onClick={handleSaveEditTag}
-                            className="text-green-600 hover:text-green-700 p-1"
+                            className="text-green-600 hover:text-green-700 p-2 min-h-[40px] min-w-[40px] flex items-center justify-center"
                           >
                             <Check className="w-4 h-4" />
                           </button>
                           <button
                             onClick={handleCancelEditTag}
-                            className="text-red-600 hover:text-red-700 p-1"
+                            className="text-red-600 hover:text-red-700 p-2 min-h-[40px] min-w-[40px] flex items-center justify-center"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -1087,13 +1163,13 @@ export default function SettingsPage() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleStartEditTag(tag)}
-                              className="text-blue-600 hover:text-blue-700 p-1"
+                              className="text-blue-600 hover:text-blue-700 p-2 min-h-[40px] min-w-[40px] flex items-center justify-center"
                             >
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteTag(tag)}
-                              className="text-red-600 hover:text-red-700 p-1"
+                              className="text-red-600 hover:text-red-700 p-2 min-h-[40px] min-w-[40px] flex items-center justify-center"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -1123,11 +1199,11 @@ export default function SettingsPage() {
 
         {/* Create User Modal */}
         {showCreateUserModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pb-24 sm:pb-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCreateUserModal(false)} />
-            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-4 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Add New User</h2>
-              <form onSubmit={handleCreateUser} className="space-y-4">
+              <form onSubmit={handleCreateUser} className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                   <input
@@ -1218,7 +1294,7 @@ export default function SettingsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2 bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white rounded-lg transition-colors"
                   >
                     Create User
                   </button>
@@ -1230,11 +1306,11 @@ export default function SettingsPage() {
 
         {/* Edit User Modal */}
         {showEditUserModal && selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pb-24 sm:pb-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditUserModal(false)} />
-            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-4 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Edit User</h2>
-              <form onSubmit={handleUpdateUser} className="space-y-4">
+              <form onSubmit={handleUpdateUser} className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                   <input
@@ -1314,7 +1390,7 @@ export default function SettingsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2 bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white rounded-lg transition-colors"
                   >
                     Update User
                   </button>

@@ -107,7 +107,10 @@ export default function HistoryPage() {
       <main className="p-4 space-y-4">
         {/* Stats Summary */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          <button
+            onClick={() => setFilter('ALL')}
+            className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+          >
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
                 <Package className="w-5 h-5 text-white" />
@@ -117,8 +120,11 @@ export default function HistoryPage() {
                 <p className="text-xs text-gray-600 dark:text-gray-400">Total Orders</p>
               </div>
             </div>
-          </div>
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          </button>
+          <button
+            onClick={() => setFilter('DELIVERED')}
+            className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+          >
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
                 <CheckCircle className="w-5 h-5 text-white" />
@@ -128,8 +134,11 @@ export default function HistoryPage() {
                 <p className="text-xs text-gray-600 dark:text-gray-400">Delivered</p>
               </div>
             </div>
-          </div>
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          </button>
+          <button
+            onClick={() => setFilter('IN_TRANSIT')}
+            className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+          >
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-md">
                 <ArrowRight className="w-5 h-5 text-white" />
@@ -139,8 +148,11 @@ export default function HistoryPage() {
                 <p className="text-xs text-gray-600 dark:text-gray-400">In Transit</p>
               </div>
             </div>
-          </div>
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+          </button>
+          <button
+            onClick={() => setFilter('ASSIGNED')}
+            className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+          >
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
                 <Clock className="w-5 h-5 text-white" />
@@ -150,7 +162,7 @@ export default function HistoryPage() {
                 <p className="text-xs text-gray-600 dark:text-gray-400">Pending</p>
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Filter Tabs & View Toggle */}

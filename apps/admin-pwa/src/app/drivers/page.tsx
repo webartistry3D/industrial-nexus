@@ -734,11 +734,8 @@ export default function DriversPage() {
             {/* Drivers List */}
             <div className="px-4">
               {driversLoading ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
-                    <Users className="w-8 h-8 text-white" />
-                  </div>
-                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading drivers...</p>
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent" />
                 </div>
               ) : driversError ? (
                 <div className="text-center py-12">
@@ -948,11 +945,8 @@ export default function DriversPage() {
             {/* Vehicles List */}
             <div className="px-4">
               {vehiclesLoading ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
-                    <Truck className="w-8 h-8 text-white" />
-                  </div>
-                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading vehicles...</p>
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent" />
                 </div>
               ) : vehiclesError ? (
                 <div className="text-center py-12">

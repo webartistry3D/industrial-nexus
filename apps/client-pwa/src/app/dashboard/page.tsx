@@ -126,6 +126,7 @@ export default function DashboardPage() {
 
   const getSLAStatus = () => {
     if (!stats) return 'neutral';
+    if (stats.activeShipments === 0) return 'neutral';
     const delayedRatio = stats.delayed / stats.activeShipments;
     if (delayedRatio === 0) return 'good';
     if (delayedRatio < 0.2) return 'warning';
@@ -144,7 +145,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
         </div>
       </div>
@@ -172,10 +173,10 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <StatCard icon={Truck} label="Active" value={loading ? '...' : (stats?.activeShipments || 0).toString()} color="blue" />
-          <StatCard icon={Clock} label="In Transit" value={loading ? '...' : (stats?.inTransit || 0).toString()} color="green" />
-          <StatCard icon={AlertCircle} label="Delayed" value={loading ? '...' : (stats?.delayed || 0).toString()} color={(stats?.delayed || 0) > 0 ? 'red' : 'green'} />
-          <StatCard icon={CheckCircle} label="Delivered" value={loading ? '...' : (stats?.delivered || 0).toString()} color="purple" />
+          <StatCard icon={Truck} label="Active Shipment" value={loading ? '...' : (stats?.activeShipments || 0).toString()} color="blue" onClick={() => router.push('/orders?status=ASSIGNED')} />
+          <StatCard icon={Clock} label="In Transit" value={loading ? '...' : (stats?.inTransit || 0).toString()} color="green" onClick={() => router.push('/orders?status=IN_TRANSIT')} />
+          <StatCard icon={AlertCircle} label="Delayed" value={loading ? '...' : (stats?.delayed || 0).toString()} color={(stats?.delayed || 0) > 0 ? 'red' : 'green'} onClick={() => router.push('/orders?status=DELAYED')} />
+          <StatCard icon={CheckCircle} label="Delivered" value={loading ? '...' : (stats?.delivered || 0).toString()} color="purple" onClick={() => router.push('/orders?status=DELIVERED')} />
         </div>
 
         {/* SLA Status */}
@@ -192,15 +193,18 @@ export default function DashboardPage() {
                 ? 'bg-green-500 text-white'
                 : slaStatus === 'warning'
                 ? 'bg-amber-500 text-white'
+                : slaStatus === 'neutral'
+                ? 'bg-gray-500 text-white'
                 : 'bg-red-500 text-white'
             }`}>
               {slaStatus === 'good' && <CheckCircle className="w-6 h-6" />}
               {slaStatus === 'warning' && <AlertCircle className="w-6 h-6" />}
+              {slaStatus === 'neutral' && <CheckCircle className="w-6 h-6" />}
               {slaStatus === 'critical' && <AlertCircle className="w-6 h-6" />}
             </div>
             <div>
               <p className="font-bold text-gray-900 dark:text-white text-lg">
-                SLA Status: {slaStatus === 'good' ? 'Good' : slaStatus === 'warning' ? 'Warning' : 'Critical'}
+                SLA Status: {slaStatus === 'good' ? 'Good' : slaStatus === 'warning' ? 'Warning' : slaStatus === 'neutral' ? 'Neutral' : 'Critical'}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 {stats?.delayed || 0} delayed out of {stats?.activeShipments || 0} active shipments
