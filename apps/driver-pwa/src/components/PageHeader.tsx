@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Sun, Moon, User, LogOut, LogOut as LogOutIcon, Bell, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -13,6 +13,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -33,6 +34,20 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
   const handleLogout = () => {
     logout();
     window.location.href = '/login';
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.isRead) {
+      markAsRead(notification.id);
+    }
+    setShowNotifications(false);
+    if (notification.entityId) {
+      if (notification.entityType === 'order' || notification.type === 'ORDER') {
+        router.push(`/orders/${notification.entityId}`);
+      } else if (notification.entityType === 'trip' || notification.type === 'TRIP') {
+        router.push(`/trips/${notification.entityId}`);
+      }
+    }
   };
 
   const getHeaderTitle = () => {
@@ -74,10 +89,10 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                 setShowNotifications(!showNotifications);
                 setShowProfileDropdown(false);
               }}
-              className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors relative"
+              className="p-2 bg-lime-500 rounded-lg hover:bg-lime-600 transition-colors relative"
               aria-label="Notifications"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-5 h-5 text-black" />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                   {unreadCount}
@@ -107,7 +122,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                     notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        onClick={() => !notification.isRead && markAsRead(notification.id)}
+                        onClick={() => handleNotificationClick(notification)}
                         className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
                           !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                         }`}
@@ -130,10 +145,10 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
 
           <button
             onClick={toggleTheme}
-            className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"
+            className="p-2 bg-lime-500 rounded-lg hover:bg-lime-600 transition-colors"
             aria-label="Toggle theme"
           >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {isDark ? <Sun className="w-5 h-5 text-black" /> : <Moon className="w-5 h-5 text-black" />}
           </button>
           <div className="relative">
             <button
@@ -141,10 +156,10 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                 setShowProfileDropdown(!showProfileDropdown);
                 setShowNotifications(false);
               }}
-              className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"
+              className="p-2 bg-lime-500 rounded-lg hover:bg-lime-600 transition-colors"
               aria-label="Profile"
             >
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5 text-black" />
             </button>
 
             {/* Profile Dropdown */}

@@ -65,6 +65,22 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
   
   const paginatedNotifications = notifications.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.isRead) {
+      markAsRead(notification.id);
+    }
+    setShowNotifications(false);
+    if (notification.entityId) {
+      if (notification.entityType === 'order' || notification.type === 'ORDER') {
+        router.push(`/orders/${notification.entityId}`);
+      } else if (notification.entityType === 'trip' || notification.type === 'TRIP') {
+        router.push(`/trips/${notification.entityId}`);
+      } else if (notification.entityType === 'driver' || notification.type === 'DRIVER') {
+        router.push(`/drivers/${notification.entityId}`);
+      }
+    }
+  };
+
   const formatTime = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
@@ -96,10 +112,10 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
                 setShowNotifications(!showNotifications);
                 setShowProfileDropdown(false);
               }}
-              className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors relative"
+              className="p-2 bg-lime-500 dark:bg-lime-500 rounded-lg hover:bg-lime-600 dark:hover:bg-lime-600 transition-colors relative"
               aria-label="Notifications"
             >
-              <Bell className="w-5 h-5 dark:text-lime-400" />
+              <Bell className="w-5 h-5 text-black dark:text-black" />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                   {unreadCount}
@@ -131,7 +147,7 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
                         {paginatedNotifications.map((notification) => (
                           <div
                             key={notification.id}
-                            onClick={() => !notification.isRead && markAsRead(notification.id)}
+                            onClick={() => handleNotificationClick(notification)}
                             className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
                               !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                             }`}
@@ -183,10 +199,10 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"
+            className="p-2 bg-lime-500 dark:bg-lime-500 rounded-lg hover:bg-lime-600 dark:hover:bg-lime-600 transition-colors"
             aria-label="Toggle theme"
           >
-            {isDark ? <Sun className="w-5 h-5 dark:text-lime-400" /> : <Moon className="w-5 h-5 dark:text-lime-400" />}
+            {isDark ? <Sun className="w-5 h-5 text-black dark:text-black" /> : <Moon className="w-5 h-5 text-black dark:text-black" />}
           </button>
 
           {/* Profile */}
@@ -196,10 +212,10 @@ export function TopNav({ role = 'admin' }: TopNavProps) {
                 setShowProfileDropdown(!showProfileDropdown);
                 setShowNotifications(false);
               }}
-              className="p-2 bg-white/20 dark:bg-blue-600 rounded-lg hover:bg-white/30 dark:hover:bg-blue-700 transition-colors"
+              className="p-2 bg-lime-500 dark:bg-lime-500 rounded-lg hover:bg-lime-600 dark:hover:bg-lime-600 transition-colors"
               aria-label="Profile"
             >
-              <User className="w-5 h-5 dark:text-lime-400" />
+              <User className="w-5 h-5 text-black dark:text-black" />
             </button>
 
             {/* Profile Dropdown */}

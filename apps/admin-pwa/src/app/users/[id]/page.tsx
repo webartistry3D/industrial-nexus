@@ -246,14 +246,14 @@ export default function UserDetailPage() {
 
         <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
           {/* User Profile Card */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+          <div className="bg-white dark:bg-blue-900 rounded-lg shadow-sm border border-gray-200 dark:border-blue-800 p-6">
             <div className="flex items-start gap-6">
               <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-lime-500">
                     {user?.firstName || ''} {user?.lastName || ''}
                   </h2>
                   <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getRoleColor(user?.role || '')}`}>

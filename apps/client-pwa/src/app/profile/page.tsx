@@ -127,7 +127,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       <main className="p-4 space-y-4">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-800 dark:to-blue-800 rounded-2xl p-6 text-white shadow-lg border border-white/10">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 rounded-2xl p-6 text-white dark:text-lime-500 shadow-lg border border-white/10 dark:border-blue-800">
           <div className="flex items-center gap-4">
             <div className="relative">
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />

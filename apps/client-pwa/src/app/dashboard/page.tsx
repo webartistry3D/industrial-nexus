@@ -33,7 +33,7 @@ interface Shipment {
 }
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<Shipment[]>([]);
@@ -41,13 +41,15 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.push('/login');
       return;
     }
     fetchDashboardData();
-  }, [user, router]);
+  }, [authLoading, user, router]);
 
   const fetchDashboardData = async () => {
     try {
@@ -158,7 +160,7 @@ export default function DashboardPage() {
         {/* Greeting */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:text-lime-400 dark:bg-none">{user?.firstName}</span>
+            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:text-lime-500 dark:bg-none">{user?.firstName}</span>
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your shipment update</p>
         </div>

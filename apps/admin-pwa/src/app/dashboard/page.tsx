@@ -20,7 +20,6 @@ import { FleetTracker } from '@/components/fleet-tracker';
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
@@ -33,9 +32,16 @@ export default function Dashboard() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (user) fetchDashboardData();
-  }, [user, authLoading]);
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [authLoading, user, router]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
   const fetchDashboardData = async () => {
     try {
@@ -119,7 +125,7 @@ export default function Dashboard() {
       <main className="p-4 pb-24 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:text-lime-400 dark:bg-none">{user?.firstName}</span>
+            {getGreeting()}, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:text-lime-500 dark:bg-none">{user?.firstName}</span>
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">Here's your operations update</p>
         </div>

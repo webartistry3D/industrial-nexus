@@ -84,7 +84,7 @@ export default function TripsPage() {
             onClick={() => setFilter('active')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'active'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                 : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
@@ -94,7 +94,7 @@ export default function TripsPage() {
             onClick={() => setFilter('completed')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'completed'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                 : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
@@ -104,7 +104,7 @@ export default function TripsPage() {
             onClick={() => setFilter('all')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
               filter === 'all'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                 : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700'
             }`}
           >
@@ -177,7 +177,7 @@ export default function TripsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <button className="flex-1 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-900 dark:to-blue-900 text-white py-2.5 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150">
+                  <button className="flex-1 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black py-2.5 rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150">
                     {trip.status === 'ASSIGNED' ? 'Start Trip' : 'View Details'}
                   </button>
                 </div>

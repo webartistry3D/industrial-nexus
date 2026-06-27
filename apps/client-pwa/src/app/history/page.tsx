@@ -172,7 +172,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('ALL')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'ALL'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -182,7 +182,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('DELIVERED')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'DELIVERED'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -192,7 +192,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('IN_TRANSIT')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'IN_TRANSIT'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >
@@ -202,7 +202,7 @@ export default function HistoryPage() {
               onClick={() => setFilter('SUBMITTED')}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                 filter === 'SUBMITTED'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
               }`}
             >

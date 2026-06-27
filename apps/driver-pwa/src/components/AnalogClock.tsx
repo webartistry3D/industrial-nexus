@@ -36,7 +36,7 @@ const AnalogClock = memo(function AnalogClock() {
     <div className="w-full flex flex-col items-center justify-center gap-1 py-1">
       <div className="flex items-baseline gap-1.5">
         <span
-          className="text-3xl sm:text-5xl md:text-8xl font-semibold tracking-tight text-gray-900 dark:text-white leading-none"
+          className="text-4xl sm:text-5xl md:text-8xl font-semibold tracking-tight text-gray-900 dark:text-white leading-none"
           style={{ fontFamily: 'JetBrains Mono, monospace' }}
         >
           {main}
