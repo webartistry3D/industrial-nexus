@@ -112,8 +112,8 @@ export default function HistoryPage() {
             className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                <Package className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Package className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.total}</p>
@@ -126,8 +126,8 @@ export default function HistoryPage() {
             className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                <CheckCircle className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <CheckCircle className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.delivered}</p>
@@ -140,8 +140,8 @@ export default function HistoryPage() {
             className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-md">
-                <ArrowRight className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <ArrowRight className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.inTransit}</p>
@@ -154,8 +154,8 @@ export default function HistoryPage() {
             className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-                <Clock className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Clock className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.pending}</p>

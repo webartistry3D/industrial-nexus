@@ -620,12 +620,12 @@ function TripsPageContent() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm"><TrendingUp className="w-4 h-4 text-white" /></div>
+                  <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-sm"><TrendingUp className="w-4 h-4" /></div>
                   <h2 className="font-semibold text-gray-900 dark:text-white">Delivery Trends</h2>
                 </div>
                 <div className="flex items-center gap-1">
                   {([7, 14, 30] as const).map(d => (
-                    <button key={d} onClick={() => setTrendDays(d)} className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${trendDays === d ? 'bg-purple-600 text-white' : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400'}`}>{d}d</button>
+                    <button key={d} onClick={() => setTrendDays(d)} className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${trendDays === d ? 'bg-blue-600 text-white dark:bg-lime-500 dark:text-black' : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400'}`}>{d}d</button>
                   ))}
                 </div>
               </div>

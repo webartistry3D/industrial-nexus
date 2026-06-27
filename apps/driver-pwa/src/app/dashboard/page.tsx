@@ -260,18 +260,18 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push('/trips')}
-            className="bg-blue-900 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-blue-900 border border-blue-900"
+            className="bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 border border-gray-200 dark:border-slate-700"
           >
-            <div className="p-2 bg-white/20 rounded-xl">
+            <div className="p-2 bg-blue-500 rounded-xl text-white">
               <Truck className="w-6 h-6" />
             </div>
             <span className="text-sm font-semibold">View All Trips</span>
           </button>
           <button
             onClick={() => router.push('/tracking')}
-            className="bg-slate-600 dark:bg-slate-700 text-white rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-slate-700 border border-slate-700"
+            className="bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 border border-gray-200 dark:border-slate-700"
           >
-            <div className="p-2 bg-white/20 rounded-xl">
+            <div className="p-2 bg-slate-500 rounded-xl text-white">
               <MapPin className="w-6 h-6" />
             </div>
             <span className="text-sm font-semibold">Live Tracking</span>
@@ -304,15 +304,15 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-orange-500">
-                  <AlertCircle className="w-4 h-4 text-white" />
+                <div className="p-1.5 rounded-lg bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+                  <AlertCircle className="w-4 h-4" />
                 </div>
                 <h2 className="font-bold text-gray-800 dark:text-white">Priority Trip</h2>
               </div>
               <div className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700/50 px-3 py-1 rounded-full">Highest Priority</div>
             </div>
-            
-            <div className="bg-blue-600 dark:bg-blue-800 rounded-2xl shadow-sm border-l-4 border-orange-400 dark:border-orange-500 p-5 text-white">
+
+            <div className="bg-blue-600 dark:bg-blue-800 rounded-2xl shadow-sm border-l-4 border-lime-500 p-5 text-white">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-bold text-lg font-mono">{activeTrips[0].order?.orderNumber}</span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 dark:bg-white/10 border border-white/30 dark:border-white/20">

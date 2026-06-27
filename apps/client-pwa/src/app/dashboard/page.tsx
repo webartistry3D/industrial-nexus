@@ -167,7 +167,7 @@ export default function DashboardPage() {
 
         {/* Clock and Weather Widgets */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-blue-500/10 border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
             <AnalogClock />
           </div>
           <WeatherWidget />
@@ -341,7 +341,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => router.push('/orders/new')}
-              className="group flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50"
+              className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               <div className="p-2 bg-blue-500 rounded-lg text-white">
                 <Plus className="w-4 h-4" />
@@ -350,7 +350,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => router.push('/tracking')}
-              className="group flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/30 rounded-xl border border-green-200 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:bg-green-100 dark:hover:bg-green-900/50"
+              className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               <div className="p-2 bg-green-500 rounded-lg text-white">
                 <MapPin className="w-4 h-4" />

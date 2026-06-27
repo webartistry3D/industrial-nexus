@@ -408,7 +408,7 @@ export default function DriversPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <main className="pb-24">
         {/* Header */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-4">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
@@ -483,18 +483,18 @@ export default function DriversPage() {
           {/* Drivers Stats */}
           {activeTab === 'drivers' && (
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 backdrop-blur-sm rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md inline-flex mb-4"><Users className="w-5 h-5" /></div>
+              <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Users className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Total</div>
               </div>
-              <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 backdrop-blur-sm rounded-xl border border-green-200/50 dark:border-green-700/50 p-4 shadow-lg shadow-green-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
+              <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{drivers.filter(d => d.status === 'ACTIVE').length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</div>
               </div>
-              <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 backdrop-blur-sm rounded-xl border border-purple-200/50 dark:border-purple-700/50 p-4 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
+              <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{drivers.filter(d => d.availability === 'ON_TRIP').length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">On Trip</div>
               </div>
@@ -504,18 +504,18 @@ export default function DriversPage() {
           {/* Vehicles Stats */}
           {activeTab === 'vehicles' && (
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 backdrop-blur-sm rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
+              <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Total</div>
               </div>
-              <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 backdrop-blur-sm rounded-xl border border-green-200/50 dark:border-green-700/50 p-4 shadow-lg shadow-green-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
+              <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.filter(v => v.status === 'ACTIVE').length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</div>
               </div>
-              <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 backdrop-blur-sm rounded-xl border border-purple-200/50 dark:border-purple-700/50 p-4 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-md inline-flex mb-4"><Grid2x2 className="w-5 h-5" /></div>
+              <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Grid2x2 className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.filter(v => v.isPartitioned).length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Partitioned</div>
               </div>

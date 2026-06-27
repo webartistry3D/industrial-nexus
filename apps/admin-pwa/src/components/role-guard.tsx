@@ -15,7 +15,7 @@ export function RoleGuard({ children, userRole }: RoleGuardProps) {
   useEffect(() => {
     if (userRole && !canAccessAdminFeatures(userRole)) {
       // Redirect to dashboard if user doesn't have admin access
-      router.push('/dashboard');
+      router.push('/login');
     }
   }, [userRole, router]);
 

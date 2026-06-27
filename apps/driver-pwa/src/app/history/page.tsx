@@ -97,8 +97,8 @@ export default function HistoryPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                <Truck className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Truck className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.length}</p>
@@ -108,8 +108,8 @@ export default function HistoryPage() {
           </div>
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                <CheckCircle className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <CheckCircle className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.filter(t => t.status === 'DELIVERED').length}</p>
@@ -119,8 +119,8 @@ export default function HistoryPage() {
           </div>
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-                <Clock className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Clock className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.filter(t => t.status === 'IN_TRANSIT').length}</p>
@@ -130,8 +130,8 @@ export default function HistoryPage() {
           </div>
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
-                <XCircle className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <XCircle className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.filter(t => t.status === 'CANCELLED').length}</p>

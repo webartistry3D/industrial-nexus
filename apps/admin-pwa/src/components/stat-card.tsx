@@ -16,9 +16,9 @@ const trendClasses = 'text-[11px] font-medium text-gray-600 dark:text-gray-400 b
 export function StatCard({ icon: Icon, label, value, trend, color, onClick }: StatCardProps) {
   if (color === 'blue') {
     return (
-      <div onClick={onClick} className={`${baseClasses} bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 shadow-blue-500/10 ${onClick ? cursorClass : ''}`}>
+      <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -32,9 +32,9 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
   }
   if (color === 'green') {
     return (
-      <div onClick={onClick} className={`${baseClasses} bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 border border-green-200/50 dark:border-green-700/50 shadow-green-500/10 ${onClick ? cursorClass : ''}`}>
+      <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -48,9 +48,9 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
   }
   if (color === 'yellow') {
     return (
-      <div onClick={onClick} className={`${baseClasses} bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 border border-amber-200/50 dark:border-amber-700/50 shadow-amber-500/10 ${onClick ? cursorClass : ''}`}>
+      <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -64,9 +64,9 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
   }
   if (color === 'red') {
     return (
-      <div onClick={onClick} className={`${baseClasses} bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 shadow-red-500/10 ${onClick ? cursorClass : ''}`}>
+      <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -79,9 +79,9 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
     );
   }
   return (
-    <div onClick={onClick} className={`${baseClasses} bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 border border-purple-200/50 dark:border-purple-700/50 shadow-purple-500/10 ${onClick ? cursorClass : ''}`}>
+    <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
       <div className="flex items-start justify-between relative z-10">
-        <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-md">
+        <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
           <Icon className="w-5 h-5" />
         </div>
         {trend && <span className={trendClasses}>{trend}</span>}

@@ -367,8 +367,8 @@ export default function ProfilePage() {
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Driver Information</h3>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                      <Truck className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <Truck className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">License Number</p>
@@ -376,8 +376,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                      <Scale className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <Scale className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">Vehicle Weight</p>
@@ -391,8 +391,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                      <Shield className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <Shield className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">KYC Status</p>
@@ -495,8 +495,8 @@ export default function ProfilePage() {
               ) : (
                 <div className="space-y-4 text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                      <UserIcon className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <UserIcon className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">Full Name</p>
@@ -504,8 +504,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                      <Phone className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <Phone className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">Phone Number</p>
@@ -513,8 +513,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                      <Mail className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <Mail className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">Email Address</p>
@@ -532,8 +532,8 @@ export default function ProfilePage() {
           {/* Driver Documentation Section */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
             <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-md">
-                <FileText className="w-4 h-4 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <FileText className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Driver Documentation</h3>
             </div>
@@ -550,14 +550,8 @@ export default function ProfilePage() {
                       className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-700/50 rounded-xl border border-gray-200/50 dark:border-slate-600/50"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`p-2 rounded-lg shadow-sm flex-shrink-0 ${
-                          doc.status === KycDocumentStatus.VERIFIED
-                            ? 'bg-gradient-to-br from-green-500 to-green-600'
-                            : doc.status === KycDocumentStatus.REJECTED
-                            ? 'bg-gradient-to-br from-red-500 to-red-600'
-                            : 'bg-gradient-to-br from-yellow-500 to-yellow-600'
-                        }`}>
-                          <FileText className="w-4 h-4 text-white" />
+                        <div className="p-2 rounded-lg shadow-sm flex-shrink-0 bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+                          <FileText className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -678,8 +672,8 @@ export default function ProfilePage() {
                 {kycDocuments.map((doc) => (
                   <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-300">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                        <FileText className="w-5 h-5 text-white" />
+                      <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                        <FileText className="w-5 h-5" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -717,8 +711,8 @@ export default function ProfilePage() {
             <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-md">
-                    <Truck className="w-4 h-4 text-white" />
+                  <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <Truck className="w-4 h-4" />
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Vehicle Documents</h3>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
@@ -809,8 +803,8 @@ export default function ProfilePage() {
                   {vehicleDocuments.map((doc) => (
                     <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-300">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-md">
-                          <FileText className="w-5 h-5 text-white" />
+                        <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                          <FileText className="w-5 h-5" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">

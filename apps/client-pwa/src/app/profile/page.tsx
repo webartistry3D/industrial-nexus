@@ -235,8 +235,8 @@ export default function ProfilePage() {
           ) : (
             <div className="p-4 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                  <Mail className="w-5 h-5 text-white mt-0.5" />
+                <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                  <Mail className="w-5 h-5 mt-0.5" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
@@ -245,8 +245,8 @@ export default function ProfilePage() {
               </div>
               {profile?.phoneNumber && (
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                    <Phone className="w-5 h-5 text-white mt-0.5" />
+                  <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <Phone className="w-5 h-5 mt-0.5" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
@@ -265,8 +265,8 @@ export default function ProfilePage() {
           </div>
           <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
             <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                <Shield className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Shield className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <p className="text-gray-900 dark:text-white font-medium">Security</p>
@@ -274,8 +274,8 @@ export default function ProfilePage() {
               </div>
             </button>
             <button className="w-full p-4 flex items-center gap-3 text-left hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                <Bell className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Bell className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <p className="text-gray-900 dark:text-white font-medium">Notifications</p>

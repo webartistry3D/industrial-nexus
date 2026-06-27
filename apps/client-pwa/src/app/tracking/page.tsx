@@ -218,7 +218,7 @@ export default function TrackingPage() {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Track Shipments</h1>
             </div>
           </div>
-          <button
+          {/* <button
             onClick={isSimulating ? handleStopSimulation : handleStartSimulation}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-lg ${
               isSimulating
@@ -228,7 +228,7 @@ export default function TrackingPage() {
           >
             {isSimulating ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             {isSimulating ? 'Stop Demo' : 'Start Demo'}
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -241,8 +241,8 @@ export default function TrackingPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Active Shipments</p>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{activeShipments}</p>
               </div>
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                <Truck className="w-6 h-6 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Truck className="w-6 h-6" />
               </div>
             </div>
           </div>
@@ -253,8 +253,8 @@ export default function TrackingPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Shipments</p>
                 <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{shipments.length}</p>
               </div>
-              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                <Package className="w-6 h-6 text-white" />
+              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <Package className="w-6 h-6" />
               </div>
             </div>
           </div>

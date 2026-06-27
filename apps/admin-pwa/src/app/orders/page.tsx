@@ -200,7 +200,7 @@ function OrdersPageContent() {
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   {activeTab === 'trackers'
-                    ? 'Package Trackers'
+                    ? 'Trackers'
                     : (cargoTypeFilter || cargoTypeParam) ? `${cargoTypeFilter || cargoTypeParam} Orders` : 
                       (statusFilter || statusParam) ? `${statusFilter || statusParam} Orders` : 
                       (kittingStatusFilter || kittingStatusParam) ? `${KITTING_STATUS_OPTIONS.find(opt => opt.value === (kittingStatusFilter || kittingStatusParam))?.label} Orders` :

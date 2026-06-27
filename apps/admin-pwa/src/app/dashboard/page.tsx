@@ -131,7 +131,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-blue-500/10 border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 flex items-center justify-center">
             <AnalogClock />
           </div>
           <WeatherWidget />
@@ -186,19 +186,19 @@ export default function Dashboard() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button onClick={() => router.push('/orders/new')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/30 dark:to-purple-800/20 rounded-xl border border-purple-200/50 dark:border-purple-700/50 text-purple-700 dark:text-purple-400 text-sm font-semibold hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/orders/new')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-purple-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Plus className="w-4 h-4" /></div>
               <span>Create Order</span>
             </button>
-            <button onClick={() => router.push('/orders')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/orders')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-blue-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Package className="w-4 h-4" /></div>
               <span>View Orders</span>
             </button>
-            <button onClick={() => router.push('/trips')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-900/30 dark:to-green-800/20 rounded-xl border border-green-200/50 dark:border-green-700/50 text-green-700 dark:text-green-400 text-sm font-semibold hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/trips')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-green-500 rounded-lg text-white group-hover:scale-110 transition-transform"><Route className="w-4 h-4" /></div>
               <span>View Trips</span>
             </button>
-            <button onClick={() => router.push('/drivers')} className="group flex items-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-orange-800/20 rounded-xl border border-orange-200/50 dark:border-orange-700/50 text-orange-700 dark:text-orange-400 text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/drivers')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-orange-500 rounded-lg text-white group-hover:scale-110 transition-transform"><UserPlus className="w-4 h-4" /></div>
               <span>View Drivers</span>
             </button>
