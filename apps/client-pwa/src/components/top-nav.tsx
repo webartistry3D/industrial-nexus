@@ -26,14 +26,21 @@ function TopNavInner({ role }: { role: 'admin' | 'client' | 'driver' }) {
   const [isDark, setIsDark] = useState(false);
   
   useEffect(() => {
-    const initialTheme = document.documentElement.classList.contains('dark');
-    setIsDark(initialTheme);
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    const prefersDark = savedTheme === 'dark' || (savedTheme !== 'light' && document.documentElement.classList.contains('dark'));
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    }
+    setIsDark(prefersDark);
   }, []);
   
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
     document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
 
   const handleLogout = () => {

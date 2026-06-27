@@ -54,10 +54,8 @@ export function useNotifications() {
       setUnreadCount(unread);
       if (!initialFetchDone.current) {
         initialFetchDone.current = true;
-        const soundPlayed = sessionStorage.getItem('notificationSoundPlayed');
-        if (!soundPlayed && unread > 0) {
+        if (unread > 0) {
           playNotificationSoundRef.current();
-          sessionStorage.setItem('notificationSoundPlayed', 'true');
         }
       }
     } catch (err) {

@@ -22,13 +22,21 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
 
   useEffect(() => {
     setMounted(true);
-    setIsDark(document.documentElement.classList.contains('dark'));
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    const prefersDark = savedTheme === 'dark' || (savedTheme !== 'light' && document.documentElement.classList.contains('dark'));
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    }
+    setIsDark(prefersDark);
   }, []);
 
   const toggleTheme = () => {
     const newIsDark = !document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark');
     setIsDark(newIsDark);
+    localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
 
   const handleLogout = () => {
