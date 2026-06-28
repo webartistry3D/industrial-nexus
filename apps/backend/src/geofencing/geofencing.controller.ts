@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { GeofencingService } from './geofencing.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -11,6 +12,8 @@ class GPSUpdateDto {
   accuracy?: number;
 }
 
+@ApiTags('geofencing')
+@ApiBearerAuth('access-token')
 @Controller('geofencing')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class GeofencingController {

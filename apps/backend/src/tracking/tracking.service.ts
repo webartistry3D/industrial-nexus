@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { GeofencingService } from '../geofencing/geofencing.service';
+import { ValhallaService } from '../maps/valhalla.service';
 import { TripStatus } from '@prisma/client';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class TrackingService {
     private prisma: PrismaService,
     private redis: RedisService,
     private geofencingService: GeofencingService,
+    private valhallaService: ValhallaService,
   ) {}
 
   async getLiveTripLocation(tripId: string) {
@@ -105,17 +107,17 @@ export class TrackingService {
     // Get tracking history for actual path
     const trackingHistory = await this.getTripTrackingHistory(tripId, 1000);
 
-    // Calculate straight-line distance
-    const distance = this.calculateDistance(pickup, delivery);
+    // Attempt Valhalla route, fall back to straight-line
+    const valhallaRoute = await this.valhallaService.getRoute(pickup, delivery);
+    const distance = valhallaRoute?.distanceMeters ?? this.calculateDistance(pickup, delivery);
 
-    // For now, return straight-line route. In production, integrate with Google Directions API
     const route = {
-      polyline: [
+      polyline: valhallaRoute?.polyline ?? [
         { lat: pickup.lat, lng: pickup.lng },
         { lat: delivery.lat, lng: delivery.lng },
       ],
-      distance: distance,
-      estimatedDuration: Math.round(distance / 30), // Assume 30m/s average speed
+      distance,
+      estimatedDuration: valhallaRoute?.durationSeconds ?? Math.round(distance / 30),
       pickup,
       delivery,
       trackingHistory,
@@ -272,7 +274,7 @@ export class TrackingService {
     });
 
     // Invalidate cache
-    await this.redis.del(`tracking:package:live:${packageTrackerId}`);
+    await this.redis.del(`tracking:package:live:v2:${packageTrackerId}`);
 
     // Publish to Redis for WebSocket
     await this.redis.publish('tracking:package:location', JSON.stringify({

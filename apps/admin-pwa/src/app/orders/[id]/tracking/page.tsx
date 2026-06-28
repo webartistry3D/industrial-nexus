@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 import { api } from '@/lib/api';
-import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
+import { MapPolyline } from '@/components/maps/MapPolyline';
 import { Navigation, MapPin, Battery, Activity, ArrowLeft } from 'lucide-react';
 import { Order } from '@/types';
 
@@ -32,6 +33,29 @@ interface PackageTrackerData {
     heading?: number;
     timestamp: string;
   };
+}
+
+function PackageMapOverlays({
+  location,
+  trail,
+  pickupLocation,
+  deliveryLocation,
+}: {
+  location: { lat: number; lng: number } | null;
+  trail: { lat: number; lng: number }[];
+  pickupLocation?: { lat: number; lng: number } | null;
+  deliveryLocation?: { lat: number; lng: number } | null;
+}) {
+  const map = useMap();
+  if (!map) return null;
+  return (
+    <>
+      {trail.length > 1 && <MapPolyline map={map} id="pkg-trail" path={trail} color="#a855f7" strokeWeight={3} />}
+      {location && <MapMarker map={map} position={location} type="package" label="📦" />}
+      {pickupLocation && <MapMarker map={map} position={pickupLocation} type="pickup" label="🏭" />}
+      {deliveryLocation && <MapMarker map={map} position={deliveryLocation} type="delivery" label="🏠" />}
+    </>
+  );
 }
 
 export default function PackageTrackingPage() {
@@ -157,51 +181,28 @@ export default function PackageTrackingPage() {
 
       <main className="px-4 py-4 pb-24">
         {/* Map */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden mb-6">
-          <div className="h-[400px] sm:h-[500px]">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-600 border-t-transparent" />
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
+          <div className="h-[400px] sm:h-[500px] relative overflow-hidden rounded-2xl">
+            <GoogleMapWrapper center={mapCenter} zoom={14}>
+              {!loading && !error && trackerData?.location && (
+                <PackageMapOverlays
+                  location={{ lat: trackerData.location.lat, lng: trackerData.location.lng }}
+                  trail={trail}
+                  pickupLocation={order?.pickupLocation?.lat ? { lat: order.pickupLocation.lat, lng: order.pickupLocation.lng } : null}
+                  deliveryLocation={order?.deliveryLocation?.lat ? { lat: order.deliveryLocation.lat, lng: order.deliveryLocation.lng } : null}
+                />
+              )}
+            </GoogleMapWrapper>
+            {(loading || error || !trackerData?.location) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+                {loading ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-600 border-t-transparent" />
+                ) : error ? (
+                  <p className="text-red-500">{error}</p>
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-400">No location data available</p>
+                )}
               </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-red-500">{error}</p>
-              </div>
-            ) : !trackerData?.location ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600 dark:text-gray-400">No location data available</p>
-              </div>
-            ) : (
-              <GoogleMapWrapper center={mapCenter} zoom={14}>
-                {/* Trail */}
-                {trail.length > 1 && (
-                  <MapPolyline path={trail} color="#a855f7" strokeWeight={3} />
-                )}
-                {/* Package location */}
-                {trackerData.location && (
-                  <MapMarker
-                    position={{ lat: trackerData.location.lat, lng: trackerData.location.lng }}
-                    type="package"
-                    label="📦"
-                  />
-                )}
-                {/* Pickup location */}
-                {order?.pickupLocation?.lat && order?.pickupLocation?.lng && (
-                  <MapMarker
-                    position={{ lat: order.pickupLocation.lat, lng: order.pickupLocation.lng }}
-                    type="pickup"
-                    label="🏭"
-                  />
-                )}
-                {/* Delivery location */}
-                {order?.deliveryLocation?.lat && order?.deliveryLocation?.lng && (
-                  <MapMarker
-                    position={{ lat: order.deliveryLocation.lat, lng: order.deliveryLocation.lng }}
-                    type="delivery"
-                    label="🏠"
-                  />
-                )}
-              </GoogleMapWrapper>
             )}
           </div>
         </div>
@@ -271,11 +272,3 @@ export default function PackageTrackingPage() {
   );
 }
 
-// Simple polyline component for package trail
-function MapPolyline({ path, color, strokeWeight }: { path: { lat: number; lng: number }[]; color: string; strokeWeight: number }) {
-  return (
-    <div style={{ display: 'none' }}>
-      {/* Placeholder - actual polyline should be rendered via Google Maps API */}
-    </div>
-  );
-}

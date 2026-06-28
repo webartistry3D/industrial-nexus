@@ -1,4 +1,5 @@
 import { Controller, Get, Param, Query, UseGuards, Post, Body } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TrackingService } from './tracking.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -9,6 +10,8 @@ import { RouteQueryDto } from './dto/route-query.dto';
 import { LocationUpdateDto } from './dto/location-update.dto';
 import { PackageLocationUpdateDto } from './dto/package-location-update.dto';
 
+@ApiTags('tracking')
+@ApiBearerAuth('access-token')
 @Controller('tracking')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TrackingController {

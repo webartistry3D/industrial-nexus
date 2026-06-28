@@ -27,9 +27,10 @@ export function useTrackingWebSocket() {
 
       const socket = io(`${WS_URL}/tracking`, {
         auth: { token },
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'],
         reconnection: true,
         reconnectionDelay: 5000,
+        timeout: 10000,
       });
 
       socket.on('connect', () => {
@@ -87,6 +88,18 @@ export function useTrackingWebSocket() {
         }
       });
 
+      socket.on('auth:expired', async () => {
+        console.warn('[Tracking WebSocket] Server signalled token expiry — refreshing');
+        if (!isRefreshingRef.current) {
+          isRefreshingRef.current = true;
+          const newToken = await refreshAccessToken();
+          isRefreshingRef.current = false;
+          if (newToken) {
+            connect(newToken);
+          }
+        }
+      });
+
       socketRef.current = socket;
     } catch (err) {
       console.error('[Tracking WebSocket] Connection failed:', err);
@@ -95,8 +108,12 @@ export function useTrackingWebSocket() {
   };
 
   const disconnect = () => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
+    const socket = socketRef.current;
+    if (socket) {
+      socket.off();
+      if (socket.connected || socket.io?.engine?.readyState === 'opening') {
+        socket.disconnect();
+      }
       socketRef.current = null;
       setIsConnected(false);
     }

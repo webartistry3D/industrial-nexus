@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Order } from '@/types';
 import { 
   Package, ArrowLeft, MapPin, Clock, User, Truck, 
@@ -434,7 +435,7 @@ export default function OrderDetailPage() {
   const handleFetchDrivers = async () => {
     try {
       const [drivers, vehicles] = await Promise.all([
-        api.getUsers({ role: 'DRIVER', status: 'ACTIVE' }),
+        api.getDrivers({ status: 'ACTIVE', availability: 'AVAILABLE' }),
         api.getVehicles({ status: 'ACTIVE' }),
       ]);
       setAvailableDrivers(drivers.data || []);
@@ -592,10 +593,10 @@ export default function OrderDetailPage() {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">{order.orderNumber}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                {String(order.status || '').replace('_', ' ')}
+                {formatStatus(order.status)}
               </span>
               <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
-                {String(order.priority || '')} Priority
+                {formatStatus(order.priority)} Priority
               </span>
             </div>
           </div>
@@ -719,7 +720,7 @@ export default function OrderDetailPage() {
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-gray-400" />
               <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
-                {String(order.priority || 'NORMAL')} Priority
+                {formatStatus(order.priority || 'NORMAL')} Priority
               </span>
             </div>
           </div>
@@ -758,12 +759,9 @@ export default function OrderDetailPage() {
                   // Skip empty or invalid results
                   if (!tagText || tagText === '[object Object]') return null;
 
-                  // Format: replace underscores with spaces
-                  tagText = tagText.replace(/_/g, ' ');
-
                   return (
                     <span key={index} className={`px-2 py-1 text-xs rounded ${getHandlingTagColor(tagText)}`}>
-                      {tagText}
+                      {formatStatus(tagText)}
                     </span>
                   );
                 }).filter(Boolean)}
@@ -838,7 +836,7 @@ export default function OrderDetailPage() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.packageTracker.status)}`}>
-                  {order.packageTracker.status}
+                  {formatStatus(order.packageTracker.status)}
                 </span>
               </div>
               {order.packageTracker.lastSeenAt && (
@@ -874,7 +872,7 @@ export default function OrderDetailPage() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.trip?.status)}`}>
-                  {String(order.trip?.status || '').replace('_', ' ')}
+                  {formatStatus(order.trip?.status)}
                 </span>
               </div>
               
@@ -904,7 +902,7 @@ export default function OrderDetailPage() {
 
             {/* View Trip Button */}
             <button
-              onClick={() => router.push('/trips')}
+              onClick={() => router.push(`/trips/${order.trip?.id}`)}
               className="mt-4 w-full flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 text-blue-600 dark:text-blue-400 rounded-xl hover:from-blue-500/20 hover:to-blue-600/10 dark:hover:from-blue-500/30 dark:hover:to-blue-600/20 transition-all duration-300"
             >
               View Trip Details
@@ -929,7 +927,7 @@ export default function OrderDetailPage() {
                 {timelineEvents.map((event, index) => (
                   <div key={index} className="flex items-center gap-3 text-sm">
                     <div className={`w-2 h-2 rounded-full ${getTimelineDotColor(event.status)} flex-shrink-0`} />
-                    <span className="text-gray-500 dark:text-gray-400 w-32 flex-shrink-0">{event.status}</span>
+                    <span className="text-gray-500 dark:text-gray-400 w-32 flex-shrink-0">{formatStatus(event.status)}</span>
                     <span className="text-gray-900 dark:text-white flex-1 min-w-0">{event.description}</span>
                     <span className="text-gray-400 dark:text-gray-500 text-xs whitespace-nowrap flex-shrink-0">
                       {event.timestamp.toLocaleString()}
@@ -968,7 +966,7 @@ export default function OrderDetailPage() {
                     <option value="">Select a driver...</option>
                     {availableDrivers.map((driver) => (
                       <option key={driver.id} value={driver.id}>
-                        {driver.firstName} {driver.lastName} ({driver.email})
+                        {driver.user?.firstName} {driver.user?.lastName} — {driver.licenseNumber}
                       </option>
                     ))}
                   </select>

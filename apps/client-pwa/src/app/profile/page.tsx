@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { User as UserIcon, Mail, Phone, Edit, Save, LogOut, Shield, Bell, Camera } from 'lucide-react';
 
 interface UserProfile {
@@ -150,7 +151,7 @@ export default function ProfilePage() {
               <h1 className="text-2xl font-bold">{profile?.firstName} {profile?.lastName}</h1>
               <p className="text-blue-100 dark:text-slate-300">{profile?.email}</p>
               <span className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
-                {profile?.role}
+                {formatStatus(profile?.role)}
               </span>
             </div>
           </div>

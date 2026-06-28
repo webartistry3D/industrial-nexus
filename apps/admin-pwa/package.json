@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
-    "@googlemaps/js-api-loader": "^2.1.1",
-    "@react-google-maps/api": "^2.20.8",
+    "@industrial-nexus/maps": "*",
+    "maplibre-gl": "^4.7.0",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
@@ -23,6 +23,7 @@
     "next": "^14.2.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "@types/geojson": "^7946.0.14",
     "recharts": "^2.12.0",
     "socket.io-client": "^4.8.3",
     "typescript": "^5.4.0"

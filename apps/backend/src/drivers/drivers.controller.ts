@@ -24,15 +24,21 @@ import { UpdateDriverDto } from './dto/update-driver.dto';
 import { DriverFilterDto } from './dto/driver-filter.dto';
 import { CreateKycDocumentDto, UpdateKycDocumentDto, KycDocumentFilterDto } from './dto/kyc-document.dto';
 import { UserRole, DriverAvailability, KycDocumentType } from '@prisma/client';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { StorageService } from '../storage/storage.service';
 
+@ApiTags('drivers')
+@ApiBearerAuth('access-token')
 @Controller('drivers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DriversController {
-  constructor(private readonly driversService: DriversService) {}
+  constructor(
+    private readonly driversService: DriversService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
@@ -96,14 +102,7 @@ export class DriversController {
   @Post(':id/kyc/documents/upload')
   @Roles(UserRole.DRIVER, UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
   @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/kyc-docs',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = uuidv4();
-        const ext = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
       const ext = extname(file.originalname).toLowerCase();
@@ -113,9 +112,7 @@ export class DriversController {
         cb(new BadRequestException('Only PDF, JPG, and PNG files are allowed'), false);
       }
     },
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB
-    },
+    limits: { fileSize: 10 * 1024 * 1024 },
   }))
   @HttpCode(HttpStatus.CREATED)
   async uploadKycDocument(
@@ -128,8 +125,8 @@ export class DriversController {
       throw new BadRequestException('File is required');
     }
 
-    const fileUrl = `/uploads/kyc-docs/${file.filename}`;
-    
+    const { url: fileUrl } = await this.storageService.upload(file, 'kyc-docs');
+
     const createKycDocumentDto: CreateKycDocumentDto = {
       documentType: documentType as any,
       fileUrl,

@@ -26,8 +26,8 @@ export default function Login() {
     localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
 
-  const [email, setEmail] = useState('driver1@industrialnexus.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -134,6 +134,14 @@ export default function Login() {
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => router.push('/forgot-password')}
+            className="text-sm text-blue-700 dark:text-blue-400 hover:underline"
+          >
+            Forgot your password?
+          </button>
+        </div>
       </div>
     </div>
   );

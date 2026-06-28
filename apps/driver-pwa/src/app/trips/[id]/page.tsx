@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
 import { MapPin, Package, CheckCircle, Camera, Pen, Navigation, Clock, Truck, Calendar, Play, Send, X, RotateCcw, ImageIcon, User, Phone, StickyNote, FileCheck, Upload } from 'lucide-react';
 
@@ -49,6 +50,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
@@ -87,8 +89,9 @@ export default function TripDetail({ params }: { params: { id: string } }) {
       setActionError(null);
       if (trip?.order) {
         await api.startOrderTrip(trip.order.id);
+      } else {
+        await api.startTrip(params.id);
       }
-      await api.startTrip(params.id);
       await fetchTrip();
       setActionSuccess(true);
       setTimeout(() => setActionSuccess(false), 3000);
@@ -166,16 +169,30 @@ export default function TripDetail({ params }: { params: { id: string } }) {
     setPodForm(f => ({ ...f, signatureUrl: '' }));
   };
 
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const url = ev.target?.result as string;
-      setPhotoPreview(url);
-      setPodForm(f => ({ ...f, photoUrl: url }));
-    };
-    reader.readAsDataURL(file);
+
+    const localPreview = URL.createObjectURL(file);
+    setPhotoPreview(localPreview);
+    setPodError(null);
+
+    try {
+      setPhotoUploading(true);
+      const { uploadUrl, finalUrl } = await api.getPodUploadUrl(
+        params.id,
+        file.name,
+        file.type,
+      );
+      await api.uploadFileToPresignedUrl(uploadUrl, file);
+      setPodForm(f => ({ ...f, photoUrl: finalUrl }));
+    } catch (err: any) {
+      setPodError('Failed to upload photo. Please try again.');
+      setPhotoPreview(null);
+      setPodForm(f => ({ ...f, photoUrl: '' }));
+    } finally {
+      setPhotoUploading(false);
+    }
   };
 
   const handleSubmitPOD = async () => {
@@ -330,7 +347,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
               trip.status === 'ASSIGNED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' :
               'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
             }`}>
-              {trip.status.replace(/_/g, ' ')}
+              {formatStatus(trip.status)}
             </span>
           </div>
           {trip.eta && (
@@ -540,13 +557,23 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                         />
                         {photoPreview ? (
                           <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700">
-                            <img src={photoPreview} alt="POD photo" className="w-full max-h-48 object-cover" />
-                            <button
-                              onClick={() => { setPhotoPreview(null); setPodForm(f => ({ ...f, photoUrl: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
+                            <img src={photoPreview} alt="POD photo" className={`w-full max-h-48 object-cover ${photoUploading ? 'opacity-50' : ''}`} />
+                            {photoUploading && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                <div className="flex items-center gap-2 bg-white/90 dark:bg-slate-800/90 px-3 py-1.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                  Uploading…
+                                </div>
+                              </div>
+                            )}
+                            {!photoUploading && (
+                              <button
+                                onClick={() => { setPhotoPreview(null); setPodForm(f => ({ ...f, photoUrl: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <button
@@ -627,7 +654,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
                       <button
                         onClick={handleSubmitPOD}
-                        disabled={podSubmitting || (!podForm.photoUrl && !hasSignature)}
+                        disabled={podSubmitting || photoUploading || (!podForm.photoUrl && !hasSignature)}
                         className="w-full bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 active:opacity-80 transition-opacity duration-150"
                       >
                         <Send className="w-4 h-4" />

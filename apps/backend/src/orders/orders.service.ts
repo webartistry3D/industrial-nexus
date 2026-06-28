@@ -427,15 +427,18 @@ export class OrdersService {
 
     const resolvedVehicleId = driver.vehicleId || null;
 
-    // Create trip
-    await this.prisma.trip.create({
-      data: {
-        orderId: id,
-        driverId: driver.id,
-        vehicleId: resolvedVehicleId,
-        status: 'ASSIGNED',
-      },
-    });
+    // Create trip only if one doesn't already exist for this order
+    const existingTrip = await this.prisma.trip.findFirst({ where: { orderId: id } });
+    if (!existingTrip) {
+      await this.prisma.trip.create({
+        data: {
+          orderId: id,
+          driverId: driver.id,
+          vehicleId: resolvedVehicleId,
+          status: 'ASSIGNED',
+        },
+      });
+    }
 
     await this.auditService.log({
       userId,

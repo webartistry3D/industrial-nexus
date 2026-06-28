@@ -1,6 +1,7 @@
 'use client';
 
 import { Order } from '@/types';
+import { formatStatus } from '@/lib/formatting';
 import { Package, MapPin, Clock, Scale } from 'lucide-react';
 
 interface OrdersOverviewProps {
@@ -92,7 +93,7 @@ export function OrdersOverview({ orders, loading = false, onOrderClick }: Orders
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-sm text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{order.orderNumber}</span>
                 <span className={`status-badge ${getStatusColor(order.status)}`}>
-                  {order.status?.replace('_', ' ')}
+                  {formatStatus(order.status)}
                 </span>
               </div>
 
@@ -119,8 +120,8 @@ export function OrdersOverview({ orders, loading = false, onOrderClick }: Orders
                 <div className="mt-2">
                   <span className={`status-badge ${getKittingStatusColor(order.kittingStatus)}`}>
                     {order.kittingStatus === 'DISPATCH_READY'
-                      ? 'DISPATCH READY'
-                      : `Kitting: ${order.kittingStatus?.replace('_', ' ')}`}
+                      ? 'Dispatch Ready'
+                      : `Kitting: ${formatStatus(order.kittingStatus)}`}
                   </span>
                 </div>
               )}

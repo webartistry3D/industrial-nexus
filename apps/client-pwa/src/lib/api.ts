@@ -90,6 +90,16 @@ class ApiClient {
     localStorage.removeItem('refreshToken');
   }
 
+  async requestPasswordReset(email: string) {
+    const response = await this.client.post('/auth/password-reset/request', { email });
+    return response.data;
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const response = await this.client.post('/auth/password-reset/confirm', { token, newPassword });
+    return response.data;
+  }
+
   async getProfile() {
     const response = await this.client.get('/users/me');
     return response.data;

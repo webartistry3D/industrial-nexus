@@ -3,12 +3,30 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { geocodeAddress } from '@/lib/geocoding';
 import { Package, ArrowLeft, MapPin, Check } from 'lucide-react';
 import { PlacesAutocomplete } from '@/components/maps/PlacesAutocomplete';
-import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { SuccessModal } from '@/components/success-modal';
+
+function OrderMapOverlays({
+  pickupLat, pickupLng, deliveryLat, deliveryLng,
+}: { pickupLat: number; pickupLng: number; deliveryLat: number; deliveryLng: number }) {
+  const map = useMap();
+  if (!map) return null;
+  return (
+    <>
+      {pickupLat !== 0 && pickupLng !== 0 && (
+        <MapMarker map={map} position={{ lat: pickupLat, lng: pickupLng }} type="pickup" label="📦" />
+      )}
+      {deliveryLat !== 0 && deliveryLng !== 0 && (
+        <MapMarker map={map} position={{ lat: deliveryLat, lng: deliveryLng }} type="delivery" label="🏠" />
+      )}
+    </>
+  );
+}
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -118,8 +136,6 @@ export default function NewOrderPage() {
     setError(null);
 
     try {
-      console.log('Form data before geocoding:', formData);
-      
       // Skip geocoding if manual coordinates are provided
       const shouldSkipGeocoding = useManualCoords && 
         formData.pickupLat !== 0 && formData.pickupLng !== 0 && 
@@ -130,17 +146,12 @@ export default function NewOrderPage() {
         setGeocoding(true);
         setError(null);
 
-        console.log('Starting geocoding process...');
-        console.log('Pickup address:', formData.pickupAddress);
-        console.log('Delivery address:', formData.deliveryAddress);
-
         // Create a local copy of form data to update
         let updatedFormData = { ...formData };
 
         // Geocode pickup address if needed
         if (!formData.pickupLat || !formData.pickupLng) {
           const pickupResult = await geocodeAddress(formData.pickupAddress);
-          console.log('Pickup geocoding result:', pickupResult);
           
           if (pickupResult) {
             updatedFormData.pickupLat = pickupResult.lat;
@@ -153,7 +164,6 @@ export default function NewOrderPage() {
         // Geocode delivery address if needed
         if (!formData.deliveryLat || !formData.deliveryLng) {
           const deliveryResult = await geocodeAddress(formData.deliveryAddress);
-          console.log('Delivery geocoding result:', deliveryResult);
           
           if (deliveryResult) {
             updatedFormData.deliveryLat = deliveryResult.lat;
@@ -193,7 +203,6 @@ export default function NewOrderPage() {
           priority: updatedFormData.priority,
         };
 
-        console.log('Sending order data:', JSON.stringify(orderData, null, 2));
         await api.createOrder(orderData);
         setSuccess(true);
         setTimeout(() => {
@@ -220,7 +229,6 @@ export default function NewOrderPage() {
           priority: formData.priority,
         };
 
-        console.log('Sending order data (direct path):', JSON.stringify(orderData, null, 2));
         await api.createOrder(orderData);
         setSuccess(true);
         setTimeout(() => {
@@ -363,7 +371,7 @@ export default function NewOrderPage() {
                       getHandlingTagColor(tag, formData.handlingTags.includes(tag))
                     }`}
                   >
-                    {tag.replace(/_/g, ' ')}
+                    {formatStatus(tag)}
                   </button>
                 ))}
               </div>
@@ -547,20 +555,12 @@ export default function NewOrderPage() {
               {/* Right: Map */}
               <div className="h-[400px] bg-gray-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-gray-200/50 dark:border-slate-700/50">
                 <GoogleMapWrapper center={mapCenter} zoom={12}>
-                  {formData.pickupLat !== 0 && formData.pickupLng !== 0 && (
-                    <MapMarker
-                      position={{ lat: formData.pickupLat, lng: formData.pickupLng }}
-                      type="pickup"
-                      label="📦"
-                    />
-                  )}
-                  {formData.deliveryLat !== 0 && formData.deliveryLng !== 0 && (
-                    <MapMarker
-                      position={{ lat: formData.deliveryLat, lng: formData.deliveryLng }}
-                      type="delivery"
-                      label="🏠"
-                    />
-                  )}
+                  <OrderMapOverlays
+                    pickupLat={formData.pickupLat}
+                    pickupLng={formData.pickupLng}
+                    deliveryLat={formData.deliveryLat}
+                    deliveryLng={formData.deliveryLng}
+                  />
                 </GoogleMapWrapper>
               </div>
             </div>

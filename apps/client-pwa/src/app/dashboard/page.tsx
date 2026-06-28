@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp, Plus, MapPin } from 'lucide-react';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
 import { StatCard } from '@/components/stat-card';
+import { SlaIndicator } from '@/components/sla-indicator';
 
 interface DashboardStats {
   activeShipments: number;
@@ -28,6 +30,7 @@ interface Shipment {
     id: string;
     status: string;
     eta?: string;
+    startedAt?: string;
   };
   createdAt: string;
 }
@@ -48,7 +51,9 @@ export default function DashboardPage() {
       router.push('/login');
       return;
     }
-    fetchDashboardData();
+    if (!authLoading && user) {
+      fetchDashboardData();
+    }
   }, [authLoading, user, router]);
 
   const fetchDashboardData = async () => {
@@ -257,11 +262,14 @@ export default function DashboardPage() {
                       <p className="text-sm text-gray-500 dark:text-gray-500 truncate">
                         {shipment.deliveryLocation.address}
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(shipment.trip?.status || shipment.status)}`}>
-                          {shipment.trip?.status || shipment.status}
+                          {formatStatus(shipment.trip?.status || shipment.status)}
                         </span>
-                        {shipment.trip?.eta && (
+                        {shipment.trip?.startedAt && shipment.trip?.status === 'IN_TRANSIT' && (
+                          <SlaIndicator startedAt={shipment.trip.startedAt} compact />
+                        )}
+                        {shipment.trip?.eta && !shipment.trip?.startedAt && (
                           <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                             ETA: {new Date(shipment.trip.eta).toLocaleDateString()}
                           </span>
@@ -279,7 +287,7 @@ export default function DashboardPage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
           <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
               Recent Orders
             </h2>
             <button
@@ -317,7 +325,7 @@ export default function DashboardPage() {
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                          {order.status}
+                          {formatStatus(order.status)}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                           {new Date(order.createdAt).toLocaleDateString()}

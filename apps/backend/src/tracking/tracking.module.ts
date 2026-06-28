@@ -5,6 +5,7 @@ import { TrackingGateway } from './tracking.gateway';
 import { PrismaModule } from '../prisma/prisma.module';
 import { RedisModule } from '../redis/redis.module';
 import { GeofencingModule } from '../geofencing/geofencing.module';
+import { MapsModule } from '../maps/maps.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -14,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     PrismaModule,
     RedisModule,
     GeofencingModule,
+    MapsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

@@ -5,10 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 import { api } from '@/lib/api';
-import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { formatStatus } from '@/lib/formatting';
+import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
-import { Truck, MapPin, Activity, Navigation, AlertCircle, CheckCircle, Clock, Package, Battery } from 'lucide-react';
-import { Circle } from '@react-google-maps/api';
+import { GeofenceCircle } from '@/components/maps/GeofenceCircle';
+import { RouteHeatmap } from '@/components/maps/RouteHeatmap';
+import { Truck, MapPin, Activity, Navigation, AlertCircle, CheckCircle, Clock, Package, Battery, Flame } from 'lucide-react';
 
 interface FleetLocation {
   tripId: string;
@@ -32,6 +34,50 @@ interface GeofenceEvent {
   data: any;
 }
 
+function TrackingMapOverlays({
+  fleetLocation,
+  packageLiveLocation,
+  showHeatmap,
+  heatmapPoints,
+}: {
+  fleetLocation: FleetLocation | null;
+  packageLiveLocation: { lat: number; lng: number } | null;
+  showHeatmap: boolean;
+  heatmapPoints: Array<{ lat: number; lng: number; speed?: number; timestamp: string }>;
+}) {
+  const map = useMap();
+  if (!map) return null;
+
+  const deliveryLoc = fleetLocation?.trip?.order?.deliveryLocation;
+
+  return (
+    <>
+      {deliveryLoc && (
+        <>
+          <GeofenceCircle map={map} id="radius-c" center={deliveryLoc} radiusMeters={100} />
+          <GeofenceCircle map={map} id="radius-b" center={deliveryLoc} radiusMeters={1000} />
+          <GeofenceCircle map={map} id="radius-a" center={deliveryLoc} radiusMeters={5000} />
+        </>
+      )}
+      {fleetLocation?.location && (
+        <MapMarker map={map} position={{ lat: fleetLocation.location.lat, lng: fleetLocation.location.lng }} type="vehicle" />
+      )}
+      {packageLiveLocation && (
+        <MapMarker map={map} position={packageLiveLocation} type="package" label="📦" />
+      )}
+      {fleetLocation?.trip?.order?.pickupLocation && (
+        <MapMarker map={map} position={fleetLocation.trip.order.pickupLocation} type="pickup" label="📦" />
+      )}
+      {deliveryLoc && (
+        <MapMarker map={map} position={deliveryLoc} type="delivery" label="🏠" />
+      )}
+      {showHeatmap && heatmapPoints.length > 0 && (
+        <RouteHeatmap map={map} points={heatmapPoints} />
+      )}
+    </>
+  );
+}
+
 function TrackingPageContent() {
   const { isConnected, subscribe, unsubscribe } = useTrackingWebSocket();
   const { user, isLoading: authLoading } = useAuth();
@@ -52,6 +98,9 @@ function TrackingPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [packageTrackerData, setPackageTrackerData] = useState<any>(null);
   const [packageLiveLocation, setPackageLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [heatmapPoints, setHeatmapPoints] = useState<Array<{ lat: number; lng: number; speed?: number; timestamp: string }>>([]);
+  const [heatmapLoading, setHeatmapLoading] = useState(false);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -129,8 +178,9 @@ function TrackingPageContent() {
 
   const handleLocationUpdate = (data: any) => {
     console.log('[Tracking] Received location update:', data);
-    if (fleetLocation && fleetLocation?.tripId === data.tripId) {
-      setFleetLocation((prev) => prev ? {
+    setFleetLocation((prev) => {
+      if (!prev || prev.tripId !== data.tripId) return prev;
+      return {
         ...prev,
         location: {
           tripId: data.tripId,
@@ -141,8 +191,8 @@ function TrackingPageContent() {
           speed: data.speed,
           heading: data.heading,
         },
-      } : null);
-    }
+      };
+    });
   };
 
   const handleGeofenceEvent = (data: any) => {
@@ -192,11 +242,7 @@ function TrackingPageContent() {
       setError(null);
       const data = await api.getActiveFleetLocations('IN_TRANSIT');
       console.log('[Tracking] Fetched fleet locations:', data);
-      // Specifically fetch trip-7 (Festac Town shipment)
-      const trip7Location = data.find((loc: FleetLocation) => loc.tripId === 'trip-7');
-      if (trip7Location) {
-        setFleetLocation(trip7Location);
-      } else if (data.length > 0) {
+      if (data.length > 0) {
         setFleetLocation(data[0]);
       }
     } catch (err) {
@@ -204,6 +250,33 @@ function TrackingPageContent() {
       setError('Failed to load fleet tracking data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHeatmapPoints = async (tripId: string) => {
+    try {
+      setHeatmapLoading(true);
+      const history = await api.getTripTrackingHistory(tripId, 500);
+      const points = (history || []).map((p: any) => ({
+        lat: p.lat,
+        lng: p.lng,
+        speed: p.speed,
+        timestamp: p.timestamp,
+      }));
+      setHeatmapPoints(points);
+    } catch (err) {
+      console.error('[Tracking] Failed to fetch heatmap points:', err);
+      setHeatmapPoints([]);
+    } finally {
+      setHeatmapLoading(false);
+    }
+  };
+
+  const handleToggleHeatmap = () => {
+    const next = !showHeatmap;
+    setShowHeatmap(next);
+    if (next && heatmapPoints.length === 0 && fleetLocation?.tripId) {
+      fetchHeatmapPoints(fleetLocation.tripId);
     }
   };
 
@@ -243,7 +316,7 @@ function TrackingPageContent() {
       case 'DELIVERY_WORKFLOW_TRIGGERED':
         return 'Delivery Workflow Triggered';
       default:
-        return eventType.replace(/_/g, ' ');
+        return formatStatus(eventType);
     }
   };
 
@@ -273,133 +346,78 @@ function TrackingPageContent() {
               </p>
             </div>
           </div>
-          {fleetLocation && (
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {isConnected ? 'Connected' : 'Disconnected'}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {fleetLocation && (
+              <>
+                <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {isConnected ? 'Connected' : 'Disconnected'}
+                </span>
+              </>
+            )}
+            {fleetLocation && (
+              <button
+                onClick={handleToggleHeatmap}
+                disabled={heatmapLoading}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  showHeatmap
+                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                }`}
+                title="Toggle route heatmap"
+              >
+                <Flame className="w-3.5 h-3.5" />
+                {heatmapLoading ? 'Loading…' : showHeatmap ? 'Heatmap On' : 'Heatmap'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <main className="px-4 py-4 pb-24">
         {/* Map */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden mb-6">
-          <div className="h-[600px]">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600 dark:text-gray-400">Loading map...</p>
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
+          <div className="h-[600px] relative overflow-hidden rounded-2xl">
+            <GoogleMapWrapper center={mapCenter} zoom={13}>
+              {!loading && !error && (fleetLocation || packageTrackerData) && (
+                <TrackingMapOverlays
+                  fleetLocation={fleetLocation}
+                  packageLiveLocation={packageLiveLocation}
+                  showHeatmap={showHeatmap}
+                  heatmapPoints={heatmapPoints}
+                />
+              )}
+            </GoogleMapWrapper>
+            {(loading || error || (!fleetLocation && !packageTrackerData)) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+                {loading ? (
+                  <p className="text-gray-600 dark:text-gray-400">Loading map...</p>
+                ) : error ? (
+                  <p className="text-red-500">{error}</p>
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-400">No active vehicle or package tracking</p>
+                )}
               </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-red-500">{error}</p>
-              </div>
-            ) : !fleetLocation && !packageTrackerData ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600 dark:text-gray-400">No active vehicle or package tracking</p>
-              </div>
-            ) : (
-              <GoogleMapWrapper center={mapCenter} zoom={13}>
-                {/* Geofence Radius C - 100m (Arrival Zone) */}
-                {fleetLocation?.trip?.order?.deliveryLocation && (
-                  <Circle
-                    center={{
-                      lat: fleetLocation.trip.order.deliveryLocation.lat,
-                      lng: fleetLocation.trip.order.deliveryLocation.lng,
-                    }}
-                    radius={100}
-                    options={{
-                      strokeColor: '#f97316',
-                      strokeOpacity: 0.8,
-                      strokeWeight: 2,
-                      fillColor: '#f97316',
-                      fillOpacity: 0.1,
-                    }}
-                  />
-                )}
-                
-                {/* Geofence Radius B - 1km (Approaching Zone) */}
-                {fleetLocation?.trip?.order?.deliveryLocation && (
-                  <Circle
-                    center={{
-                      lat: fleetLocation.trip.order.deliveryLocation.lat,
-                      lng: fleetLocation.trip.order.deliveryLocation.lng,
-                    }}
-                    radius={1000}
-                    options={{
-                      strokeColor: '#eab308',
-                      strokeOpacity: 0.6,
-                      strokeWeight: 2,
-                      fillColor: '#eab308',
-                      fillOpacity: 0.05,
-                    }}
-                  />
-                )}
-                
-                {/* Geofence Radius A - 5km (Early Awareness Zone) */}
-                {fleetLocation?.trip?.order?.deliveryLocation && (
-                  <Circle
-                    center={{
-                      lat: fleetLocation.trip.order.deliveryLocation.lat,
-                      lng: fleetLocation.trip.order.deliveryLocation.lng,
-                    }}
-                    radius={5000}
-                    options={{
-                      strokeColor: '#3b82f6',
-                      strokeOpacity: 0.4,
-                      strokeWeight: 2,
-                      fillColor: '#3b82f6',
-                      fillOpacity: 0.05,
-                    }}
-                  />
-                )}
-                
-                {/* Current vehicle location */}
-                {fleetLocation?.location && (
-                  <MapMarker
-                    position={{ lat: fleetLocation.location.lat, lng: fleetLocation.location.lng }}
-                    type="vehicle"
-                  />
-                )}
-
-                {/* Package tracker location */}
-                {packageLiveLocation && (
-                  <MapMarker
-                    position={{ lat: packageLiveLocation.lat, lng: packageLiveLocation.lng }}
-                    type="package"
-                    label="📦"
-                  />
-                )}
-                
-                {/* Pickup location */}
-                {fleetLocation?.trip?.order?.pickupLocation && (
-                  <MapMarker
-                    position={{
-                      lat: fleetLocation.trip.order.pickupLocation.lat,
-                      lng: fleetLocation.trip.order.pickupLocation.lng,
-                    }}
-                    type="pickup"
-                    label="📦"
-                  />
-                )}
-                
-                {/* Delivery location */}
-                {fleetLocation?.trip?.order?.deliveryLocation && (
-                  <MapMarker
-                    position={{
-                      lat: fleetLocation.trip.order.deliveryLocation.lat,
-                      lng: fleetLocation.trip.order.deliveryLocation.lng,
-                    }}
-                    type="delivery"
-                    label="🏠"
-                  />
-                )}
-              </GoogleMapWrapper>
             )}
           </div>
         </div>
+
+        {/* Heatmap Legend */}
+        {showHeatmap && heatmapPoints.length > 0 && (
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-200/50 dark:border-slate-700/50 px-4 py-3 mb-4 flex flex-wrap items-center gap-4">
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-orange-500" /> Route Density
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-28 rounded-full" style={{ background: 'linear-gradient(to right, rgba(65,105,225,0.6), rgba(0,255,0,0.8), rgba(255,200,0,0.9), rgba(255,50,0,1))' }} />
+              <span className="text-xs text-gray-500 dark:text-gray-400">Low → High</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-0.5 border-t-2 border-dashed border-blue-400 opacity-70" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">Route path ({heatmapPoints.length} points)</span>
+            </div>
+          </div>
+        )}
 
         {/* Package Tracker Details */}
         {packageTrackerData && (
@@ -451,7 +469,7 @@ function TrackingPageContent() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {packageTrackerData.packageTracker?.status || 'N/A'}
+                    {formatStatus(packageTrackerData.packageTracker?.status) || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -528,7 +546,7 @@ function TrackingPageContent() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {fleetLocation?.trip.status}
+                    {formatStatus(fleetLocation?.trip.status)}
                   </p>
                 </div>
               </div>

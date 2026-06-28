@@ -5,6 +5,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions } from 'socket.io';
 import { join } from 'path';
+import helmet from 'helmet';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 class CorsIoAdapter extends IoAdapter {
@@ -19,8 +21,9 @@ class CorsIoAdapter extends IoAdapter {
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.use(helmet());
   app.useWebSocketAdapter(new CorsIoAdapter(app));
-  
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -37,15 +40,31 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Serve static files for uploaded documents
-  // __dirname resolves to dist/src at runtime, so go two levels up to reach backend root
-  app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
-    prefix: '/uploads/',
-    setHeaders: (res) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    },
-  });
+  // Swagger API docs — only available outside production
+  if (configService.get<string>('NODE_ENV') !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Industrial Nexus API')
+      .setDescription('Logistics platform REST API')
+      .setVersion('1.0')
+      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: { persistAuthorization: true },
+    });
+    console.log(`Swagger docs available at http://localhost:${configService.get('PORT', 3001)}/api/docs`);
+  }
+
+  // Serve static uploads only in local dev (production uses S3 URLs directly)
+  if (configService.get<string>('NODE_ENV') !== 'production') {
+    app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
+      prefix: '/uploads/',
+      setHeaders: (res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      },
+    });
+  }
 
   const port = configService.get<number>('PORT', 3001);
   

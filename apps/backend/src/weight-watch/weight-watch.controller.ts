@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { WeightWatchService, WeightValidationResult } from './weight-watch.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -19,6 +20,8 @@ class ValidateWeightDto {
   handlingTags?: string[];
 }
 
+@ApiTags('weight-watch')
+@ApiBearerAuth('access-token')
 @Controller('weight-watch')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class WeightWatchController {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { RoleGuard } from '@/components/role-guard';
 import { useAuth } from '@/hooks/useAuth';
 import { Settings, Save, Bell, Shield, Database, Globe, Clock, AlertTriangle, Users, Plus, Search, Filter, Edit, Trash2, UserCheck, UserX, Tag as TagIcon, X, Check, Eye, EyeOff } from 'lucide-react';
@@ -1026,13 +1027,13 @@ export default function SettingsPage() {
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getRoleColor(user.role)}`}>
                               <Shield className="w-3 h-3 mr-1" />
-                              {user.role}
+                              {formatStatus(user.role)}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(user.status)}`}>
                               {user.status === 'ACTIVE' ? <UserCheck className="w-3 h-3 mr-1" /> : <UserX className="w-3 h-3 mr-1" />}
-                              {user.status}
+                              {formatStatus(user.status)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">

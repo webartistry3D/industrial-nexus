@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { RoleGuard } from '@/components/role-guard';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -258,10 +259,10 @@ export default function UserDetailPage() {
                   </h2>
                   <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getRoleColor(user?.role || '')}`}>
                     <Shield className="w-3 h-3 mr-1" />
-                    {user?.role || ''}
+                    {formatStatus(user?.role || '')}
                   </span>
                   <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(user?.status || '')}`}>
-                    {user?.status || ''}
+                    {formatStatus(user?.status || '')}
                   </span>
                 </div>
                 <div className="space-y-2">

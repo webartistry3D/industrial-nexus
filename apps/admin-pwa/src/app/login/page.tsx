@@ -135,6 +135,14 @@ export default function Login() {
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => router.push('/forgot-password')}
+            className="text-sm text-blue-700 dark:text-blue-400 hover:underline"
+          >
+            Forgot your password?
+          </button>
+        </div>
       </div>
     </div>
   );

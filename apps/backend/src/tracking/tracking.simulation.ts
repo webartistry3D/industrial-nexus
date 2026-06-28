@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
-import axios from 'axios';
+import { ValhallaService } from '../maps/valhalla.service';
 
 interface GeofenceState {
   radiusAEntered: boolean;
@@ -16,12 +16,12 @@ export class TrackingSimulationService implements OnModuleInit, OnModuleDestroy 
   private simulationInterval: NodeJS.Timeout | null = null;
   private routePoints: { lat: number; lng: number }[] = [];
   private currentRouteIndex = 0;
-  private readonly GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
   private geofenceStates: Map<string, GeofenceState> = new Map();
 
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private valhallaService: ValhallaService,
   ) {}
 
   async onModuleInit() {
@@ -50,12 +50,11 @@ export class TrackingSimulationService implements OnModuleInit, OnModuleDestroy 
 
   private async simulateVehicleMovement() {
     try {
-      // Specifically track the Festac Town shipment (trip-7)
       const activeTrip = await this.prisma.trip.findFirst({
         where: {
-          id: 'trip-7',
           status: { in: ['IN_TRANSIT', 'ASSIGNED'] },
         },
+        orderBy: { updatedAt: 'desc' },
         include: {
           order: true,
         },
@@ -242,74 +241,20 @@ export class TrackingSimulationService implements OnModuleInit, OnModuleDestroy 
 
   private async fetchRoute(origin: { lat: number; lng: number }, destination: { lat: number; lng: number }) {
     try {
-      if (!this.GOOGLE_API_KEY) {
-        this.logger.warn('Google Maps API key not found, using straight-line route');
-        this.generateStraightLineRoute(origin, destination);
-        return;
-      }
+      const route = await this.valhallaService.getRoute(origin, destination);
 
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/directions/json`,
-        {
-          params: {
-            origin: `${origin.lat},${origin.lng}`,
-            destination: `${destination.lat},${destination.lng}`,
-            key: this.GOOGLE_API_KEY,
-            mode: 'driving',
-          },
-        },
-      );
-
-      if (response.data.status === 'OK' && response.data.routes.length > 0) {
-        const route = response.data.routes[0];
-        const points = this.decodePolyline(route.overview_polyline.points);
+      if (route?.polyline && route.polyline.length > 0) {
         // Sample points to reduce frequency (every 10th point)
-        this.routePoints = points.filter((_, index) => index % 10 === 0);
+        this.routePoints = route.polyline.filter((_, index) => index % 10 === 0);
         this.logger.log(`Fetched route with ${this.routePoints.length} points`);
       } else {
-        this.logger.warn('Failed to fetch route, using straight-line route');
+        this.logger.warn('Failed to fetch route from Valhalla, using straight-line route');
         this.generateStraightLineRoute(origin, destination);
       }
     } catch (error) {
-      this.logger.error('Error fetching route from Google Maps:', error);
+      this.logger.error('Error fetching route from Valhalla:', error);
       this.generateStraightLineRoute(origin, destination);
     }
-  }
-
-  private decodePolyline(encoded: string): { lat: number; lng: number }[] {
-    const points: { lat: number; lng: number }[] = [];
-    let index = 0;
-    let lat = 0;
-    let lng = 0;
-
-    while (index < encoded.length) {
-      let shift = 0;
-      let result = 0;
-      let byte;
-
-      do {
-        byte = encoded.charCodeAt(index++) - 63;
-        result |= (byte & 0x1f) << shift;
-        shift += 5;
-      } while (byte >= 0x20);
-
-      lat += (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-
-      shift = 0;
-      result = 0;
-
-      do {
-        byte = encoded.charCodeAt(index++) - 63;
-        result |= (byte & 0x1f) << shift;
-        shift += 5;
-      } while (byte >= 0x20);
-
-      lng += (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-
-      points.push({ lat: lat / 1e5, lng: lng / 1e5 });
-    }
-
-    return points;
   }
 
   private generateStraightLineRoute(origin: { lat: number; lng: number }, destination: { lat: number; lng: number }) {

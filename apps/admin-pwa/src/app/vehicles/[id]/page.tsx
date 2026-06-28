@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Vehicle, VehicleDocument, VehicleDocumentType, VehicleDocumentTypeValue, VehicleDocumentStatus, VehicleDocumentStatusValue } from '@/types';
 import {
   ArrowLeft, Truck, CheckCircle, XCircle, Clock, FileText,
@@ -216,7 +217,7 @@ export default function VehicleDetailPage() {
                   vehicle?.status === 'INACTIVE' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
                   'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
                 }`}>
-                  {vehicle?.status}
+                  {formatStatus(vehicle?.status)}
                 </span>
               </div>
             </div>
@@ -338,7 +339,7 @@ export default function VehicleDetailPage() {
                         {doc.status === VehicleDocumentStatus.VERIFIED && <BadgeCheck className="w-3 h-3" />}
                         {doc.status === VehicleDocumentStatus.REJECTED && <XCircle className="w-3 h-3" />}
                         {doc.status !== VehicleDocumentStatus.VERIFIED && doc.status !== VehicleDocumentStatus.REJECTED && <Clock className="w-3 h-3" />}
-                        {doc.status}
+                        {formatStatus(doc.status)}
                       </span>
                       {doc.status === VehicleDocumentStatus.REJECTED && doc.rejectionReason && (
                         <span className="text-xs text-red-600 dark:text-red-400 max-w-[200px] truncate" title={doc.rejectionReason}>

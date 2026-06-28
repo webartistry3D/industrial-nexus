@@ -1,5 +1,6 @@
 import { IsString, IsNumber, IsOptional, IsEnum, IsObject, ValidateNested, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
+import { Sanitize } from '../../common/decorators/sanitize.decorator';
 import { Priority } from '@prisma/client';
 
 class LocationDto {
@@ -37,10 +38,12 @@ export class UpdateOrderDto {
 
   @IsOptional()
   @IsString()
+  @Sanitize()
   cargoDescription?: string;
 
   @IsOptional()
   @IsString()
+  @Sanitize()
   deliveryInstructions?: string;
 
   @IsOptional()

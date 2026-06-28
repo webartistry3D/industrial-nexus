@@ -4,8 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { User, Driver, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue, VehicleDocument, VehicleDocumentType, VehicleDocumentTypeValue, VehicleDocumentStatus, VehicleDocumentStatusValue } from '@/types';
-import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale, CalendarClock, BadgeCheck, AlertTriangle, Camera, Edit2, Save, X } from 'lucide-react';
+import { User as UserIcon, Truck, Phone, Mail, LogOut, Shield, Upload, FileText, CheckCircle, XCircle, Clock, Trash2, Scale, CalendarClock, BadgeCheck, AlertTriangle, Camera, Edit2, Save, X, ScanLine, ExternalLink } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function ProfilePage() {
@@ -356,7 +357,7 @@ export default function ProfilePage() {
                 <h1 className="text-2xl font-bold">{user?.firstName} {user?.lastName}</h1>
                 <p className="text-blue-100 dark:text-slate-300 truncate">{user?.email}</p>
                 <span className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
-                  {user?.role}
+                  {formatStatus(user?.role)}
                 </span>
               </div>
             </div>
@@ -404,7 +405,7 @@ export default function ProfilePage() {
                         driver.kycStatus === 'PENDING' ? 'text-yellow-600 dark:text-yellow-400' :
                         'text-red-600 dark:text-red-400'
                       }`}>
-                        {driver.kycStatus}
+                        {formatStatus(driver.kycStatus)}
                       </p>
                     </div>
                   </div>
@@ -416,7 +417,7 @@ export default function ProfilePage() {
                     }`} />
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">Availability</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{driver.availability}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{formatStatus(driver.availability)}</p>
                     </div>
                   </div>
                 </div>
@@ -576,7 +577,7 @@ export default function ProfilePage() {
                           {doc.status === KycDocumentStatus.VERIFIED && <BadgeCheck className="w-3 h-3" />}
                           {doc.status === KycDocumentStatus.REJECTED && <XCircle className="w-3 h-3" />}
                           {doc.status !== KycDocumentStatus.VERIFIED && doc.status !== KycDocumentStatus.REJECTED && <Clock className="w-3 h-3" />}
-                          {doc.status}
+                          {formatStatus(doc.status)}
                         </span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-mono ${
                           expiryState === 'expired' ? 'text-red-500 dark:text-red-400' :
@@ -597,6 +598,42 @@ export default function ProfilePage() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* Biometric / Liveness Check Placeholder */}
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-md">
+                <ScanLine className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Biometric Verification</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  Complete a liveness check to strengthen your KYC approval. Powered by Smile Identity / Youverify.
+                </p>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold mb-3">
+                  <Clock className="w-3 h-3" /> Integration coming soon
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    disabled
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-xl text-sm font-semibold opacity-50 cursor-not-allowed"
+                  >
+                    <ScanLine className="w-4 h-4" />
+                    Start Liveness Check
+                  </button>
+                  <a
+                    href="https://smileidentity.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Learn more
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* KYC Documents Section */}
@@ -691,7 +728,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-1">
                         {getDocumentStatusIcon(doc.status)}
                         <span className="text-xs text-gray-600 dark:text-gray-400">
-                          {doc.status}
+                          {formatStatus(doc.status)}
                         </span>
                       </div>
                       {doc.status !== KycDocumentStatus.VERIFIED && (
@@ -833,7 +870,7 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-1">
                           {getDocumentStatusIcon(doc.status)}
                           <span className="text-xs text-gray-600 dark:text-gray-400">
-                            {doc.status}
+                            {formatStatus(doc.status)}
                           </span>
                         </div>
                         {doc.status !== VehicleDocumentStatus.VERIFIED && (

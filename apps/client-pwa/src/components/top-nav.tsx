@@ -69,9 +69,9 @@ function TopNavInner({ role }: { role: 'admin' | 'client' | 'driver' }) {
     }
     setShowNotifications(false);
     if (notification.entityId) {
-      if (notification.entityType === 'order' || notification.type === 'ORDER') {
+      if (notification.entityType === 'ORDER' || notification.type === 'ORDER') {
         router.push(`/orders/${notification.entityId}`);
-      } else if (notification.entityType === 'trip' || notification.type === 'TRIP') {
+      } else if (notification.entityType === 'TRIP' || notification.type === 'TRIP') {
         router.push(`/tracking/${notification.entityId}`);
       }
     }
@@ -141,11 +141,11 @@ function TopNavInner({ role }: { role: 'admin' | 'client' | 'driver' }) {
                           <div
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
-                            className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
-                              !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                            className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors border-l-4 ${
+                              !notification.isRead ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40' : 'border-transparent'
                             }`}
                           >
-                            <p className="text-sm text-gray-900 dark:text-white font-medium">{notification.title}</p>
+                            <p className={`text-sm ${!notification.isRead ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-900 dark:text-white font-medium'}`}>{notification.title}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{notification.message}</p>
                             <div className="flex items-center justify-between mt-1">
                               <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{formatTime(notification.createdAt)}</p>

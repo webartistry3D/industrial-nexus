@@ -4,13 +4,37 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
-import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { ArrowLeft, MapPin, Navigation, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
+
+function TrackingMapOverlays({
+  currentLocation,
+  polyline,
+  pickupLocation,
+  deliveryLocation,
+}: {
+  currentLocation: { lat: number; lng: number } | null;
+  polyline: { lat: number; lng: number }[];
+  pickupLocation?: { lat: number; lng: number } | null;
+  deliveryLocation?: { lat: number; lng: number } | null;
+}) {
+  const map = useMap();
+  if (!map) return null;
+  return (
+    <>
+      {currentLocation && <MapMarker map={map} position={currentLocation} type="current" label="📍" />}
+      {polyline.length > 0 && <MapPolyline map={map} id="trail" path={polyline} />}
+      {pickupLocation && <MapMarker map={map} position={pickupLocation} type="pickup" label="📦" />}
+      {deliveryLocation && <MapMarker map={map} position={deliveryLocation} type="delivery" label="🏠" />}
+    </>
+  );
+}
 
 export default function TrackingPage() {
   const router = useRouter();
@@ -43,7 +67,12 @@ export default function TrackingPage() {
   // Subscribe to WebSocket room when trip is loaded
   useEffect(() => {
     if (currentTrip?.id && isConnected) {
-      subscribe(`trip:${currentTrip.id}`, () => {});
+      subscribe(`trip:${currentTrip.id}`, (data: any) => {
+        if (data.tripId === currentTripRef.current?.id) {
+          setCurrentLocation({ lat: data.lat, lng: data.lng });
+          setTrackingHistory(prev => [...prev, { lat: data.lat, lng: data.lng, timestamp: data.timestamp }]);
+        }
+      });
     }
   }, [currentTrip?.id, isConnected, subscribe]);
 
@@ -164,40 +193,39 @@ export default function TrackingPage() {
         </button> */}
 
         {/* Map */}
-        <div className="h-[50vh] bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg mb-4">
-                <Navigation className="w-8 h-8 text-white" />
-              </div>
-              <p className="text-red-500 font-medium">{error}</p>
-            </div>
-          ) : !currentTrip ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg mb-4">
-                <MapPin className="w-8 h-8 text-white" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">No active trip to track</p>
-            </div>
-          ) : (
-            <GoogleMapWrapper center={mapCenter} zoom={14}>
-              {currentLocation && (
-                <MapMarker position={currentLocation} type="current" label="📍" />
+        <div className="h-[50vh] bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 relative overflow-hidden">
+          <GoogleMapWrapper center={mapCenter} zoom={14}>
+            {!loading && !error && currentTrip && (
+              <TrackingMapOverlays
+                currentLocation={currentLocation}
+                polyline={polyline}
+                pickupLocation={currentTrip.order?.pickupLocation}
+                deliveryLocation={currentTrip.order?.deliveryLocation}
+              />
+            )}
+          </GoogleMapWrapper>
+          {(loading || error || !currentTrip) && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm gap-3">
+              {loading ? (
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+                </div>
+              ) : error ? (
+                <>
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg">
+                    <Navigation className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-red-500 font-medium">{error}</p>
+                </>
+              ) : (
+                <>
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 shadow-lg">
+                    <MapPin className="w-8 h-8 text-white" />
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">No active trip to track</p>
+                </>
               )}
-              {polyline.length > 0 && <MapPolyline path={polyline} />}
-              {currentTrip.order?.pickupLocation && (
-                <MapMarker position={currentTrip.order.pickupLocation} type="pickup" label="📦" />
-              )}
-              {currentTrip.order?.deliveryLocation && (
-                <MapMarker position={currentTrip.order.deliveryLocation} type="delivery" label="🏠" />
-              )}
-            </GoogleMapWrapper>
+            </div>
           )}
         </div>
 
@@ -244,7 +272,7 @@ export default function TrackingPage() {
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
                     <p className="font-semibold text-gray-900 dark:text-white">
-                      {currentTrip.status.replace(/_/g, ' ')}
+                      {formatStatus(currentTrip.status)}
                     </p>
                   </div>
                 </div>
@@ -290,7 +318,7 @@ export default function TrackingPage() {
                         'bg-blue-900'
                       }`} />
                       <span className="text-gray-700 dark:text-gray-300 font-medium">
-                        {evt.eventType.replace(/_/g, ' ')}
+                        {formatStatus(evt.eventType)}
                       </span>
                       <span className="text-gray-400 dark:text-gray-500 ml-auto text-xs font-mono">
                         {evt.distance ? `${Math.round(evt.distance)}m` : ''}

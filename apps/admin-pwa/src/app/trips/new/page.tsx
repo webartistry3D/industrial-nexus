@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Order, Driver, Vehicle } from '@/types';
 import { ArrowLeft, Truck, CheckCircle, AlertCircle, Package, Users } from 'lucide-react';
 
@@ -234,7 +235,7 @@ export default function NewTripPage() {
                       {selectedDriver.user?.firstName} {selectedDriver.user?.lastName}
                     </p>
                     <p className="text-gray-600 dark:text-gray-400 font-mono">License: {selectedDriver.licenseNumber}</p>
-                    <p className="text-gray-500">KYC: {selectedDriver.kycStatus}</p>
+                    <p className="text-gray-500">KYC: {formatStatus(selectedDriver.kycStatus)}</p>
                   </div>
                 )}
               </div>

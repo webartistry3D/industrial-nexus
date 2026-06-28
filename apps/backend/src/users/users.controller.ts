@@ -14,11 +14,12 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from './users.service';
+import { StorageService } from '../storage/storage.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -28,10 +29,15 @@ import { UpdateUserDto, UpdateMyProfileDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { UserRole } from '@prisma/client';
 
+@ApiTags('users')
+@ApiBearerAuth('access-token')
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
@@ -64,14 +70,7 @@ export class UsersController {
 
   @Post('me/avatar')
   @UseInterceptors(FileInterceptor('avatar', {
-    storage: diskStorage({
-      destination: './uploads/avatars',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = uuidv4();
-        const ext = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       const allowedTypes = ['.jpg', '.jpeg', '.png', '.webp'];
       const ext = extname(file.originalname).toLowerCase();
@@ -91,7 +90,7 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('Image file is required');
     }
-    const profileImageUrl = `/uploads/avatars/${file.filename}`;
+    const { url: profileImageUrl } = await this.storageService.upload(file, 'avatars');
     return this.usersService.updateMyProfile(user.userId, { profileImageUrl });
   }
 

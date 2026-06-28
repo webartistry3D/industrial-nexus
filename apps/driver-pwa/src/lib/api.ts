@@ -89,6 +89,16 @@ class ApiClient {
     localStorage.removeItem('refreshToken');
   }
 
+  async requestPasswordReset(email: string) {
+    const response = await this.client.post('/auth/password-reset/request', { email });
+    return response.data;
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const response = await this.client.post('/auth/password-reset/confirm', { token, newPassword });
+    return response.data;
+  }
+
   async getProfile() {
     const response = await this.client.get('/users/me');
     return response.data;
@@ -142,6 +152,24 @@ class ApiClient {
       accuracy,
     });
     return response.data;
+  }
+
+  // POD — presigned upload
+  async getPodUploadUrl(tripId: string, filename: string, mimeType: string): Promise<{
+    uploadUrl: string;
+    finalUrl: string;
+    key: string;
+  }> {
+    const response = await this.client.get(`/trips/${tripId}/pod/upload-url`, {
+      params: { filename, mimeType },
+    });
+    return response.data;
+  }
+
+  async uploadFileToPresignedUrl(uploadUrl: string, file: File): Promise<void> {
+    await axios.put(uploadUrl, file, {
+      headers: { 'Content-Type': file.type },
+    });
   }
 
   // POD

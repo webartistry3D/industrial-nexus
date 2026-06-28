@@ -9,7 +9,9 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TripsService } from './trips.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -19,11 +21,17 @@ import { CreateTripDto } from './dto/create-trip.dto';
 import { TripFilterDto } from './dto/trip-filter.dto';
 import { AssignDriverDto } from './dto/assign-driver.dto';
 import { UserRole } from '@prisma/client';
+import { StorageService } from '../storage/storage.service';
 
+@ApiTags('trips')
+@ApiBearerAuth('access-token')
 @Controller('trips')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TripsController {
-  constructor(private readonly tripsService: TripsService) {}
+  constructor(
+    private readonly tripsService: TripsService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
@@ -81,6 +89,19 @@ export class TripsController {
     @Body() locationData: { lat: number; lng: number; accuracy?: number },
   ) {
     return this.tripsService.updateLocation(id, locationData.lat, locationData.lng, locationData.accuracy);
+  }
+
+  @Get(':id/pod/upload-url')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  async getPodUploadUrl(
+    @Param('id') id: string,
+    @Query('filename') filename: string,
+    @Query('mimeType') mimeType: string,
+  ) {
+    if (!filename || !mimeType) {
+      throw new BadRequestException('filename and mimeType query params are required');
+    }
+    return this.storageService.getPresignedUploadUrl('pod-photos', filename, mimeType);
   }
 
   @Post(':id/pod')

@@ -23,6 +23,7 @@ export function useLocationTracking({ tripId, enabled, interval = 30000 }: UseLo
   const [isTracking, setIsTracking] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const locationRef = useRef<Location | null>(null);
 
   // Send location update to backend
   const sendLocationUpdate = useCallback(async (loc: Location) => {
@@ -58,6 +59,7 @@ export function useLocationTracking({ tripId, enabled, interval = 30000 }: UseLo
           accuracy: position.coords.accuracy,
           timestamp: Date.now(),
         };
+        locationRef.current = newLocation;
         setLocation(newLocation);
         
         // Send to backend
@@ -77,12 +79,12 @@ export function useLocationTracking({ tripId, enabled, interval = 30000 }: UseLo
     // Backup interval for battery optimization
     // Send updates even if position hasn't changed significantly
     intervalRef.current = setInterval(() => {
-      if (location) {
-        sendLocationUpdate(location);
+      if (locationRef.current) {
+        sendLocationUpdate(locationRef.current);
       }
     }, interval);
 
-  }, [interval, location, sendLocationUpdate]);
+  }, [interval, sendLocationUpdate]);
 
   // Stop tracking
   const stopTracking = useCallback(() => {

@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -22,6 +23,8 @@ import { OrderFilterDto } from './dto/order-filter.dto';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { UserRole } from '@prisma/client';
 
+@ApiTags('orders')
+@ApiBearerAuth('access-token')
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OrdersController {

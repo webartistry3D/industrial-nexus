@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TokenResponseDto } from './dto/token-response.dto';
@@ -17,6 +18,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private auditService: AuditService,
+    private mailService: MailService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -203,10 +205,14 @@ export class AuthService {
       newValue: { email: user.email },
     });
 
-    // TODO: Send email with reset token
-    // For now, return the token in development mode
-    const isDevelopment = this.configService.get<string>('NODE_ENV') === 'development';
-    if (isDevelopment) {
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    if (smtpHost) {
+      try {
+        await this.mailService.sendPasswordReset(user.email, user.firstName, resetToken);
+      } catch {
+        // Email send failure is non-fatal; token is still valid
+      }
+    } else if (this.configService.get<string>('NODE_ENV') === 'development') {
       return { message: `Password reset token (dev mode): ${resetToken}` };
     }
 
@@ -328,7 +334,7 @@ export class AuthService {
     
     const refreshTokenString = this.generateRandomToken();
     const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d');
-    const refreshExpiresDays = parseInt(refreshExpiresIn.replace('d', ''));
+    const refreshExpiresDays = this.parseDurationToDays(refreshExpiresIn);
     
     await this.prisma.refreshToken.create({
       data: {
@@ -348,5 +354,18 @@ export class AuthService {
 
   private generateRandomToken(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2)}-${Math.random().toString(36).substring(2)}`;
+  }
+
+  private parseDurationToDays(duration: string): number {
+    const match = duration.match(/^(\d+(\.\d+)?)(d|h|m|w)$/i);
+    if (!match) return 7; // default 7 days
+    const value = parseFloat(match[1]);
+    switch (match[3].toLowerCase()) {
+      case 'w': return value * 7;
+      case 'd': return value;
+      case 'h': return value / 24;
+      case 'm': return value / (24 * 60);
+      default:  return 7;
+    }
   }
 }

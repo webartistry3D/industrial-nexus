@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip, GeofenceEvent, TrackingPoint } from '@/types';
 import { 
   Truck, ArrowLeft, MapPin, Clock, Navigation, X, 
@@ -160,7 +161,7 @@ export default function TripDetailPage() {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                {trip.status?.replace('_', ' ') || 'Unknown'}
+                {formatStatus(trip.status) || 'Unknown'}
               </span>
             </div>
           </div>
@@ -274,7 +275,7 @@ export default function TripDetailPage() {
           <p className="text-gray-700 dark:text-gray-300 mb-4">{trip.order?.cargoDescription || 'No description'}</p>
           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
             <span className="font-mono">Weight: {trip.order?.totalWeight || 0} kg</span>
-            <span>Priority: {trip.order?.priority}</span>
+            <span>Priority: {formatStatus(trip.order?.priority)}</span>
           </div>
         </div>
 
@@ -291,7 +292,7 @@ export default function TripDetailPage() {
               {geofenceEvents.map((event, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-sm p-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700/30 dark:to-slate-700/50 rounded-xl">
                   {getEventIcon(event.type)}
-                  <span className="text-gray-700 dark:text-gray-300">{event.type?.replace('_', ' ') || 'Event'}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{formatStatus(event.type) || 'Event'}</span>
                   <span className="text-xs text-gray-400 ml-auto font-mono">{event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : 'N/A'}</span>
                 </div>
               ))}

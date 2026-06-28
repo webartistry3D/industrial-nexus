@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Driver, Vehicle, KycDocument, KycDocumentType, KycDocumentStatus } from '@/types';
 import { 
   ArrowLeft, Users, Mail, Shield, Truck, MapPin, 
@@ -240,13 +241,13 @@ export default function DriverDetailPage() {
               <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{driver.licenseNumber}</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(driver.status)}`}>
-                  {driver.status}
+                  {formatStatus(driver.status)}
                 </span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getKycColor(driver.kycStatus)}`}>
-                  KYC: {driver.kycStatus}
+                  KYC: {formatStatus(driver.kycStatus)}
                 </span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(driver.availability)}`}>
-                  {driver.availability.replace('_', ' ')}
+                  {formatStatus(driver.availability)}
                 </span>
               </div>
             </div>
@@ -327,7 +328,7 @@ export default function DriverDetailPage() {
                           {doc.status === KycDocumentStatus.VERIFIED && <BadgeCheck className="w-3 h-3" />}
                           {doc.status === KycDocumentStatus.REJECTED && <XCircle className="w-3 h-3" />}
                           {doc.status !== KycDocumentStatus.VERIFIED && doc.status !== KycDocumentStatus.REJECTED && <Clock className="w-3 h-3" />}
-                          {doc.status}
+                          {formatStatus(doc.status)}
                         </span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-mono ${
                           expiryState === 'expired' ? 'text-red-500 dark:text-red-400' :
@@ -378,7 +379,7 @@ export default function DriverDetailPage() {
                           : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      {status}
+                      {formatStatus(status)}
                     </button>
                   ))}
                 </div>
@@ -401,7 +402,7 @@ export default function DriverDetailPage() {
                           : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      {kycStatus}
+                      {formatStatus(kycStatus)}
                     </button>
                   ))}
                 </div>
@@ -424,7 +425,7 @@ export default function DriverDetailPage() {
                           : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      {availability.replace('_', ' ')}
+                      {formatStatus(availability)}
                     </button>
                   ))}
                 </div>

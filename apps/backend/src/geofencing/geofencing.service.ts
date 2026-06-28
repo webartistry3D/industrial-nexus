@@ -83,22 +83,24 @@ export class GeofencingService {
     const radiusB = 1000;  // 1km - Approaching
     const radiusC = 100;   // 100m - Arrival zone
 
-    // Check each radius zone
-    if (distance <= radiusC) {
+    // Check each radius zone independently so inner zones don't suppress outer ones
+    if (distance <= radiusA) {
       results.push({
-        eventType: GeofenceEventType.RADIUS_C_ENTERED,
+        eventType: GeofenceEventType.RADIUS_A_ENTERED,
         distance,
         insidePolygon: false,
       });
-    } else if (distance <= radiusB) {
+    }
+    if (distance <= radiusB) {
       results.push({
         eventType: GeofenceEventType.RADIUS_B_ENTERED,
         distance,
         insidePolygon: false,
       });
-    } else if (distance <= radiusA) {
+    }
+    if (distance <= radiusC) {
       results.push({
-        eventType: GeofenceEventType.RADIUS_A_ENTERED,
+        eventType: GeofenceEventType.RADIUS_C_ENTERED,
         distance,
         insidePolygon: false,
       });

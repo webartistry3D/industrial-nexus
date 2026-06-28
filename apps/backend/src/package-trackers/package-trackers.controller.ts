@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { PackageTrackersService } from './package-trackers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -43,6 +44,8 @@ class UpdatePackageTrackerDto {
   batteryLevel?: number;
 }
 
+@ApiTags('package-trackers')
+@ApiBearerAuth('access-token')
 @Controller('package-trackers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PackageTrackersController {

@@ -4,10 +4,29 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { ArrowLeft, Navigation, MapPin, Truck, Clock } from 'lucide-react';
+
+function NavMapOverlays({
+  currentLocation,
+  routeData,
+}: {
+  currentLocation: { lat: number; lng: number } | null;
+  routeData: any;
+}) {
+  const map = useMap();
+  if (!map) return null;
+  return (
+    <>
+      {currentLocation && <MapMarker map={map} position={currentLocation} type="current" label="📍" />}
+      {routeData?.polyline && <MapPolyline map={map} id="route" path={routeData.polyline} />}
+      {routeData?.pickup && <MapMarker map={map} position={routeData.pickup} type="pickup" label="📦" />}
+      {routeData?.delivery && <MapMarker map={map} position={routeData.delivery} type="delivery" label="🏠" />}
+    </>
+  );
+}
 
 export default function NavigationPage() {
   const router = useRouter();
@@ -91,16 +110,7 @@ export default function NavigationPage() {
           </div>
         ) : routeData ? (
           <GoogleMapWrapper center={mapCenter} zoom={14}>
-            {currentLocation && (
-              <MapMarker position={currentLocation} type="current" label="📍" />
-            )}
-            {routeData.polyline && <MapPolyline path={routeData.polyline} />}
-            {routeData.pickup && (
-              <MapMarker position={routeData.pickup} type="pickup" label="📦" />
-            )}
-            {routeData.delivery && (
-              <MapMarker position={routeData.delivery} type="delivery" label="🏠" />
-            )}
+            <NavMapOverlays currentLocation={currentLocation} routeData={routeData} />
           </GoogleMapWrapper>
         ) : null}
       </div>
@@ -161,7 +171,7 @@ export default function NavigationPage() {
           </>
         )}
 
-        {/* Open in Google Maps Button */}
+        {/* Open in External Navigation */}
         {routeData?.pickup && routeData?.delivery && (
           <button
             onClick={() => {
@@ -171,7 +181,7 @@ export default function NavigationPage() {
             className="w-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 active:opacity-80 transition-opacity duration-150"
           >
             <Navigation className="w-5 h-5" />
-            Open in Google Maps
+            Open in Maps
           </button>
         )}
       </div>

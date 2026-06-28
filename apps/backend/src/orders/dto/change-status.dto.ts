@@ -1,4 +1,5 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Sanitize } from '../../common/decorators/sanitize.decorator';
 import { OrderStatus } from '@prisma/client';
 
 export class ChangeStatusDto {
@@ -7,6 +8,7 @@ export class ChangeStatusDto {
 
   @IsOptional()
   @IsString()
+  @Sanitize()
   notes?: string;
 
   @IsOptional()

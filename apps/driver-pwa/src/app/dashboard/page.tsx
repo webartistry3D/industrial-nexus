@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
 import { Activity, Award, AlertCircle, CheckCircle, Clock, MapPin, Package, TrendingUp, Truck, Wifi, WifiOff } from 'lucide-react';
 import AnalogClock from '@/components/AnalogClock';
@@ -65,7 +66,7 @@ export default function Dashboard() {
           break;
         case 'yesterday':
           startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-          startDate.setHours(23, 59, 59, 999);
+          startDate.setHours(0, 0, 0, 0);
           break;
         case 'last_7_days':
           startDate = new Date(now);
@@ -80,14 +81,9 @@ export default function Dashboard() {
           startDate.setDate(startDate.getDate() - 7);
       }
       
-      const endDate = dateFilter === 'yesterday' 
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+      const endDate = dateFilter === 'yesterday'
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999)
         : new Date();
-      
-      if (dateFilter === 'yesterday') {
-        endDate.setHours(23, 59, 59, 999);
-        startDate.setHours(0, 0, 0, 0);
-      }
       
       // Filter trips based on date range
       const filteredTrips = tripData.filter((t: Trip) => {
@@ -104,10 +100,6 @@ export default function Dashboard() {
           return completedAt >= startDate && completedAt <= endDate;
         }
       });
-      
-      // Debug: Log active trips count
-      const activeCount = tripData.filter((t: Trip) => t.status !== 'DELIVERED' && t.status !== 'CANCELLED').length;
-      console.log('[Dashboard] Total trips:', tripData.length, 'Active trips:', activeCount, 'Filter:', dateFilter);
       
       // Count completed based on filter
       const completedCount = filteredTrips.length || 0;
@@ -312,7 +304,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-3">
                 <span className="font-bold text-lg font-mono">{activeTrips[0].order?.orderNumber}</span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 dark:bg-white/10 border border-white/30 dark:border-white/20">
-                  {activeTrips[0].status.replace(/_/g, ' ')}
+                  {formatStatus(activeTrips[0].status)}
                 </span>
               </div>
 
@@ -376,7 +368,7 @@ export default function Dashboard() {
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                          {trip.status.replace(/_/g, ' ')}
+                          {formatStatus(trip.status)}
                         </span>
                       </div>
                     </div>

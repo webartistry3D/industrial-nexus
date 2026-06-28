@@ -1,6 +1,7 @@
 'use client';
 
 import { WeightAlert } from '@/types';
+import { formatStatus } from '@/lib/formatting';
 import { AlertTriangle, Scale, Clock } from 'lucide-react';
 
 interface AlertsPanelProps {
@@ -94,7 +95,7 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                       <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.cargoWeight}kg</span> cargo / <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{alert.vehicleCapacity}kg</span> vehicle capacity • <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{Math.round(alert.utilization * 100)}%</span> utilized
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      {alert.status} • {formatTimeAgo(alert.checkedAt)}
+                      {formatStatus(alert.status)} • {formatTimeAgo(alert.checkedAt)}
                     </p>
                   </div>
                 </div>

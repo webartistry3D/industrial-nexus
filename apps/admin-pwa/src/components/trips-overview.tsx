@@ -1,6 +1,7 @@
 'use client';
 
 import { Trip } from '@/types';
+import { formatStatus } from '@/lib/formatting';
 import { Truck, MapPin, Clock } from 'lucide-react';
 
 interface TripsOverviewProps {
@@ -152,7 +153,7 @@ export function TripsOverview({ trips, loading = false, onTripClick, liveLocatio
                 trip.status === 'ARRIVED' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
                 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300'
               }`}>
-                {trip.status?.replace('_', ' ')}
+                {formatStatus(trip.status)}
               </span>
             </div>
             

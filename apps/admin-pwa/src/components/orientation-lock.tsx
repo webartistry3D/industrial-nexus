@@ -16,8 +16,7 @@ export function OrientationLock() {
         try {
           await orientation.lock(type);
           return true;
-        } catch (err) {
-          console.log(`Orientation lock failed for ${type}:`, err);
+        } catch {
           return false;
         }
       };

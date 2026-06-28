@@ -1,4 +1,5 @@
 import { Controller, Get, Patch, Body, UseGuards, Post, Put, Delete, Param } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -8,6 +9,8 @@ import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { CreateHandlingTagDto, UpdateHandlingTagDto } from './dto/handling-tag.dto';
 import { UserRole } from '@prisma/client';
 
+@ApiTags('settings')
+@ApiBearerAuth('access-token')
 @Controller('settings')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SettingsController {

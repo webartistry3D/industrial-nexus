@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Package, Plus, Search, List, Grid2x2 } from 'lucide-react';
 
 interface Order {
@@ -235,13 +236,13 @@ function OrdersContent() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                          {order.status}
+                          {formatStatus(order.status)}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {order.priority && (
                           <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
-                            {order.priority}
+                            {formatStatus(order.priority)}
                           </span>
                         )}
                       </td>
@@ -278,7 +279,7 @@ function OrdersContent() {
                       <div className="flex items-center justify-between mb-1">
                         <p className="font-medium text-gray-900 dark:text-white font-mono">{order.orderNumber}</p>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {order.status}
+                          {formatStatus(order.status)}
                         </span>
                       </div>
                       {order.cargoDescription && (
@@ -292,7 +293,7 @@ function OrdersContent() {
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {order.priority && (
                           <span className={`font-medium ${getPriorityColor(order.priority)}`}>
-                            {order.priority}
+                            {formatStatus(order.priority)}
                           </span>
                         )}
                         {order.totalWeight !== undefined && (
@@ -324,7 +325,7 @@ function OrdersContent() {
                             if (!tagText || tagText === '[object Object]') return null;
                             return (
                               <span key={index} className={`px-2 py-0.5 text-xs rounded ${getHandlingTagColor(tagText)}`}>
-                                {tagText.replace(/_/g, ' ')}
+                                {formatStatus(tagText)}
                               </span>
                             );
                           }).filter(Boolean)}

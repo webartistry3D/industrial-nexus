@@ -14,11 +14,12 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { VehiclesService } from './vehicles.service';
+import { StorageService } from '../storage/storage.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -29,10 +30,15 @@ import { VehicleFilterDto } from './dto/vehicle-filter.dto';
 import { CreateVehicleDocumentDto, UpdateVehicleDocumentDto, VehicleDocumentFilterDto } from './dto/vehicle-document.dto';
 import { UserRole } from '@prisma/client';
 
+@ApiTags('vehicles')
+@ApiBearerAuth('access-token')
 @Controller('vehicles')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class VehiclesController {
-  constructor(private readonly vehiclesService: VehiclesService) {}
+  constructor(
+    private readonly vehiclesService: VehiclesService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
@@ -86,14 +92,7 @@ export class VehiclesController {
   @Post(':id/documents/upload')
   @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
   @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/vehicle-docs',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = uuidv4();
-        const ext = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
       const ext = extname(file.originalname).toLowerCase();
@@ -103,9 +102,7 @@ export class VehiclesController {
         cb(new BadRequestException('Only PDF, JPG, and PNG files are allowed'), false);
       }
     },
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB
-    },
+    limits: { fileSize: 10 * 1024 * 1024 },
   }))
   @HttpCode(HttpStatus.CREATED)
   async uploadVehicleDocument(
@@ -119,7 +116,7 @@ export class VehiclesController {
       throw new BadRequestException('File is required');
     }
 
-    const fileUrl = `/uploads/vehicle-docs/${file.filename}`;
+    const { url: fileUrl } = await this.storageService.upload(file, 'vehicle-docs');
 
     const createVehicleDocumentDto: CreateVehicleDocumentDto = {
       documentType: documentType as any,

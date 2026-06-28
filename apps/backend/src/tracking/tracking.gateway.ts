@@ -4,6 +4,7 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
@@ -22,7 +23,7 @@ const corsOrigins = process.env.CORS_ORIGIN
     credentials: true,
   },
 })
-export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   @WebSocketServer()
   server: Server;
 
@@ -31,6 +32,10 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
     private redis: RedisService,
   ) {
     console.log('[TrackingGateway] Constructor called - gateway instantiated');
+  }
+
+  afterInit() {
+    console.log('[TrackingGateway] afterInit - server ready, subscribing to Redis');
     this.subscribeToRedis();
   }
 
@@ -48,6 +53,16 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
 
       const payload = this.jwtService.verify(token);
       console.log('[Tracking] Token verified - userId:', payload.sub, 'role:', payload.role);
+
+      // Re-validation: reject tokens issued more than 24 hours ago
+      const TOKEN_MAX_AGE_S = 24 * 60 * 60;
+      if (payload.iat && Math.floor(Date.now() / 1000) - payload.iat > TOKEN_MAX_AGE_S) {
+        console.log('[Tracking] Token too old, forcing re-auth for userId:', payload.sub);
+        client.emit('auth:expired', { message: 'Token expired, please re-authenticate' });
+        client.disconnect();
+        return;
+      }
+
       client.data.userId = payload.sub;
       client.data.role = payload.role;
 

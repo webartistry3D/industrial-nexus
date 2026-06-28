@@ -10,8 +10,6 @@ interface GeocodingResult {
  */
 export async function geocodeAddress(address: string): Promise<GeocodingResult | null> {
   try {
-    console.log('Geocoding address:', address);
-    
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&addressdetails=1`,
       {
@@ -23,12 +21,10 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
     );
 
     if (!response.ok) {
-      console.error('Geocoding request failed with status:', response.status);
       throw new Error(`Geocoding request failed: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Geocoding response:', data);
     
     if (data && data.length > 0) {
       const result = data[0];
@@ -36,11 +32,9 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
       const lng = parseFloat(result.lon);
       
       if (isNaN(lat) || isNaN(lng)) {
-        console.error('Invalid coordinates returned:', result);
         return null;
       }
       
-      console.log('Geocoding successful:', { lat, lng, address: result.display_name });
       return {
         lat,
         lng,
@@ -48,7 +42,6 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
       };
     }
 
-    console.log('No results found for address:', address);
     return null;
   } catch (error) {
     console.error('Geocoding error:', error);

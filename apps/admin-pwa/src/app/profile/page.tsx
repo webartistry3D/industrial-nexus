@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { User as UserIcon, Mail, Phone, Shield, Key, Bell, Globe, Clock, Edit2, Save, X, Camera, Eye, EyeOff } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -287,10 +288,10 @@ export default function ProfilePage() {
               <div className="flex gap-2 mt-2">
                 <span className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
                   <Shield className="w-3 h-3 mr-1" />
-                  {profileData.role}
+                  {formatStatus(profileData.role)}
                 </span>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(profileData.status).replace('bg-', 'bg-opacity-80 bg-')}`}>
-                  {profileData.status}
+                  {formatStatus(profileData.status)}
                 </span>
               </div>
             </div>
@@ -391,14 +392,14 @@ export default function ProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
                     <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-100 dark:bg-slate-600">
                       <Shield className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-900 dark:text-white">{profileData.role}</span>
+                      <span className="text-gray-900 dark:text-white">{formatStatus(profileData.role)}</span>
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
                     <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-100 dark:bg-slate-600">
                       <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(profileData.status)}`}>
-                        {profileData.status}
+                        {formatStatus(profileData.status)}
                       </span>
                     </div>
                   </div>

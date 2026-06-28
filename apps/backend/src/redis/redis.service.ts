@@ -126,16 +126,19 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async subscribe(channel: string, callback: (message: string) => void): Promise<void> {
     if (this.enabled) {
       const subscriber = (this as any).subscriber;
-      if (!this.redisSubscribers.has(channel)) {
+      const isNewChannel = !this.redisSubscribers.has(channel);
+      if (isNewChannel) {
         this.redisSubscribers.set(channel, new Set());
         await subscriber.subscribe(channel);
-        subscriber.on('message', (chan: string, message: string) => {
-          if (chan === channel) {
-            this.redisSubscribers.get(channel)?.forEach(cb => cb(message));
-          }
-        });
       }
       this.redisSubscribers.get(channel)!.add(callback);
+      // Register the dispatcher only once, on the first ever subscribe call
+      if (!(this as any)._messageHandlerRegistered) {
+        (this as any)._messageHandlerRegistered = true;
+        subscriber.on('message', (chan: string, message: string) => {
+          this.redisSubscribers.get(chan)?.forEach(cb => cb(message));
+        });
+      }
     } else {
       await this.inMemoryStore.subscribe(channel, callback);
     }

@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Package, MapPin, Truck, Clock, ArrowLeft, CheckCircle2, PackageCheck, FileCheck, User, Phone, StickyNote, ImageIcon } from 'lucide-react';
+import { SlaIndicator } from '@/components/sla-indicator';
 
 interface HandlingTag {
   id: string;
@@ -41,6 +43,7 @@ interface Order {
     id: string;
     status: string;
     eta?: string;
+    startedAt?: string;
     driver?: {
       user: { firstName: string; lastName: string };
       vehicle?: { plateNumber: string } | null;
@@ -176,7 +179,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white font-mono">{order.orderNumber}</h2>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {order.status}
+                  {formatStatus(order.status)}
                 </span>
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 font-mono">
@@ -242,7 +245,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                     if (!tagName) return null;
                     return (
                       <span key={index} className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getHandlingTagColor(tagName)}`}>
-                        {tagName.replace(/_/g, ' ')}
+                        {formatStatus(tagName)}
                       </span>
                     );
                   }).filter(Boolean)}
@@ -259,8 +262,13 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                     <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-900 to-blue-900 shadow-sm">
                       <Truck className="w-4 h-4 text-white" />
                     </div>
-                    <span>Status: {order.trip.status}</span>
+                    <span>Status: {formatStatus(order.trip.status)}</span>
                   </div>
+                  {order.trip.startedAt && order.trip.status === 'IN_TRANSIT' && (
+                    <div className="mt-1">
+                      <SlaIndicator startedAt={order.trip.startedAt} />
+                    </div>
+                  )}
                   {order.trip.eta && (
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                       <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm">

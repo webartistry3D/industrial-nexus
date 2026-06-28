@@ -1,13 +1,12 @@
--- CreateEnum (idempotent)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PackageTrackerStatus') THEN
-        CREATE TYPE "PackageTrackerStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'LOST', 'BROKEN');
-    END IF;
-END $$;
+-- CreateEnum
+CREATE TYPE "PackageTrackerStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'LOST', 'BROKEN');
 
--- CreateTable (idempotent)
-CREATE TABLE IF NOT EXISTS "package_trackers" (
+-- AlterEnum: add PACKAGE_TRACKER_ASSIGNMENT to KittingStage and KittingStatus
+ALTER TYPE "KittingStage" ADD VALUE 'PACKAGE_TRACKER_ASSIGNMENT';
+ALTER TYPE "KittingStatus" ADD VALUE 'PACKAGE_TRACKER_ASSIGNMENT';
+
+-- CreateTable
+CREATE TABLE "package_trackers" (
     "id" TEXT NOT NULL,
     "device_id" TEXT NOT NULL,
     "name" TEXT,
@@ -21,11 +20,11 @@ CREATE TABLE IF NOT EXISTS "package_trackers" (
     CONSTRAINT "package_trackers_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex (idempotent)
-CREATE UNIQUE INDEX IF NOT EXISTS "package_trackers_device_id_key" ON "package_trackers"("device_id");
+-- CreateIndex
+CREATE UNIQUE INDEX "package_trackers_device_id_key" ON "package_trackers"("device_id");
 
--- CreateTable (idempotent)
-CREATE TABLE IF NOT EXISTS "package_tracking_points" (
+-- CreateTable
+CREATE TABLE "package_tracking_points" (
     "id" TEXT NOT NULL,
     "package_tracker_id" TEXT NOT NULL,
     "lat" DOUBLE PRECISION NOT NULL,
@@ -38,28 +37,20 @@ CREATE TABLE IF NOT EXISTS "package_tracking_points" (
     CONSTRAINT "package_tracking_points_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex (idempotent)
-CREATE INDEX IF NOT EXISTS "package_tracking_points_package_tracker_id_idx" ON "package_tracking_points"("package_tracker_id");
-CREATE INDEX IF NOT EXISTS "package_tracking_points_timestamp_idx" ON "package_tracking_points"("timestamp");
+-- CreateIndex
+CREATE INDEX "package_tracking_points_package_tracker_id_idx" ON "package_tracking_points"("package_tracker_id");
 
--- AddForeignKey (idempotent)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'package_tracking_points_package_tracker_id_fkey') THEN
-        ALTER TABLE "package_tracking_points" ADD CONSTRAINT "package_tracking_points_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-    END IF;
-END $$;
+-- CreateIndex
+CREATE INDEX "package_tracking_points_timestamp_idx" ON "package_tracking_points"("timestamp");
 
--- AlterTable (idempotent)
-ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "package_tracker_id" TEXT;
+-- AddForeignKey
+ALTER TABLE "package_tracking_points" ADD CONSTRAINT "package_tracking_points_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey (idempotent)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_package_tracker_id_fkey') THEN
-        ALTER TABLE "orders" ADD CONSTRAINT "orders_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-    END IF;
-END $$;
+-- AlterTable
+ALTER TABLE "orders" ADD COLUMN "package_tracker_id" TEXT;
 
--- CreateIndex (idempotent)
-CREATE INDEX IF NOT EXISTS "orders_package_tracker_id_idx" ON "orders"("package_tracker_id");
+-- AddForeignKey
+ALTER TABLE "orders" ADD CONSTRAINT "orders_package_tracker_id_fkey" FOREIGN KEY ("package_tracker_id") REFERENCES "package_trackers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- CreateIndex
+CREATE INDEX "orders_package_tracker_id_idx" ON "orders"("package_tracker_id");

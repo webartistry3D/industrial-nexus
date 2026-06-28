@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Driver, PaginatedResponse, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus, KycDocumentStatusValue } from '@/types';
 import { 
   Users, Search, Plus, Mail, Shield, MapPin, CheckCircle, XCircle, AlertCircle,
@@ -753,7 +754,7 @@ export default function DriversPage() {
                             <td className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">{driver.licenseNumber}</td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDriverStatusColor(driver.status)}`}>
-                                {driver.status}
+                                {formatStatus(driver.status)}
                               </span>
                             </td>
                             <td className="px-4 py-3">
@@ -761,12 +762,12 @@ export default function DriversPage() {
                                 onClick={(e) => { e.stopPropagation(); handleViewKycDocuments(driver); }}
                                 className={`px-2 py-1 rounded-full text-xs font-medium ${getKycColor(driver.kycStatus)} hover:opacity-80 transition-opacity`}
                               >
-                                {driver.kycStatus}
+                                {formatStatus(driver.kycStatus)}
                               </button>
                             </td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(driver.availability)}`}>
-                                {driver.availability.replace('_', ' ')}
+                                {formatStatus(driver.availability)}
                               </span>
                             </td>
                             <td className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">
@@ -814,16 +815,16 @@ export default function DriversPage() {
 
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDriverStatusColor(driver.status)}`}>
-                        {driver.status}
+                        {formatStatus(driver.status)}
                       </span>
                       <button
                         onClick={() => handleViewKycDocuments(driver)}
                         className={`px-2 py-1 rounded-full text-xs font-medium ${getKycColor(driver.kycStatus)} hover:opacity-80 transition-opacity`}
                       >
-                        KYC: {driver.kycStatus}
+                        KYC: {formatStatus(driver.kycStatus)}
                       </button>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(driver.availability)}`}>
-                        {driver.availability.replace('_', ' ')}
+                        {formatStatus(driver.availability)}
                       </span>
                     </div>
 
@@ -956,7 +957,7 @@ export default function DriversPage() {
                             <td className="px-4 py-3 font-mono text-sm text-gray-600 dark:text-gray-400">{vehicle.capacityKg.toLocaleString()} kg</td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleStatusColor(vehicle.status)}`}>
-                                {vehicle.status}
+                                {formatStatus(vehicle.status)}
                               </span>
                             </td>
                             <td className="px-4 py-3">
@@ -1016,7 +1017,7 @@ export default function DriversPage() {
 
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleStatusColor(vehicle.status)}`}>
-                        {vehicle.status}
+                        {formatStatus(vehicle.status)}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVehicleCategoryColor(vehicle.category)}`}>
                         {vehicle.category}
@@ -1114,7 +1115,7 @@ export default function DriversPage() {
                           doc.status === KycDocumentStatus.UNDER_REVIEW ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
                           'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
                         }`}>
-                          {doc.status}
+                          {formatStatus(doc.status)}
                         </span>
                       </div>
 

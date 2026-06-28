@@ -104,7 +104,6 @@ class OfflineDatabase {
   async deleteSyncedActions(): Promise<void> {
     if (!this.db) await this.init();
     
-    const pending = await this.getPendingActions();
     const synced = await this.getAllActions();
     
     const syncedActions = synced.filter(a => a.synced);

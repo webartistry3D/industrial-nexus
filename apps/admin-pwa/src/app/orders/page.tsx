@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Order, PaginatedResponse } from '@/types';
 import { Package, Search, Filter, ChevronRight, AlertCircle, Plus, RefreshCw, X, Scale, List, Grid2x2, ChevronDown, Navigation } from 'lucide-react';
 import { TrackersTab } from '@/components/trackers-tab';
@@ -202,7 +203,7 @@ function OrdersPageContent() {
                   {activeTab === 'trackers'
                     ? 'Trackers'
                     : (cargoTypeFilter || cargoTypeParam) ? `${cargoTypeFilter || cargoTypeParam} Orders` : 
-                      (statusFilter || statusParam) ? `${statusFilter || statusParam} Orders` : 
+                      (statusFilter || statusParam) ? `${formatStatus(statusFilter || statusParam)} Orders` : 
                       (kittingStatusFilter || kittingStatusParam) ? `${KITTING_STATUS_OPTIONS.find(opt => opt.value === (kittingStatusFilter || kittingStatusParam))?.label} Orders` :
                       'Orders'}
                 </h1>
@@ -391,7 +392,7 @@ function OrdersPageContent() {
               )}
               {(statusFilter || statusParam) && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs rounded-full">
-                  Status: {statusFilter || statusParam}
+                  Status: {formatStatus(statusFilter || statusParam)}
                   <button 
                     onClick={() => {
                       setStatusFilter('');
@@ -540,12 +541,12 @@ function OrdersPageContent() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                          {order.status?.replace('_', ' ')}
+                          {formatStatus(order.status)}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`text-sm font-medium ${getPriorityColor(order.priority)}`}>
-                          {order.priority}
+                          {formatStatus(order.priority)}
                         </span>
                       </td>
                     </tr>
@@ -568,7 +569,7 @@ function OrdersPageContent() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.firstName || ''} {order.client?.lastName || ''}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                    {order.status?.replace('_', ' ')}
+                    {formatStatus(order.status)}
                   </span>
                 </div>
 
@@ -577,7 +578,7 @@ function OrdersPageContent() {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-3">
                     <span className={`font-medium ${getPriorityColor(order.priority)}`}>
-                      {order.priority}
+                      {formatStatus(order.priority)}
                     </span>
                     <span className="text-gray-500 dark:text-gray-400 font-mono">{order.totalWeight || 0} kg</span>
                     {order.packageTracker?.deviceId ? (
@@ -592,7 +593,7 @@ function OrdersPageContent() {
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                    <span className="text-xs">{order.kittingStatus?.replace('_', ' ') || 'N/A'}</span>
+                    <span className="text-xs">{formatStatus(order.kittingStatus) || 'N/A'}</span>
                     <ChevronRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -621,7 +622,7 @@ function OrdersPageContent() {
                       if (!tagText || tagText === '[object Object]') return null;
                       return (
                         <span key={index} className={`px-2 py-0.5 text-xs rounded ${getHandlingTagColor(tagText)}`}>
-                          {tagText.replace(/_/g, ' ')}
+                          {formatStatus(tagText)}
                         </span>
                       );
                     }).filter(Boolean)}
