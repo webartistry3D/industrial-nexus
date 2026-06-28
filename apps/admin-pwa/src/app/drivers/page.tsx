@@ -525,18 +525,44 @@ export default function DriversPage() {
           {/* Drivers Search & Filters */}
           {activeTab === 'drivers' && (
             <div className="space-y-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search drivers by name, email, or license..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search drivers by name, email, or license..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDriversViewMode('list')}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${
+                      driversViewMode === 'list'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                    }`}
+                    aria-label="List view"
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setDriversViewMode('grid')}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${
+                      driversViewMode === 'grid'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                    }`}
+                    aria-label="Grid view"
+                  >
+                    <Grid2x2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="flex gap-2">
                 <select
@@ -576,54 +602,6 @@ export default function DriversPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 justify-center md:hidden">
-                <button
-                  onClick={() => setDriversViewMode('list')}
-                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
-                    driversViewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setDriversViewMode('grid')}
-                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
-                    driversViewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <Grid2x2 className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="hidden md:flex gap-2 justify-center">
-                <button
-                  onClick={() => setDriversViewMode('list')}
-                  className={`p-2.5 rounded-xl transition-all duration-300 ${
-                    driversViewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setDriversViewMode('grid')}
-                  className={`p-2.5 rounded-xl transition-all duration-300 ${
-                    driversViewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <Grid2x2 className="w-5 h-5" />
-                </button>
-              </div>
               {hasActiveDriverFilters && (
                 <button
                   onClick={clearDriverFilters}
@@ -638,15 +616,41 @@ export default function DriversPage() {
           {/* Vehicles Search & Filters */}
           {activeTab === 'vehicles' && (
             <div className="space-y-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search vehicles by plate number..."
-                  value={vehicleSearch}
-                  onChange={(e) => setVehicleSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search vehicles by plate number..."
+                    value={vehicleSearch}
+                    onChange={(e) => setVehicleSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setVehiclesViewMode('list')}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${
+                      vehiclesViewMode === 'list'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                    }`}
+                    aria-label="List view"
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setVehiclesViewMode('grid')}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${
+                      vehiclesViewMode === 'grid'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                    }`}
+                    aria-label="Grid view"
+                  >
+                    <Grid2x2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="flex gap-2">
                 <select
@@ -668,54 +672,6 @@ export default function DriversPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 justify-center md:hidden">
-                <button
-                  onClick={() => setVehiclesViewMode('list')}
-                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
-                    vehiclesViewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setVehiclesViewMode('grid')}
-                  className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
-                    vehiclesViewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <Grid2x2 className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="hidden md:flex gap-2 justify-center">
-                <button
-                  onClick={() => setVehiclesViewMode('list')}
-                  className={`p-2.5 rounded-xl transition-all duration-300 ${
-                    vehiclesViewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setVehiclesViewMode('grid')}
-                  className={`p-2.5 rounded-xl transition-all duration-300 ${
-                    vehiclesViewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <Grid2x2 className="w-5 h-5" />
-                </button>
-              </div>
               {hasActiveVehicleFilters && (
                 <button
                   onClick={clearVehicleFilters}
@@ -732,7 +688,7 @@ export default function DriversPage() {
         {activeTab === 'drivers' && (
           <>
             {/* Drivers List */}
-            <div className="px-4">
+            <div className="px-4 mt-4">
               {driversLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent" />
@@ -943,7 +899,7 @@ export default function DriversPage() {
         {activeTab === 'vehicles' && (
           <>
             {/* Vehicles List */}
-            <div className="px-4">
+            <div className="px-4 mt-4">
               {vehiclesLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent" />
