@@ -24,7 +24,7 @@ function formatTimeAgo(dateString: string): string {
 }
 
 function getAlertSeverity(status: string): 'warning' | 'critical' {
-  return status === 'OVERLOADED' || status === 'WARNING' ? 'critical' : 'warning';
+  return status === 'OVERLOADED' ? 'critical' : 'warning';
 }
 
 export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPanelProps) {
@@ -77,14 +77,14 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
                   className={`p-3 rounded-lg border transition-shadow ${
                     getAlertSeverity(alert.status) === 'critical'
                       ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                      : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                      : 'bg-lime-50 dark:bg-lime-900/20 border-lime-200 dark:border-lime-800'
                   } ${hasValidTripId ? 'cursor-pointer hover:shadow-md' : 'cursor-default opacity-80'}`}
                 >
                 <div className="flex items-start gap-3">
                   {alert.status === 'OVERLOADED' ? (
                     <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
                   ) : (
-                    <Scale className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <Scale className="w-5 h-5 text-lime-500 mt-0.5" />
                   )}
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-800 dark:text-white">

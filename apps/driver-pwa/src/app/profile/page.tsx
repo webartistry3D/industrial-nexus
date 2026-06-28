@@ -305,9 +305,12 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+      <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+        <PageHeader />
+        <div className="flex items-center justify-center pt-20">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+          </div>
         </div>
       </div>
     );
@@ -602,7 +605,7 @@ export default function ProfilePage() {
               <h3 className="font-semibold text-gray-900 dark:text-white">KYC Documents</h3>
               <button
                 onClick={() => setShowKycSection(!showKycSection)}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-900 dark:bg-blue-600 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
               >
                 <Upload className="w-4 h-4" />
                 Upload Document
@@ -721,7 +724,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={() => setShowVehicleDocSection(!showVehicleDocSection)}
-                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-900 dark:bg-blue-600 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
                 >
                   <Upload className="w-4 h-4" />
                   Upload Document

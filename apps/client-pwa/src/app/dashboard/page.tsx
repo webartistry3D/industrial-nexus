@@ -343,7 +343,7 @@ export default function DashboardPage() {
               onClick={() => router.push('/orders/new')}
               className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
-              <div className="p-2 bg-blue-500 rounded-lg text-white">
+              <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg">
                 <Plus className="w-4 h-4" />
               </div>
               <span>New Order</span>
@@ -352,7 +352,7 @@ export default function DashboardPage() {
               onClick={() => router.push('/tracking')}
               className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
-              <div className="p-2 bg-green-500 rounded-lg text-white">
+              <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg">
                 <MapPin className="w-4 h-4" />
               </div>
               <span>Track Order</span>

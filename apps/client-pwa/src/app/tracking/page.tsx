@@ -33,6 +33,8 @@ export default function TrackingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [trackingData, setTrackingData] = useState<any>(null);
   const [liveLocation, setLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [geofenceEvents, setGeofenceEvents] = useState<any[]>([]);
@@ -51,7 +53,7 @@ export default function TrackingPage() {
 
   useEffect(() => {
     fetchShipments();
-  }, []);
+  }, [page]);
 
   // Keep ref in sync to avoid stale closures in WS handlers
   useEffect(() => {
@@ -133,8 +135,9 @@ export default function TrackingPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getMyOrders();
+      const data = await api.getMyOrders({ page, limit: 10 });
       setShipments(data.data || []);
+      setMeta(data.meta || { page: 1, limit: 10, total: 0, totalPages: 1 });
     } catch (err) {
       console.error('Failed to fetch shipments:', err);
       setError('Failed to load shipments');
@@ -267,7 +270,7 @@ export default function TrackingPage() {
             <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Shipments</h2>
             </div>
-            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50 max-h-[600px] overflow-y-auto">
+            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50 max-h-[500px] overflow-y-auto">
               {loading ? (
                 <div className="p-12 text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg mb-4">
@@ -317,6 +320,28 @@ export default function TrackingPage() {
                 ))
               )}
             </div>
+            {/* Pagination */}
+            {!loading && shipments.length > 0 && (
+              <div className="p-4 border-t border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                  Page {page} of {meta.totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+                  disabled={page === meta.totalPages}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Map and Details */}

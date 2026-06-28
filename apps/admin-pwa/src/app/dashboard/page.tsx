@@ -165,9 +165,9 @@ export default function Dashboard() {
               <div className="text-3xl font-bold text-green-600 dark:text-green-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : (stats?.activeTrips || 0) - delayedTripsCount}</div>
               <div className="text-xs font-medium text-green-700 dark:text-green-300 mt-1">On Track</div>
             </div>
-            <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 rounded-xl p-4 border border-amber-500/20">
-              <div className="text-3xl font-bold text-amber-600 dark:text-amber-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : Math.max(0, delayedTripsCount - 1)}</div>
-              <div className="text-xs font-medium text-amber-700 dark:text-amber-300 mt-1">At Risk</div>
+            <div className="bg-gradient-to-br from-lime-500/20 to-lime-600/10 rounded-xl p-4 border border-lime-500/20">
+              <div className="text-3xl font-bold text-lime-500 dark:text-lime-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : Math.max(0, delayedTripsCount - 1)}</div>
+              <div className="text-xs font-medium text-lime-700 dark:text-lime-300 mt-1">At Risk</div>
             </div>
             <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-xl p-4 border border-red-500/20">
               <div className="text-3xl font-bold text-red-600 dark:text-red-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : (delayedTripsCount > 0 ? 1 : 0)}</div>

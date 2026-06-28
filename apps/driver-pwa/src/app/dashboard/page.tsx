@@ -222,8 +222,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-900">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
                 <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Average Time</span>
@@ -239,8 +239,8 @@ export default function Dashboard() {
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-green-500">
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
                 <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">On-Time Rate</span>
@@ -260,21 +260,17 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push('/trips')}
-            className="bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 border border-gray-200 dark:border-slate-700"
+            className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
-            <div className="p-2 bg-blue-500 rounded-xl text-white">
-              <Truck className="w-6 h-6" />
-            </div>
-            <span className="text-sm font-semibold">View All Trips</span>
+            <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Truck className="w-4 h-4" /></div>
+            <span>View All Trips</span>
           </button>
           <button
             onClick={() => router.push('/tracking')}
-            className="bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-2xl p-5 flex flex-col items-center gap-3 active:bg-gray-50 dark:active:bg-slate-700 border border-gray-200 dark:border-slate-700"
+            className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
-            <div className="p-2 bg-slate-500 rounded-xl text-white">
-              <MapPin className="w-6 h-6" />
-            </div>
-            <span className="text-sm font-semibold">Live Tracking</span>
+            <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><MapPin className="w-4 h-4" /></div>
+            <span>Live Tracking</span>
           </button>
         </div>
 
