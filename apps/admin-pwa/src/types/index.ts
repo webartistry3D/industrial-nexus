@@ -116,6 +116,20 @@ export interface VehicleDocument {
   expiresAt?: string;
 }
 
+export interface POD {
+  id: string;
+  tripId: string;
+  imageUrl?: string;
+  signatureUrl?: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  notes?: string;
+  capturedAt: string;
+  lat?: number;
+  lng?: number;
+  createdAt?: string;
+}
+
 export interface Trip {
   id: string;
   orderId: string;
@@ -130,6 +144,7 @@ export interface Trip {
   eta?: string;
   trackingPoints?: TrackingPoint[];
   geofenceEvents?: GeofenceEvent[];
+  pod?: POD;
 }
 
 export interface Driver {

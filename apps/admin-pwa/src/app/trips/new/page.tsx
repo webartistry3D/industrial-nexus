@@ -79,9 +79,10 @@ export default function NewTripPage() {
       setTimeout(() => {
         router.push('/trips');
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create trip:', err);
-      setError(err.response?.data?.message || 'Failed to create trip. Please try again.');
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || 'Failed to create trip. Please try again.');
     } finally {
       setLoading(false);
     }

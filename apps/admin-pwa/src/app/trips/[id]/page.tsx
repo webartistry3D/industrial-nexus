@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
@@ -316,7 +317,7 @@ export default function TripDetailPage() {
         )}
 
         {/* POD Information */}
-        {(trip as any).pod && (
+        {trip.pod && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
@@ -330,51 +331,57 @@ export default function TripDetailPage() {
                 <Calendar className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-500 dark:text-gray-400">Captured:</span>
                 <span className="text-gray-900 dark:text-white font-mono">
-                  {(trip as any).pod.capturedAt ? new Date((trip as any).pod.capturedAt).toLocaleString() : 'N/A'}
+                  {trip.pod?.capturedAt ? new Date(trip.pod.capturedAt).toLocaleString() : 'N/A'}
                 </span>
               </div>
               
               {/* GPS Coordinates */}
-              {(trip as any).pod.lat && (trip as any).pod.lng && (
+              {trip.pod?.lat && trip.pod?.lng && (
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-500 dark:text-gray-400">Location:</span>
                   <span className="text-gray-900 dark:text-white font-mono">
-                    {(trip as any).pod.lat.toFixed(6)}, {(trip as any).pod.lng.toFixed(6)}
+                    {trip.pod.lat.toFixed(6)}, {trip.pod.lng.toFixed(6)}
                   </span>
                 </div>
               )}
               
               {/* Photo */}
-              {(trip as any).pod.imageUrl && (
+              {trip.pod?.imageUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Delivery Photo</p>
-                  <img 
-                    src={(trip as any).pod.imageUrl} 
-                    alt="POD" 
-                    className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700" 
+                  <Image
+                    src={trip.pod.imageUrl}
+                    alt="POD"
+                    width={800}
+                    height={384}
+                    className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700"
+                    unoptimized
                   />
                 </div>
               )}
               
               {/* Signature */}
-              {(trip as any).pod.signatureUrl && (
+              {trip.pod?.signatureUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Receiver Signature</p>
-                  <img 
-                    src={(trip as any).pod.signatureUrl} 
-                    alt="Signature" 
-                    className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white" 
+                  <Image
+                    src={trip.pod.signatureUrl}
+                    alt="Signature"
+                    width={800}
+                    height={256}
+                    className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white"
+                    unoptimized
                   />
                 </div>
               )}
               
               {/* Notes */}
-              {(trip as any).pod.notes && (
+              {trip.pod?.notes && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Notes</p>
                   <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                    {(trip as any).pod.notes}
+                    {trip.pod.notes}
                   </p>
                 </div>
               )}
