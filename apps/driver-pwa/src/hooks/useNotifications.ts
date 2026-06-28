@@ -18,6 +18,10 @@ export interface Notification {
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
+// Module-level flag to prevent duplicate socket connections across remounts
+let socketInitialized = false;
+let sharedSocket: Socket | null = null;
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -25,7 +29,7 @@ export function useNotifications() {
   const socketRef = useRef<Socket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const initialFetchDone = useRef(false);
-  const mountedRef = useRef(false);
+  const knownIdsRef = useRef<Set<string>>(new Set());
   const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
@@ -52,12 +56,9 @@ export function useNotifications() {
       const unread = list.filter((n: Notification) => !n.isRead).length;
       setNotifications(list);
       setUnreadCount(unread);
-      if (!initialFetchDone.current) {
-        initialFetchDone.current = true;
-        if (unread > 0) {
-          playNotificationSoundRef.current();
-        }
-      }
+      // Track known IDs so we don't play sound for pre-existing notifications
+      list.forEach((n: Notification) => knownIdsRef.current.add(n.id));
+      initialFetchDone.current = true;
     } catch (err) {
       console.error('[Notifications] Failed to fetch:', err);
     } finally {
@@ -109,10 +110,17 @@ export function useNotifications() {
       setLoading(false);
       return;
     }
-    if (mountedRef.current) return;
-    mountedRef.current = true;
 
-    let socket: Socket | null = null;
+    // Always fetch notifications on mount (to refresh the list)
+    fetchNotificationsRef.current();
+
+    // Only create the WebSocket once across all mounts
+    if (socketInitialized) {
+      socketRef.current = sharedSocket;
+      return;
+    }
+    socketInitialized = true;
+
     let isRefreshing = false;
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 2;
@@ -121,12 +129,12 @@ export function useNotifications() {
       const token = tokenOverride || (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null);
       if (!token) return;
 
-      if (socket) {
-        socket.disconnect();
-        socket = null;
+      if (sharedSocket) {
+        sharedSocket.disconnect();
+        sharedSocket = null;
       }
 
-      socket = io(`${WS_URL}/tracking`, {
+      const socket = io(`${WS_URL}/tracking`, {
         auth: { token },
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -140,6 +148,9 @@ export function useNotifications() {
 
       socket.on('notification:new', (notification: Notification) => {
         if (notification.userId && notification.userId !== user?.userId) return;
+        // Only play sound for genuinely new notifications we haven't seen before
+        if (knownIdsRef.current.has(notification.id)) return;
+        knownIdsRef.current.add(notification.id);
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
         playNotificationSoundRef.current();
@@ -161,17 +172,13 @@ export function useNotifications() {
         }
       });
 
+      sharedSocket = socket;
       socketRef.current = socket;
     };
 
-    fetchNotificationsRef.current();
     connectSocket();
 
-    return () => {
-      socket?.disconnect();
-      socketRef.current = null;
-      mountedRef.current = false;
-    };
+    // Do NOT disconnect on unmount — the socket is shared across page navigations
   }, [authLoading, user]);
 
   return {

@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
 import { Truck, Package, MapPin, CheckCircle, List, Grid2x2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
+import { StatCard } from '@/components/stat-card';
 
 export default function TripsPage() {
   const router = useRouter();
@@ -98,18 +100,8 @@ export default function TripsPage() {
 
         {/* Stats - Aligned with Dashboard */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-4xl font-bold text-black dark:text-white font-mono">
-              {loading ? '...' : activeTripsCount}
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Active Trips</div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">
-            <div className="text-4xl font-bold text-black dark:text-white font-mono">
-              {loading ? '...' : totalCompletedCount}
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Total Completed</div>
-          </div>
+          <StatCard icon={Truck} label="Active Trips" value={loading ? '...' : activeTripsCount.toString()} color="blue" />
+          <StatCard icon={CheckCircle} label="Total Completed" value={loading ? '...' : totalCompletedCount.toString()} color="green" />
         </div>
 
         {/* Filter Tabs */}
@@ -251,7 +243,7 @@ export default function TripsPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                        {trip.status.replace(/_/g, ' ')}
+                        {formatStatus(trip.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -277,7 +269,7 @@ export default function TripsPage() {
                     {trip.order?.orderNumber}
                   </span>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                    {trip.status.replace(/_/g, ' ')}
+                    {formatStatus(trip.status)}
                   </span>
                 </div>
 

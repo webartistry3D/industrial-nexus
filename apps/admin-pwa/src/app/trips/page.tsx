@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip, PaginatedResponse, WeightAlert } from '@/types';
 import {
   Truck, Search, MapPin, Clock, ChevronRight, Navigation, AlertTriangle, Scale, X, Plus,
@@ -45,7 +46,7 @@ function DeliveryTrendChart({ data }: { data: TrendPoint[] }) {
   const barGroupW = chartW / data.length;
   const barW = Math.max(4, Math.min(18, barGroupW * 0.6));
   const gap = barW * 0.2;
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(p * maxVal));
+  const yTicks = Array.from(new Set([0, 0.25, 0.5, 0.75, 1].map(p => Math.round(p * maxVal))));
   const toY = (v: number) => padT + chartH - (v / maxVal) * chartH;
   const fmtDate = (iso: string) => { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}`; };
   const labelStep = data.length <= 7 ? 1 : data.length <= 14 ? 2 : Math.ceil(data.length / 7);
@@ -66,7 +67,7 @@ function DeliveryTrendChart({ data }: { data: TrendPoint[] }) {
           const delayH = (d.delayed / maxVal) * chartH;
           const cancH  = (d.cancelled / maxVal) * chartH;
           return (
-            <g key={d.date}>
+            <g key={`${d.date}-${i}`}>
               {delivH > 0 && <rect x={startX} y={toY(d.delivered)} width={barW} height={delivH} rx={2} fill="#22c55e" opacity={0.85} />}
               {delayH > 0 && <rect x={startX + barW + gap} y={toY(d.delayed)} width={barW} height={delayH} rx={2} fill="#f87171" opacity={0.85} />}
               {cancH  > 0 && <rect x={startX + (barW + gap) * 2} y={toY(d.cancelled)} width={barW} height={cancH}  rx={2} fill="#94a3b8" opacity={0.7} />}
@@ -708,7 +709,7 @@ function TripsPageContent() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                          {trip.status.replace('_', ' ')}
+                          {formatStatus(trip.status)}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -738,7 +739,7 @@ function TripsPageContent() {
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                    {trip.status.replace('_', ' ')}
+                    {formatStatus(trip.status)}
                   </span>
                 </div>
 

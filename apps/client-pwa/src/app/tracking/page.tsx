@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
-import { GoogleMapWrapper } from '@/components/maps/GoogleMap';
+import { formatStatus } from '@/lib/formatting';
+import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { TripSimulation } from '@/components/maps/TripSimulation';
-import { Truck, Package, MapPin, Clock, ArrowRight, Play, Square, Navigation, Battery } from 'lucide-react';
+import { Truck, Package, MapPin, Clock, ArrowRight, Play, Square, Navigation, Battery, List, Grid2x2 } from 'lucide-react';
+import { StatCard } from '@/components/stat-card';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 
 interface Shipment {
@@ -27,6 +29,62 @@ interface Shipment {
   };
 }
 
+function SimOverlay({
+  demoPickupLocation,
+  demoDeliveryLocation,
+  isSimulating,
+  onSimulationComplete,
+  onVehiclePositionChange,
+}: {
+  demoPickupLocation: { lat: number; lng: number; address: string };
+  demoDeliveryLocation: { lat: number; lng: number; address: string };
+  isSimulating: boolean;
+  onSimulationComplete?: () => void;
+  onVehiclePositionChange?: (pos: { lat: number; lng: number }) => void;
+}) {
+  const map = useMap();
+  if (!map) return null;
+  return (
+    <TripSimulation
+      map={map}
+      pickupLocation={demoPickupLocation}
+      deliveryLocation={demoDeliveryLocation}
+      isSimulating={isSimulating}
+      onSimulationComplete={onSimulationComplete}
+      onVehiclePositionChange={onVehiclePositionChange}
+    />
+  );
+}
+
+function LiveOverlay({
+  vehiclePosition,
+  packageLiveLocation,
+  packageTrail,
+  trackingData,
+  pickupLocation,
+  deliveryLocation,
+}: {
+  vehiclePosition: { lat: number; lng: number } | null;
+  packageLiveLocation: { lat: number; lng: number } | null;
+  packageTrail: { lat: number; lng: number }[];
+  trackingData: any;
+  pickupLocation: { lat: number; lng: number; address: string };
+  deliveryLocation: { lat: number; lng: number; address: string };
+}) {
+  const map = useMap();
+  if (!map) return null;
+  return (
+    <>
+      {vehiclePosition && <MapMarker map={map} position={vehiclePosition} type="vehicle" label="🚚" />}
+      {packageLiveLocation && <MapMarker map={map} position={packageLiveLocation} type="package" label="📦" />}
+      {packageTrail.length > 1 && <MapPolyline map={map} id="pkg-trail" path={packageTrail} color="#a855f7" />}
+      {trackingData?.route?.polyline && <MapPolyline map={map} id="route" path={trackingData.route.polyline} />}
+      <MapMarker map={map} position={pickupLocation} type="pickup" label="📦" />
+      <MapMarker map={map} position={deliveryLocation} type="delivery" label="🏠" />
+    </>
+  );
+}
+
 export default function TrackingPage() {
   const { user } = useAuth();
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -34,6 +92,7 @@ export default function TrackingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [trackingData, setTrackingData] = useState<any>(null);
   const [liveLocation, setLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -44,6 +103,7 @@ export default function TrackingPage() {
   const [packageLiveLocation, setPackageLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [packageTrail, setPackageTrail] = useState<{ lat: number; lng: number }[]>([]);
   const selectedShipmentRef = useRef<Shipment | null>(null);
+  const packageTrackerDataRef = useRef<any>(null);
   const { subscribe, unsubscribe, isConnected } = useTrackingWebSocket();
 
   // Scroll to top on page load
@@ -55,10 +115,14 @@ export default function TrackingPage() {
     fetchShipments();
   }, [page]);
 
-  // Keep ref in sync to avoid stale closures in WS handlers
+  // Keep refs in sync to avoid stale closures in WS handlers
   useEffect(() => {
     selectedShipmentRef.current = selectedShipment;
   }, [selectedShipment]);
+
+  useEffect(() => {
+    packageTrackerDataRef.current = packageTrackerData;
+  }, [packageTrackerData]);
 
   useEffect(() => {
     if (selectedShipment?.trip?.id) {
@@ -67,7 +131,12 @@ export default function TrackingPage() {
       fetchTrackingData(selectedShipment.trip.id);
 
       // Subscribe to trip-specific WebSocket room
-      subscribe(`trip:${selectedShipment.trip.id}`, () => {});
+      const tripId = selectedShipment.trip.id;
+      subscribe(`trip:${tripId}`, (data: any) => {
+        if (selectedShipmentRef.current?.trip?.id === data.tripId) {
+          setLiveLocation({ lat: data.lat, lng: data.lng });
+        }
+      });
 
       // Poll every 30 seconds as fallback
       const interval = setInterval(() => {
@@ -116,12 +185,12 @@ export default function TrackingPage() {
     });
     subscribe('package:location:update', (data: any) => {
       const sel = selectedShipmentRef.current;
-      if (sel?.id && data?.packageTrackerId === packageTrackerData?.packageTrackerId) {
+      if (sel?.id && data?.packageTrackerId === packageTrackerDataRef.current?.packageTrackerId) {
         setPackageLiveLocation({ lat: data.lat, lng: data.lng });
         setPackageTrail(prev => [...prev, { lat: data.lat, lng: data.lng }]);
       }
     });
-  }, [subscribe, packageTrackerData?.packageTrackerId]);
+  }, [subscribe]);
 
   useEffect(() => {
     return () => {
@@ -221,7 +290,7 @@ export default function TrackingPage() {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Track Shipments</h1>
             </div>
           </div>
-          {/* <button
+          <button
             onClick={isSimulating ? handleStopSimulation : handleStartSimulation}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-lg ${
               isSimulating
@@ -231,46 +300,49 @@ export default function TrackingPage() {
           >
             {isSimulating ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             {isSimulating ? 'Stop Demo' : 'Start Demo'}
-          </button> */}
+          </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 pb-24">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Shipments</p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{activeShipments}</p>
-              </div>
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <Truck className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Shipments</p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{shipments.length}</p>
-              </div>
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <Package className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <StatCard icon={Truck} label="Active Shipments" value={activeShipments.toString()} color="blue" />
+          <StatCard icon={Package} label="Total Shipments" value={shipments.length.toString()} color="green" />
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Shipments List */}
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
-            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50">
+          <div className="order-2 lg:order-1 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+            <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Shipments</h2>
+              <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2.5 rounded-xl transition-all duration-300 ${
+                  viewMode === 'list'
+                    ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                }`}
+                aria-label="List view"
+              >
+                <List className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2.5 rounded-xl transition-all duration-300 ${
+                  viewMode === 'grid'
+                    ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+                }`}
+                aria-label="Grid view"
+              >
+                <Grid2x2 className="w-5 h-5" />
+              </button>
             </div>
-            <div className="divide-y divide-gray-200/50 dark:divide-slate-700/50 max-h-[500px] overflow-y-auto">
+            </div>
+            <div className={viewMode === 'list' ? 'divide-y divide-gray-200/50 dark:divide-slate-700/50 max-h-[500px] overflow-y-auto' : 'p-4 max-h-[500px] overflow-y-auto'}>
               {loading ? (
                 <div className="p-12 text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-900 to-blue-900 shadow-lg mb-4">
@@ -285,39 +357,96 @@ export default function TrackingPage() {
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 font-medium">No shipments found</p>
                 </div>
-              ) : (
-                shipments.map((shipment) => (
-                  <div
-                    key={shipment.id}
-                    className={`p-4 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all duration-300 ${
-                      selectedShipment?.id === shipment.id ? 'bg-blue-50/80 dark:bg-slate-700/50' : ''
-                    }`}
-                    onClick={() => setSelectedShipment(shipment)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                        <Package className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                          {shipment.deliveryLocation.address}
+              ) : viewMode === 'list' ? (
+            // Table View
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50/50 dark:bg-slate-700/50 border-b border-gray-200/50 dark:border-slate-700/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Shipment #</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Destination</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Driver</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
+                  {shipments.map((shipment) => (
+                    <tr
+                      key={shipment.id}
+                      className={`hover:bg-gray-50/50 dark:hover:bg-slate-700/30 cursor-pointer transition-colors ${
+                        selectedShipment?.id === shipment.id ? 'bg-blue-50/80 dark:bg-slate-700/50' : ''
+                      }`}
+                      onClick={() => setSelectedShipment(shipment)}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="font-semibold text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          shipment.trip?.status === 'IN_TRANSIT'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                            : shipment.trip?.status === 'ASSIGNED'
+                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>
+                          {formatStatus(shipment.trip?.status || shipment.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{shipment.deliveryLocation.address}</p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {shipment.trip?.driver 
+                            ? `${shipment.trip.driver.user.firstName} ${shipment.trip.driver.user.lastName}`
+                            : '-'
+                          }
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            shipment.trip?.status === 'IN_TRANSIT'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : shipment.trip?.status === 'ASSIGNED'
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                          }`}>
-                            {shipment.trip?.status || shipment.status}
-                          </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+              ) : (
+                <div className="space-y-3">
+                  {shipments.map((shipment) => (
+                    <div
+                      key={shipment.id}
+                      className="bg-gray-50/50 dark:bg-slate-700/30 rounded-xl p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300"
+                      onClick={() => setSelectedShipment(shipment)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
+                          <Package className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              shipment.trip?.status === 'IN_TRANSIT'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                : shipment.trip?.status === 'ASSIGNED'
+                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            }`}>
+                              {formatStatus(shipment.trip?.status || shipment.status)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-500 truncate">
+                            {shipment.deliveryLocation.address}
+                          </p>
+                          {shipment.trip?.driver && (
+                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              <span>Driver: {shipment.trip.driver.user.firstName} {shipment.trip.driver.user.lastName}</span>
+                              <span className="font-mono">{(shipment.trip.vehicle ?? shipment.trip.driver.vehicle)?.plateNumber || 'N/A'}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
             {/* Pagination */}
@@ -345,57 +474,34 @@ export default function TrackingPage() {
           </div>
 
           {/* Map and Details */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="order-1 lg:order-2 lg:col-span-2 space-y-6">
             {/* Map */}
-            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 overflow-hidden">
-              <div className="h-[400px]">
-                {isSimulating ? (
-                  <GoogleMapWrapper center={mapCenter} zoom={12}>
-                    <TripSimulation
-                      pickupLocation={demoPickupLocation}
-                      deliveryLocation={demoDeliveryLocation}
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
+              <div className="h-[400px] relative overflow-hidden rounded-2xl">
+                <GoogleMapWrapper center={mapCenter} zoom={12}>
+                  {isSimulating ? (
+                    <SimOverlay
+                      demoPickupLocation={demoPickupLocation}
+                      demoDeliveryLocation={demoDeliveryLocation}
                       isSimulating={isSimulating}
                       onSimulationComplete={handleSimulationComplete}
                       onVehiclePositionChange={setSimulatedVehiclePosition}
                     />
-                  </GoogleMapWrapper>
-                ) : selectedShipment && (trackingData || vehiclePosition || packageTrackerData) ? (
-                  <GoogleMapWrapper center={mapCenter} zoom={12}>
-                    {vehiclePosition && (
-                      <MapMarker
-                        position={vehiclePosition}
-                        type="vehicle"
-                        label="🚚"
-                      />
-                    )}
-                    {packageLiveLocation && (
-                      <MapMarker
-                        position={packageLiveLocation}
-                        type="package"
-                        label="📦"
-                      />
-                    )}
-                    {packageTrail.length > 1 && (
-                      <MapPolyline path={packageTrail} color="#a855f7" />
-                    )}
-                    {trackingData?.route?.polyline && (
-                      <MapPolyline path={trackingData.route.polyline} />
-                    )}
-                    <MapMarker
-                      position={selectedShipment.pickupLocation}
-                      type="pickup"
-                      label="📦"
+                  ) : selectedShipment && (trackingData || vehiclePosition || packageTrackerData) ? (
+                    <LiveOverlay
+                      vehiclePosition={vehiclePosition}
+                      packageLiveLocation={packageLiveLocation}
+                      packageTrail={packageTrail}
+                      trackingData={trackingData}
+                      pickupLocation={selectedShipment.pickupLocation}
+                      deliveryLocation={selectedShipment.deliveryLocation}
                     />
-                    <MapMarker
-                      position={selectedShipment.deliveryLocation}
-                      type="delivery"
-                      label="🏠"
-                    />
-                  </GoogleMapWrapper>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-600 dark:text-gray-400 font-medium">
-                      {isSimulating ? 'Starting simulation...' : selectedShipment ? 'Loading map...' : 'Select a shipment or start simulation to view map'}
+                  ) : null}
+                </GoogleMapWrapper>
+                {!isSimulating && !selectedShipment && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <p className="text-gray-600 dark:text-gray-400 font-medium bg-white/80 dark:bg-slate-800/80 px-4 py-2 rounded-xl">
+                      Select a shipment or start simulation to view map
                     </p>
                   </div>
                 )}
@@ -532,7 +638,7 @@ export default function TrackingPage() {
                               evt.eventType === 'RADIUS_A_ENTERED' ? 'bg-yellow-500' :
                               'bg-blue-500'
                             }`} />
-                            <span className="text-gray-700 dark:text-gray-300">{evt.eventType.replace(/_/g, ' ')}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{formatStatus(evt.eventType)}</span>
                             {evt.distance > 0 && <span className="text-gray-400 ml-auto text-xs font-mono">{Math.round(evt.distance)}m away</span>}
                           </div>
                         ))}
@@ -556,7 +662,7 @@ export default function TrackingPage() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600 dark:text-gray-400">Status</span>
                           <span className="font-medium text-gray-900 dark:text-white">
-                            {packageTrackerData.packageTracker?.status}
+                            {formatStatus(packageTrackerData.packageTracker?.status)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">

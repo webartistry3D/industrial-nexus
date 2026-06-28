@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
 import { Truck, Package, MapPin, CheckCircle, Calendar, Clock, List, Grid2x2, XCircle } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
+import { StatCard } from '@/components/stat-card';
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -27,16 +29,13 @@ export default function HistoryPage() {
       router.push('/login');
       return;
     }
-    if (user) {
-      fetchTrips();
-    }
   }, [authLoading, user, router]);
 
   useEffect(() => {
     if (user) {
       fetchTrips();
     }
-  }, [page]);
+  }, [user, page]);
 
   const fetchTrips = async () => {
     try {
@@ -60,7 +59,7 @@ export default function HistoryPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      ASSIGNED: 'bg-blue-900 text-blue-900 dark:bg-blue-900 dark:text-blue-300',
+      ASSIGNED: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
       IN_TRANSIT: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
       ARRIVED: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
       DELIVERED: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -95,50 +94,10 @@ export default function HistoryPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <Truck className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.length}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Total Trips</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.filter(t => t.status === 'DELIVERED').length}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Completed</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.filter(t => t.status === 'IN_TRANSIT').length}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">In Transit</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <XCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{loading ? '...' : trips.filter(t => t.status === 'CANCELLED').length}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Cancelled</p>
-              </div>
-            </div>
-          </div>
+          <StatCard icon={Truck} label="Total Trips" value={loading ? '...' : trips.length.toString()} color="blue" />
+          <StatCard icon={CheckCircle} label="Completed" value={loading ? '...' : trips.filter(t => t.status === 'DELIVERED').length.toString()} color="green" />
+          <StatCard icon={Clock} label="In Transit" value={loading ? '...' : trips.filter(t => t.status === 'IN_TRANSIT').length.toString()} color="yellow" />
+          <StatCard icon={XCircle} label="Cancelled" value={loading ? '...' : trips.filter(t => t.status === 'CANCELLED').length.toString()} color="red" />
         </div>
 
         {/* Filter Tabs */}
@@ -280,7 +239,7 @@ export default function HistoryPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                        {trip.status.replace(/_/g, ' ')}
+                        {formatStatus(trip.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -306,7 +265,7 @@ export default function HistoryPage() {
                     {trip.order?.orderNumber}
                   </span>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(trip.status)}`}>
-                    {trip.status.replace(/_/g, ' ')}
+                    {formatStatus(trip.status)}
                   </span>
                 </div>
 

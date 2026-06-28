@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Package, MapPin, Calendar, CheckCircle, Clock, XCircle, ArrowRight, History, List, Grid2x2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { formatStatus } from '@/lib/formatting';
+import { StatCard } from '@/components/stat-card';
 
 type OrderStatus = 'SUBMITTED' | 'APPROVED' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
 
@@ -107,62 +109,10 @@ export default function HistoryPage() {
       <main className="p-4 space-y-4">
         {/* Stats Summary */}
         <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setFilter('ALL')}
-            className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <Package className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.total}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Total Orders</p>
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={() => setFilter('DELIVERED')}
-            className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.delivered}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Delivered</p>
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={() => setFilter('IN_TRANSIT')}
-            className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <ArrowRight className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.inTransit}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">In Transit</p>
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={() => setFilter('ASSIGNED')}
-            className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{stats.pending}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Pending</p>
-              </div>
-            </div>
-          </button>
+          <StatCard icon={Package} label="Total Orders" value={stats.total.toString()} color="blue" onClick={() => setFilter('ALL')} />
+          <StatCard icon={CheckCircle} label="Delivered" value={stats.delivered.toString()} color="green" onClick={() => setFilter('DELIVERED')} />
+          <StatCard icon={ArrowRight} label="In Transit" value={stats.inTransit.toString()} color="yellow" onClick={() => setFilter('IN_TRANSIT')} />
+          <StatCard icon={Clock} label="Pending" value={stats.pending.toString()} color="purple" onClick={() => setFilter('SUBMITTED')} />
         </div>
 
         {/* Filter Tabs & View Toggle */}
@@ -298,7 +248,7 @@ export default function HistoryPage() {
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                             <StatusIcon className="w-3 h-3" />
-                            {order.status.replace('_', ' ')}
+                            {formatStatus(order.status)}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -329,7 +279,7 @@ export default function HistoryPage() {
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}>
                         <StatusIcon className="w-3 h-3" />
-                        {order.status.replace('_', ' ')}
+                        {formatStatus(order.status)}
                       </span>
                     </div>
 
