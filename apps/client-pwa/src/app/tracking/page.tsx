@@ -8,7 +8,7 @@ import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
 import { MapPolyline } from '@/components/maps/MapPolyline';
 import { TripSimulation } from '@/components/maps/TripSimulation';
-import { Truck, Package, MapPin, Clock, ArrowRight, Play, Square, Navigation, Battery, List, Grid2x2 } from 'lucide-react';
+import { Truck, Package, MapPin, Clock, ArrowRight, Navigation, Battery, List, Grid2x2 } from 'lucide-react';
 import { StatCard } from '@/components/stat-card';
 import { useTrackingWebSocket } from '@/hooks/useTrackingWebSocket';
 
@@ -263,16 +263,6 @@ export default function TrackingPage() {
   const demoPickupLocation = { lat: 6.5026, lng: 3.3515, address: 'Surulere, Lagos' };
   const demoDeliveryLocation = { lat: 6.4680, lng: 3.2920, address: '1st Avenue, Festac Town' };
 
-  const handleStartSimulation = () => {
-    setIsSimulating(true);
-    setSimulatedVehiclePosition(demoPickupLocation);
-  };
-
-  const handleStopSimulation = () => {
-    setIsSimulating(false);
-    setSimulatedVehiclePosition(null);
-  };
-
   const handleSimulationComplete = () => {
     setIsSimulating(false);
     setSimulatedVehiclePosition(demoDeliveryLocation);
@@ -281,26 +271,13 @@ export default function TrackingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-              <Truck className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Track Shipments</h1>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
+            <Truck className="w-6 h-6 text-white" />
           </div>
-          <button
-            onClick={isSimulating ? handleStopSimulation : handleStartSimulation}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-lg ${
-              isSimulating
-                ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-red-500/20'
-                : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white hover:shadow-purple-500/20'
-            }`}
-          >
-            {isSimulating ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {isSimulating ? 'Stop Demo' : 'Start Demo'}
-          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Track Shipments</h1>
+          </div>
         </div>
       </div>
 
@@ -501,7 +478,7 @@ export default function TrackingPage() {
                 {!isSimulating && !selectedShipment && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <p className="text-gray-600 dark:text-gray-400 font-medium bg-white/80 dark:bg-slate-800/80 px-4 py-2 rounded-xl">
-                      Select a shipment or start simulation to view map
+                      Select a shipment to view map
                     </p>
                   </div>
                 )}

@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
+import { PageHeader } from '@/components/PageHeader';
 import { MapPin, Package, CheckCircle, Camera, Pen, Navigation, Clock, Truck, Calendar, Play, Send, X, RotateCcw, ImageIcon, User, Phone, StickyNote, FileCheck, Upload } from 'lucide-react';
 
 const sopChecklist = [
@@ -300,8 +301,9 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+      <PageHeader />
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white p-4 border-b border-white/10">
+      <header className="pt-20 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
           <button onClick={() => router.back()} className="text-white hover:text-blue-200 transition-colors">
             ← Back

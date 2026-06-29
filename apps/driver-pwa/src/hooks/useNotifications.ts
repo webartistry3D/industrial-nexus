@@ -21,6 +21,9 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 // Module-level flag to prevent duplicate socket connections across remounts
 let socketInitialized = false;
 let sharedSocket: Socket | null = null;
+// Track which user we have already played the initial unread sound for,
+// so the sound only plays once after login, not on every page navigation.
+let initialSoundPlayedForUser: string | null = null;
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -30,6 +33,8 @@ export function useNotifications() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const initialFetchDone = useRef(false);
   const knownIdsRef = useRef<Set<string>>(new Set());
+  const playInitialSoundRef = useRef(false);
+  const userIdRef = useRef<string | null>(null);
   const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
@@ -58,6 +63,12 @@ export function useNotifications() {
       setUnreadCount(unread);
       // Track known IDs so we don't play sound for pre-existing notifications
       list.forEach((n: Notification) => knownIdsRef.current.add(n.id));
+      // Play sound once after login if there are pending unread notifications
+      if (playInitialSoundRef.current && unread > 0) {
+        playNotificationSoundRef.current();
+        initialSoundPlayedForUser = userIdRef.current;
+        playInitialSoundRef.current = false;
+      }
       initialFetchDone.current = true;
     } catch (err) {
       console.error('[Notifications] Failed to fetch:', err);
@@ -107,9 +118,13 @@ export function useNotifications() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
+      initialSoundPlayedForUser = null;
       setLoading(false);
       return;
     }
+
+    userIdRef.current = user.userId || null;
+    playInitialSoundRef.current = user.userId !== initialSoundPlayedForUser;
 
     // Always fetch notifications on mount (to refresh the list)
     fetchNotificationsRef.current();

@@ -377,7 +377,7 @@ function TrackingPageContent() {
       <main className="px-4 py-4 pb-24">
         {/* Map */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
-          <div className="h-[600px] relative overflow-hidden rounded-2xl">
+          <div className="h-[400px] relative overflow-hidden rounded-2xl">
             <GoogleMapWrapper center={mapCenter} zoom={13}>
               {!loading && !error && (fleetLocation || packageTrackerData) && (
                 <TrackingMapOverlays
