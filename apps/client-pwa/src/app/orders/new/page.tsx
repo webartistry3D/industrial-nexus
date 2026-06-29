@@ -52,6 +52,13 @@ export default function NewOrderPage() {
 
   const [handlingTagOptions, setHandlingTagOptions] = useState<string[]>([]);
   const [tagsLoading, setTagsLoading] = useState(false);
+  const [manualGeocode, setManualGeocode] = useState<{
+    pickup: { loading: boolean; error: string | null };
+    delivery: { loading: boolean; error: string | null };
+  }>({
+    pickup: { loading: false, error: null },
+    delivery: { loading: false, error: null },
+  });
 
   // Fetch handling tags from backend
   useEffect(() => {
@@ -81,6 +88,50 @@ export default function NewOrderPage() {
       }));
     }
   }, [handlingTagOptions]);
+
+  // Live geocode pickup address when manual entry is active
+  useEffect(() => {
+    if (!useManualEntry || useManualCoords) return;
+    if (formData.pickupAddress.length < 3) {
+      setManualGeocode(prev => ({ ...prev, pickup: { loading: false, error: null } }));
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setManualGeocode(prev => ({ ...prev, pickup: { loading: true, error: null } }));
+      const result = await geocodeAddress(formData.pickupAddress);
+      if (result) {
+        setFormData(prev => ({ ...prev, pickupLat: result.lat, pickupLng: result.lng }));
+        setManualGeocode(prev => ({ ...prev, pickup: { loading: false, error: null } }));
+      } else {
+        setManualGeocode(prev => ({ ...prev, pickup: { loading: false, error: 'Could not find coordinates' } }));
+      }
+    }, 800);
+
+    return () => clearTimeout(timeout);
+  }, [formData.pickupAddress, useManualEntry, useManualCoords]);
+
+  // Live geocode delivery address when manual entry is active
+  useEffect(() => {
+    if (!useManualEntry || useManualCoords) return;
+    if (formData.deliveryAddress.length < 3) {
+      setManualGeocode(prev => ({ ...prev, delivery: { loading: false, error: null } }));
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setManualGeocode(prev => ({ ...prev, delivery: { loading: true, error: null } }));
+      const result = await geocodeAddress(formData.deliveryAddress);
+      if (result) {
+        setFormData(prev => ({ ...prev, deliveryLat: result.lat, deliveryLng: result.lng }));
+        setManualGeocode(prev => ({ ...prev, delivery: { loading: false, error: null } }));
+      } else {
+        setManualGeocode(prev => ({ ...prev, delivery: { loading: false, error: 'Could not find coordinates' } }));
+      }
+    }, 800);
+
+    return () => clearTimeout(timeout);
+  }, [formData.deliveryAddress, useManualEntry, useManualCoords]);
 
   const getHandlingTagColor = (tag: string, isSelected: boolean) => {
     const upperTag = tag.toUpperCase();
@@ -409,13 +460,13 @@ export default function NewOrderPage() {
                     {useManualEntry ? 'Use Autocomplete' : 'Manual Entry'}
                   </button>
                 )}
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setUseManualCoords(!useManualCoords)}
                   className="text-sm px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all duration-300"
                 >
                   {useManualCoords ? 'Hide Coordinates' : 'Manual Coords'}
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -462,14 +513,25 @@ export default function NewOrderPage() {
                       </div>
                     </div>
                   ) : useManualEntry ? (
-                    <input
-                      type="text"
-                      value={formData.pickupAddress}
-                      onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
-                      placeholder="Enter pickup address"
-                      required
-                    />
+                    <div className="space-y-1">
+                      <input
+                        type="text"
+                        value={formData.pickupAddress}
+                        onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
+                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
+                        placeholder="Enter pickup address"
+                        required
+                      />
+                      {manualGeocode.pickup.loading ? (
+                        <p className="text-xs text-gray-400 dark:text-gray-500">Locating coordinates...</p>
+                      ) : manualGeocode.pickup.error ? (
+                        <p className="text-xs text-red-500 dark:text-red-400">{manualGeocode.pickup.error}</p>
+                      ) : formData.pickupLat !== 0 && formData.pickupLng !== 0 ? (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                          Lat: {formData.pickupLat.toFixed(6)}, Lng: {formData.pickupLng.toFixed(6)}
+                        </p>
+                      ) : null}
+                    </div>
                   ) : (
                     <PlacesAutocomplete
                       value={formData.pickupAddress}
@@ -521,14 +583,25 @@ export default function NewOrderPage() {
                       </div>
                     </div>
                   ) : useManualEntry ? (
-                    <input
-                      type="text"
-                      value={formData.deliveryAddress}
-                      onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
-                      placeholder="Enter delivery address"
-                      required
-                    />
+                    <div className="space-y-1">
+                      <input
+                        type="text"
+                        value={formData.deliveryAddress}
+                        onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
+                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
+                        placeholder="Enter delivery address"
+                        required
+                      />
+                      {manualGeocode.delivery.loading ? (
+                        <p className="text-xs text-gray-400 dark:text-gray-500">Locating coordinates...</p>
+                      ) : manualGeocode.delivery.error ? (
+                        <p className="text-xs text-red-500 dark:text-red-400">{manualGeocode.delivery.error}</p>
+                      ) : formData.deliveryLat !== 0 && formData.deliveryLng !== 0 ? (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                          Lat: {formData.deliveryLat.toFixed(6)}, Lng: {formData.deliveryLng.toFixed(6)}
+                        </p>
+                      ) : null}
+                    </div>
                   ) : (
                     <PlacesAutocomplete
                       value={formData.deliveryAddress}
@@ -540,11 +613,11 @@ export default function NewOrderPage() {
                   )}
                 </div>
 
-                {useManualCoords && (
+                {/* useManualCoords && (
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Enter coordinates manually if geocoding fails
                   </p>
-                )}
+                ) */}
                 {useManualEntry && !useManualCoords && (
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Addresses will be automatically geocoded using OpenStreetMap

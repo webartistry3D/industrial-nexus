@@ -4,6 +4,7 @@ import axios from 'axios';
 
 export interface GeocodingResult {
   placeId: string;
+  displayName: string;
   address: string;
   lat: number;
   lng: number;
@@ -34,6 +35,7 @@ export class GeocodingService {
 
       return (data as any[]).map((item) => ({
         placeId: String(item.place_id),
+        displayName: item.display_name,
         address: item.display_name,
         lat: parseFloat(item.lat),
         lng: parseFloat(item.lon),
@@ -54,6 +56,7 @@ export class GeocodingService {
 
       return {
         placeId: String(data.place_id),
+        displayName: data.display_name,
         address: data.display_name,
         lat: parseFloat(data.lat),
         lng: parseFloat(data.lon),

@@ -11,6 +11,7 @@ export interface AddressSearchProps {
   label: string;
   iconColor?: string;
   country?: string;
+  token?: string | null;
 }
 
 export function AddressSearch({
@@ -20,6 +21,7 @@ export function AddressSearch({
   label,
   iconColor = 'text-gray-400',
   country,
+  token,
 }: AddressSearchProps) {
   const [inputValue, setInputValue] = useState(value);
   const [predictions, setPredictions] = useState<GeocodingResult[]>([]);
@@ -36,7 +38,7 @@ export function AddressSearch({
 
     if (v.length > 2) {
       debounceRef.current = setTimeout(async () => {
-        const results = await searchAddress(v, country);
+        const results = await searchAddress(v, country, token);
         setPredictions(results);
         setShowPredictions(results.length > 0);
       }, 300);
@@ -88,7 +90,7 @@ export function AddressSearch({
               <button
                 key={p.placeId}
                 type="button"
-                onClick={() => handleSelect(p)}
+                onMouseDown={() => handleSelect(p)}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-900 dark:text-white text-sm"
               >
                 <div className="font-medium">{p.displayName}</div>

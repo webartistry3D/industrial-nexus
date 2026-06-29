@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
+import { api, getAccessToken } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { geocodeAddress } from '@/lib/geocoding';
 import { Package, ArrowLeft, MapPin, Check, User } from 'lucide-react';
@@ -65,6 +65,7 @@ export default function NewOrderPage() {
 
   const [handlingTagOptions, setHandlingTagOptions] = useState<string[]>([]);
   const [tagsLoading, setTagsLoading] = useState(false);
+  const accessToken = getAccessToken();
 
   // Fetch clients and handling tags from backend
   useEffect(() => {
@@ -558,6 +559,7 @@ export default function NewOrderPage() {
                       placeholder="Enter pickup address"
                       label="Pickup Address"
                       iconColor="text-orange-600 dark:text-orange-400"
+                      token={accessToken}
                     />
                   )}
                 </div>
@@ -617,6 +619,7 @@ export default function NewOrderPage() {
                       placeholder="Enter delivery address"
                       label="Delivery Address"
                       iconColor="text-green-600 dark:text-green-400"
+                      token={accessToken}
                     />
                   )}
                 </div>
