@@ -451,10 +451,16 @@ export default function OrderDetailPage() {
     if (!vehicleId || !order) return;
     try {
       setWeightValidating(true);
+      // Extract tag names from OrderHandlingTag objects
+      const tagNames = (order.handlingTags || []).map((tag: any) => {
+        if (typeof tag === 'string') return tag;
+        if (tag?.tag?.name) return tag.tag.name;
+        return '';
+      }).filter(Boolean);
       const result = await api.validateWeight({
         cargoWeight: order.totalWeight || 0,
         vehicleId,
-        handlingTags: order.handlingTags || [],
+        handlingTags: tagNames,
       });
       setVehicleWeightStatus(result);
     } catch (err) {
