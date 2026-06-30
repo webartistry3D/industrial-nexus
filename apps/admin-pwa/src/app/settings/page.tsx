@@ -214,8 +214,10 @@ export default function SettingsPage() {
         status: 'ACTIVE',
       });
       fetchUsers();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.message || 'Failed to create user');
+      setError(err.response?.data?.message || err.message || 'Failed to create user');
     }
   };
 
@@ -1241,6 +1243,8 @@ export default function SettingsPage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
                     <input
                       type="text"
+                      required
+                      placeholder="+2348012345678"
                       value={userFormData.phoneNumber}
                       onChange={(e) => setUserFormData({ ...userFormData, phoneNumber: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"

@@ -72,9 +72,11 @@ export class TrackingGateway implements OnGatewayConnection, OnGatewayDisconnect
       console.log('[Tracking] User joined room:', room);
       
       console.log(`[Tracking] User ${payload.sub} connected successfully`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('[Tracking] Connection error:', error);
-      console.error('[Tracking] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      if (error?.name === 'TokenExpiredError' || error?.message?.includes('jwt expired')) {
+        client.emit('auth:expired', { message: 'Token expired, please re-authenticate' });
+      }
       client.disconnect();
     }
   }

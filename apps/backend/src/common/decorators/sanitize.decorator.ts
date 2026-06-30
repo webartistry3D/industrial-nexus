@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
-import sanitizeHtml from 'sanitize-html';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const sanitizeHtml = require('sanitize-html');
 
 export function Sanitize() {
   return Transform(({ value }) => {

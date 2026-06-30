@@ -36,7 +36,6 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
     @CurrentUser() user: { userId: string; role: UserRole },
   ) {
-    console.log('Received order data:', JSON.stringify(createOrderDto, null, 2));
     return this.ordersService.create(createOrderDto, user.userId, user.role);
   }
 
