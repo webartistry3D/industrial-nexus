@@ -335,6 +335,7 @@ export class OrdersService {
     }
 
     // Handle driver assignment for ASSIGNED status
+    let assignedTripId: string | undefined;
     if (newStatus === OrderStatus.ASSIGNED && driverId) {
       // Check if driver exists and is active - look up by userId since frontend passes user IDs
       const driver = await this.prisma.driver.findFirst({
@@ -352,7 +353,7 @@ export class OrdersService {
       const resolvedVehicleId = vehicleId || driver.vehicleId || null;
 
       // Create trip when assigning driver
-      await this.prisma.trip.create({
+      const trip = await this.prisma.trip.create({
         data: {
           orderId: id,
           driverId: driver.id,
@@ -360,6 +361,7 @@ export class OrdersService {
           status: 'ASSIGNED',
         },
       });
+      assignedTripId = trip.id;
 
       // Update driver profile with the assigned vehicle (supports reassignment)
       if (resolvedVehicleId && resolvedVehicleId !== driver.vehicleId) {
@@ -385,8 +387,8 @@ export class OrdersService {
     });
 
     // Fire notifications based on new status
-    console.log(`[Notifications] Firing status notifications: status=${newStatus}, driverId=${driverId}, clientId=${order.clientId}`);
-    this.fireStatusNotifications(newStatus, order.orderNumber, id, order.clientId, driverId)
+    console.log(`[Notifications] Firing status notifications: status=${newStatus}, driverId=${driverId}, clientId=${order.clientId}, tripId=${assignedTripId}`);
+    this.fireStatusNotifications(newStatus, order.orderNumber, id, order.clientId, driverId, assignedTripId)
       .catch(e => console.error('[Notifications] fireStatusNotifications error:', e));
 
     return updatedOrder;
@@ -428,9 +430,10 @@ export class OrdersService {
     const resolvedVehicleId = driver.vehicleId || null;
 
     // Create trip only if one doesn't already exist for this order
+    let assignedTripId: string | undefined;
     const existingTrip = await this.prisma.trip.findFirst({ where: { orderId: id } });
     if (!existingTrip) {
-      await this.prisma.trip.create({
+      const trip = await this.prisma.trip.create({
         data: {
           orderId: id,
           driverId: driver.id,
@@ -438,6 +441,9 @@ export class OrdersService {
           status: 'ASSIGNED',
         },
       });
+      assignedTripId = trip.id;
+    } else {
+      assignedTripId = existingTrip.id;
     }
 
     await this.auditService.log({
@@ -460,6 +466,7 @@ export class OrdersService {
         adminOps.map(u => u.id),
         order.orderNumber,
         id,
+        assignedTripId,
       ).catch(e => console.error('[Notifications] notifyDriverAssigned error:', e));
     }).catch(() => {});
 
@@ -472,6 +479,7 @@ export class OrdersService {
     orderId: string,
     clientId: string,
     driverId?: string,
+    tripId?: string,
   ): Promise<void> {
     const getAdminOps = () =>
       this.prisma.user.findMany({
@@ -533,6 +541,7 @@ export class OrdersService {
         adminOps.map(u => u.id),
         orderNumber,
         orderId,
+        tripId,
       );
       console.log(`[Notifications] notifyDriverAssigned completed`);
     } else if (newStatus === OrderStatus.DISPATCH_READY) {

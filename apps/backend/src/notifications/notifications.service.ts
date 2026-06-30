@@ -305,8 +305,9 @@ export class NotificationsService {
     adminOpsUserIds: string[],
     orderNumber: string,
     orderId: string,
+    tripId?: string,
   ) {
-    console.log(`[Notifications] notifyDriverAssigned: driverUserId=${driverUserId}, clientUserId=${clientUserId}, adminOpsCount=${adminOpsUserIds.length}`);
+    console.log(`[Notifications] notifyDriverAssigned: driverUserId=${driverUserId}, clientUserId=${clientUserId}, adminOpsCount=${adminOpsUserIds.length}, tripId=${tripId}`);
 
     const driverUser = await this.prisma.user.findUnique({
       where: { id: driverUserId },
@@ -328,8 +329,8 @@ export class NotificationsService {
         type: NotificationType.TRIP_ASSIGNED,
         title: 'New Trip Assigned',
         message: `You have been assigned to order ${orderNumber}`,
-        entityId: orderId,
-        entityType: 'ORDER',
+        entityId: tripId || orderId,
+        entityType: tripId ? 'TRIP' : 'ORDER',
       }),
       ...adminOpsUserIds.map(userId =>
         this.create({

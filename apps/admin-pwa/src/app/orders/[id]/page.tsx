@@ -971,7 +971,7 @@ export default function OrderDetailPage() {
                   >
                     <option value="">Select a driver...</option>
                     {availableDrivers.map((driver) => (
-                      <option key={driver.id} value={driver.id}>
+                      <option key={driver.id} value={driver.userId}>
                         {driver.user?.firstName} {driver.user?.lastName} — {driver.licenseNumber}
                       </option>
                     ))}
