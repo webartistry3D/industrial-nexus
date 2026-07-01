@@ -86,7 +86,7 @@ export class StorageService {
     // Local dev: return a sentinel upload URL pointing to the local upload endpoint
     const appUrl = this.config.get<string>('APP_URL', 'http://localhost:3001');
     const uploadUrl = `${appUrl}/storage/local-upload/${encodeURIComponent(key)}`;
-    const finalUrl  = `/uploads/${key}`;
+    const finalUrl  = `${appUrl}/uploads/${key}`;
     return { uploadUrl, finalUrl, key };
   }
 

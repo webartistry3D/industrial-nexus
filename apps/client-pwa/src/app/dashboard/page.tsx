@@ -249,8 +249,8 @@ export default function DashboardPage() {
                   onClick={() => router.push(`/tracking?shipment=${shipment.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-blue-500">
-                      <Package className="w-5 h-5 text-white" />
+                    <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
+                      <Package className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 dark:text-white font-mono">{shipment.orderNumber}</p>
@@ -351,7 +351,7 @@ export default function DashboardPage() {
               onClick={() => router.push('/orders/new')}
               className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
-              <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg">
+              <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg">
                 <Plus className="w-4 h-4" />
               </div>
               <span>New Order</span>
@@ -360,7 +360,7 @@ export default function DashboardPage() {
               onClick={() => router.push('/tracking')}
               className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
-              <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg">
+              <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg">
                 <MapPin className="w-4 h-4" />
               </div>
               <span>Track Order</span>

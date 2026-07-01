@@ -18,7 +18,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
     return (
       <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -34,7 +34,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
     return (
       <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -50,7 +50,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
     return (
       <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -66,7 +66,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
     return (
       <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
         <div className="flex items-start justify-between relative z-10">
-          <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
             <Icon className="w-5 h-5" />
           </div>
           {trend && <span className={trendClasses}>{trend}</span>}
@@ -81,7 +81,7 @@ export function StatCard({ icon: Icon, label, value, trend, color, onClick }: St
   return (
     <div onClick={onClick} className={`${baseClasses} bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 ${onClick ? cursorClass : ''}`}>
       <div className="flex items-start justify-between relative z-10">
-        <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+        <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
           <Icon className="w-5 h-5" />
         </div>
         {trend && <span className={trendClasses}>{trend}</span>}

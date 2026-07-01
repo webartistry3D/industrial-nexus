@@ -28,7 +28,7 @@ function TrackingMapOverlays({
   if (!map) return null;
   return (
     <>
-      {currentLocation && <MapMarker map={map} position={currentLocation} type="current" label="📍" />}
+      {currentLocation && <MapMarker map={map} position={currentLocation} type="vehicle" />}
       {polyline.length > 0 && <MapPolyline map={map} id="trail" path={polyline} />}
       {pickupLocation && <MapMarker map={map} position={pickupLocation} type="pickup" label="📦" />}
       {deliveryLocation && <MapMarker map={map} position={deliveryLocation} type="delivery" label="🏠" />}

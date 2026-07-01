@@ -69,7 +69,7 @@ export default function TripDetailPage() {
       case 'ARRIVED':
         return <MapPinned className="w-6 h-6 text-green-600" />;
       default:
-        return <Truck className="w-6 h-6 text-blue-600" />;
+        return <Truck className="w-6 h-6 text-white dark:text-black" />;
     }
   };
 
@@ -155,7 +155,7 @@ export default function TripDetailPage() {
         </button>
 
         <div className="flex items-start gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+          <div className="p-3 rounded-xl bg-blue-800 dark:bg-lime-500 shadow-md">
             {getStatusIcon(trip.status)}
           </div>
           <div className="flex-1">
@@ -189,8 +189,8 @@ export default function TripDetailPage() {
           </div>
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-md">
-                <Truck className="w-4 h-4 text-white" />
+              <div className="p-2 rounded-xl bg-blue-800 dark:bg-lime-500 shadow-md">
+                
               </div>
               <span className="text-xs font-medium">Vehicle</span>
             </div>

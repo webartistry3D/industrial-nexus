@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [vehicleDocExpiry, setVehicleDocExpiry] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [kycSuccess, setKycSuccess] = useState<string | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -155,6 +156,8 @@ export default function ProfilePage() {
       
       setSelectedFile(null);
       setShowKycSection(false);
+      setKycSuccess('Document uploaded successfully');
+      setTimeout(() => setKycSuccess(null), 3000);
     } catch (err: any) {
       console.error('Failed to upload document:', err);
       setError(err.response?.data?.message || 'Failed to upload document. Please try again.');
@@ -208,6 +211,8 @@ export default function ProfilePage() {
       setSelectedVehicleFile(null);
       setVehicleDocExpiry('');
       setShowVehicleDocSection(false);
+      setSuccess('Vehicle document uploaded successfully');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       console.error('Failed to upload vehicle document:', err);
       setError(err.response?.data?.message || 'Failed to upload vehicle document. Please try again.');
@@ -254,7 +259,7 @@ export default function ProfilePage() {
         return 'Proof of Address';
       case KycDocumentType.VEHICLE_REGISTRATION:
         return 'Vehicle Registration';
-      case KycDocumentType.VEHICLE_INSURANCE:
+      case KycDocumentType.INSURANCE_CERTIFICATE:
         return 'Insurance Certificate';
       case KycDocumentType.PROFESSIONAL_CERTIFICATION:
         return 'Professional Certification';
@@ -323,7 +328,7 @@ export default function ProfilePage() {
 
       <main className="pt-20 px-4 pb-4">
         {success && (
-          <div className="max-w-6xl mx-auto mt-2 mb-0 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl p-3 text-green-800 dark:text-green-300 text-sm">
+          <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="max-w-6xl mx-auto mt-2 mb-0 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl p-3 text-green-800 dark:text-green-300 text-sm">
             {success}
           </div>
         )}
@@ -371,7 +376,7 @@ export default function ProfilePage() {
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Driver Information</h3>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                       <Truck className="w-4 h-4" />
                     </div>
                     <div>
@@ -380,7 +385,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                       <Scale className="w-4 h-4" />
                     </div>
                     <div>
@@ -395,7 +400,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                       <Shield className="w-4 h-4" />
                     </div>
                     <div>
@@ -482,7 +487,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="flex-1 bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5"
+                      className="flex-1 bg-blue-900 dark:bg-blue-900 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5"
                     >
                       <Save className="w-3.5 h-3.5" />
                       {saving ? 'Saving...' : 'Save'}
@@ -499,7 +504,7 @@ export default function ProfilePage() {
               ) : (
                 <div className="space-y-4 text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                       <UserIcon className="w-4 h-4" />
                     </div>
                     <div>
@@ -508,7 +513,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                       <Phone className="w-4 h-4" />
                     </div>
                     <div>
@@ -517,7 +522,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                    <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                       <Mail className="w-4 h-4" />
                     </div>
                     <div>
@@ -536,7 +541,7 @@ export default function ProfilePage() {
           {/* Driver Documentation Section */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
             <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+              <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                 <FileText className="w-4 h-4" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Driver Documentation</h3>
@@ -554,7 +559,7 @@ export default function ProfilePage() {
                       className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-slate-700/50 rounded-xl border border-gray-200/50 dark:border-slate-600/50"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="p-2 rounded-lg shadow-sm flex-shrink-0 bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+                        <div className="p-2 rounded-lg shadow-sm flex-shrink-0 bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
                           <FileText className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
@@ -603,8 +608,8 @@ export default function ProfilePage() {
           {/* Biometric / Liveness Check Placeholder */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-md">
-                <ScanLine className="w-6 h-6 text-white" />
+              <div className="flex-shrink-0 p-3 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                <ScanLine className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Biometric Verification</h3>
@@ -617,7 +622,7 @@ export default function ProfilePage() {
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     disabled
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 text-white rounded-xl text-sm font-semibold opacity-50 cursor-not-allowed"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-lime-500 text-black rounded-xl text-sm font-semibold opacity-50 cursor-not-allowed"
                   >
                     <ScanLine className="w-4 h-4" />
                     Start Liveness Check
@@ -641,8 +646,8 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
               <h3 className="font-semibold text-gray-900 dark:text-white">KYC Documents</h3>
               <button
-                onClick={() => setShowKycSection(!showKycSection)}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-900 dark:bg-blue-600 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                onClick={() => { setShowKycSection(!showKycSection); setError(null); setKycSuccess(null); }}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-900 dark:bg-blue-900 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
               >
                 <Upload className="w-4 h-4" />
                 Upload Document
@@ -656,20 +661,25 @@ export default function ProfilePage() {
                     {error}
                   </div>
                 )}
+                {kycSuccess && (
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 border border-green-200/50 dark:border-green-700/50 rounded-xl p-3 text-green-800 dark:text-green-300 text-sm shadow-lg">
+                    {kycSuccess}
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Document Type
                   </label>
                   <select
                     value={selectedDocType}
-                    onChange={(e) => setSelectedDocType(e.target.value as KycDocumentTypeValue)}
+                    onChange={(e) => { setSelectedDocType(e.target.value as KycDocumentTypeValue); setError(null); }}
                     className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                   >
                     <option value={KycDocumentType.GOVERNMENT_ID}>Government ID</option>
                     <option value={KycDocumentType.DRIVERS_LICENSE}>Driver's License</option>
                     <option value={KycDocumentType.PROOF_OF_ADDRESS}>Proof of Address</option>
                     <option value={KycDocumentType.VEHICLE_REGISTRATION}>Vehicle Registration</option>
-                    <option value={KycDocumentType.VEHICLE_INSURANCE}>Insurance Certificate</option>
+                    <option value={KycDocumentType.INSURANCE_CERTIFICATE}>Insurance Certificate</option>
                     <option value={KycDocumentType.PROFESSIONAL_CERTIFICATION}>Professional Certification</option>
                   </select>
                 </div>
@@ -712,7 +722,7 @@ export default function ProfilePage() {
                 {kycDocuments.map((doc) => (
                   <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-300">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                      <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                         <FileText className="w-5 h-5" />
                       </div>
                       <div>
@@ -751,7 +761,7 @@ export default function ProfilePage() {
             <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-4 md:p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                  <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                     <Truck className="w-4 h-4" />
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Vehicle Documents</h3>
@@ -761,7 +771,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={() => setShowVehicleDocSection(!showVehicleDocSection)}
-                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-900 dark:bg-blue-600 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-900 dark:bg-blue-900 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150"
                 >
                   <Upload className="w-4 h-4" />
                   Upload Document
@@ -843,7 +853,7 @@ export default function ProfilePage() {
                   {vehicleDocuments.map((doc) => (
                     <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-300">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md">
+                        <div className="p-2 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md">
                           <FileText className="w-5 h-5" />
                         </div>
                         <div>

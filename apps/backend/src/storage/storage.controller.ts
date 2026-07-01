@@ -6,11 +6,9 @@ import {
   Res,
   HttpCode,
   HttpStatus,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -18,7 +16,6 @@ import * as path from 'path';
 @Controller('storage')
 export class StorageController {
   @Put('local-upload/:key(*)')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async localUpload(
     @Param('key') key: string,

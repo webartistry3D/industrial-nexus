@@ -217,7 +217,8 @@ class ApiClient {
   async uploadKycDocument(file: File, documentType: string) {
     // Get current driver profile to get driver ID
     const profile = await this.getProfile();
-    const driverId = profile.id;
+    const driverId = profile.driver?.id;
+    if (!driverId) throw new Error('Driver profile not found');
     
     const formData = new FormData();
     formData.append('file', file);

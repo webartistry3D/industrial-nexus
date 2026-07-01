@@ -214,7 +214,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
@@ -231,7 +231,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
                 <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
@@ -254,14 +254,14 @@ export default function Dashboard() {
             onClick={() => router.push('/trips')}
             className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
-            <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Truck className="w-4 h-4" /></div>
+            <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Truck className="w-4 h-4" /></div>
             <span>View All Trips</span>
           </button>
           <button
             onClick={() => router.push('/tracking')}
             className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
-            <div className="p-2 bg-blue-600 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><MapPin className="w-4 h-4" /></div>
+            <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><MapPin className="w-4 h-4" /></div>
             <span>Live Tracking</span>
           </button>
         </div>
@@ -292,7 +292,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-blue-600 text-white dark:bg-lime-500 dark:text-black">
+                <div className="p-1.5 rounded-lg bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
                   <AlertCircle className="w-4 h-4" />
                 </div>
                 <h2 className="font-bold text-gray-800 dark:text-white">Priority Trip</h2>
@@ -337,7 +337,7 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
             <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-900"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
                 Active Trips
               </h2>
               <button

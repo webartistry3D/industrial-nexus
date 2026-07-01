@@ -28,6 +28,16 @@ services:
         value: production
       - key: CORS_ORIGIN
         value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_S3_BUCKET
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: APP_URL
+        value: https://industrial-nexus-api.onrender.com
 
   - type: web
     name: industrial-nexus-admin

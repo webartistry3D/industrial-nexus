@@ -412,11 +412,11 @@ export default function DriversPage() {
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <div className="p-2.5 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
                 {activeTab === 'drivers' ? (
-                  <Users className="w-6 h-6 text-white" />
+                  <Users className="w-6 h-6 text-white dark:text-black" />
                 ) : (
-                  <Truck className="w-6 h-6 text-white" />
+                  <Truck className="w-6 h-6 text-white dark:text-black" />
                 )}
               </div>
               <div>
@@ -443,7 +443,7 @@ export default function DriversPage() {
             ) : (
               <button
                 onClick={() => setShowCreateVehicleModal(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2.5 bg-blue-900 hover:bg-blue-800 dark:bg-lime-500 dark:hover:bg-lime-600 text-white dark:text-black rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Add Vehicle
@@ -485,17 +485,17 @@ export default function DriversPage() {
           {activeTab === 'drivers' && (
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Users className="w-5 h-5" /></div>
+                <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Users className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{meta.total}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Total</div>
               </div>
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
+                <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{drivers.filter(d => d.status === 'ACTIVE').length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</div>
               </div>
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
+                <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{drivers.filter(d => d.availability === 'ON_TRIP').length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">On Trip</div>
               </div>
@@ -506,17 +506,17 @@ export default function DriversPage() {
           {activeTab === 'vehicles' && (
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
+                <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Truck className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Total</div>
               </div>
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
+                <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><CheckCircle className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.filter(v => v.status === 'ACTIVE').length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Active</div>
               </div>
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-                <div className="p-2.5 rounded-xl bg-blue-600 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Grid2x2 className="w-5 h-5" /></div>
+                <div className="p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md inline-flex mb-4"><Grid2x2 className="w-5 h-5" /></div>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white font-mono">{vehicles.filter(v => v.isPartitioned).length}</div>
                 <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-0.5">Partitioned</div>
               </div>
@@ -545,7 +545,7 @@ export default function DriversPage() {
                     onClick={() => setDriversViewMode('list')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       driversViewMode === 'list'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="List view"
@@ -556,7 +556,7 @@ export default function DriversPage() {
                     onClick={() => setDriversViewMode('grid')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       driversViewMode === 'grid'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="Grid view"
@@ -633,7 +633,7 @@ export default function DriversPage() {
                     onClick={() => setVehiclesViewMode('list')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       vehiclesViewMode === 'list'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="List view"
@@ -644,7 +644,7 @@ export default function DriversPage() {
                     onClick={() => setVehiclesViewMode('grid')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       vehiclesViewMode === 'grid'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="Grid view"
