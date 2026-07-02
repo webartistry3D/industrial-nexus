@@ -5,6 +5,7 @@ export interface User {
   lastName: string;
   role: 'SUPER_ADMIN' | 'OPERATIONS' | 'CLIENT' | 'DRIVER';
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  profileImageUrl?: string | null;
 }
 
 export interface Order {

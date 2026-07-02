@@ -12,6 +12,41 @@ import {
   FileText, CalendarClock, BadgeCheck, AlertTriangle
 } from 'lucide-react';
 
+function DriverAvatar({ user, size = 'md' }: { user?: Driver['user']; size?: 'sm' | 'md' | 'lg' }) {
+  const [error, setError] = useState(false);
+  const sizeClasses = {
+    sm: 'w-8 h-8 rounded-lg',
+    md: 'w-12 h-12 rounded-xl',
+    lg: 'w-16 h-16 rounded-xl',
+  };
+  const textClasses = {
+    sm: 'text-sm',
+    md: 'text-lg',
+    lg: 'text-2xl',
+  };
+  const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`;
+
+  if (user?.profileImageUrl && !error) {
+    const src = user.profileImageUrl.startsWith('http')
+      ? user.profileImageUrl
+      : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${user.profileImageUrl}`;
+    return (
+      <img
+        src={src}
+        alt={`${user?.firstName} ${user?.lastName}`}
+        className={`${sizeClasses[size]} object-cover border border-gray-200 dark:border-slate-600 shadow-md`}
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center`}>
+      <span className={`${textClasses[size]} font-semibold text-white`}>{initials}</span>
+    </div>
+  );
+}
+
 export default function DriverDetailPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -229,11 +264,7 @@ export default function DriverDetailPage() {
           </button>
 
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-white">
-                {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
-              </span>
-            </div>
+            <DriverAvatar user={driver.user} size="lg" />
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 {driver.user?.firstName} {driver.user?.lastName}

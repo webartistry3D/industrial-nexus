@@ -12,6 +12,41 @@ import {
 } from 'lucide-react';
 import { StatCard } from '@/components/stat-card';
 
+function DriverAvatar({ user, size = 'sm' }: { user?: Driver['user']; size?: 'sm' | 'md' | 'lg' }) {
+  const [error, setError] = useState(false);
+  const sizeClasses = {
+    sm: 'w-8 h-8 rounded-lg',
+    md: 'w-12 h-12 rounded-xl',
+    lg: 'w-16 h-16 rounded-xl',
+  };
+  const textClasses = {
+    sm: 'text-sm',
+    md: 'text-lg',
+    lg: 'text-2xl',
+  };
+  const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`;
+
+  if (user?.profileImageUrl && !error) {
+    const src = user.profileImageUrl.startsWith('http')
+      ? user.profileImageUrl
+      : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${user.profileImageUrl}`;
+    return (
+      <img
+        src={src}
+        alt={`${user?.firstName} ${user?.lastName}`}
+        className={`${sizeClasses[size]} object-cover border border-gray-200 dark:border-slate-600 shadow-md`}
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center`}>
+      <span className={`${textClasses[size]} font-semibold text-white`}>{initials}</span>
+    </div>
+  );
+}
+
 const STATUS_OPTIONS = [
   { value: '', label: 'All Status' },
   { value: 'ACTIVE', label: 'Active' },
@@ -740,11 +775,7 @@ export default function DriversPage() {
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                  <span className="text-sm font-semibold text-white">
-                                    {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
-                                  </span>
-                                </div>
+                                <DriverAvatar user={driver.user} size="sm" />
                                 <div>
                                   <p className="font-medium text-gray-900 dark:text-white">{driver.user?.firstName} {driver.user?.lastName}</p>
                                   <p className="text-xs text-gray-500 dark:text-gray-400">{driver.user?.email}</p>
@@ -789,11 +820,7 @@ export default function DriversPage() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center">
-                          <span className="text-lg font-semibold text-white">
-                            {driver.user?.firstName?.[0]}{driver.user?.lastName?.[0]}
-                          </span>
-                        </div>
+                        <DriverAvatar user={driver.user} size="md" />
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">
                             {driver.user?.firstName} {driver.user?.lastName}
