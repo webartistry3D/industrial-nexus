@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -10,7 +10,7 @@ import { Truck, Package, MapPin, CheckCircle, Calendar, Clock, List, Grid2x2, XC
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/stat-card';
 
-export default function HistoryPage() {
+function HistoryPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
@@ -511,5 +511,13 @@ export default function HistoryPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function HistoryPage() {
+  return (
+    <Suspense>
+      <HistoryPageInner />
+    </Suspense>
   );
 }
