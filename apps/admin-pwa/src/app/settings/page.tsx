@@ -6,7 +6,8 @@ import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { RoleGuard } from '@/components/role-guard';
 import { useAuth } from '@/hooks/useAuth';
-import { Settings, Save, Bell, Shield, Database, Globe, Clock, AlertTriangle, Users, Plus, Search, Filter, Edit, Trash2, UserCheck, UserX, Tag as TagIcon, X, Check, Eye, EyeOff } from 'lucide-react';
+import { Settings, Save, Bell, Shield, Database, Globe, Clock, AlertTriangle, Users, Plus, Search, Filter, Edit, Trash2, UserCheck, UserX, Tag as TagIcon, X, Check, Eye, EyeOff, CreditCard, Receipt, DollarSign, Send } from 'lucide-react';
+import { RateCard, Invoice } from '@/types';
 
 interface SystemSettings {
   general: {
@@ -61,7 +62,7 @@ export default function SettingsPage() {
     }
   }, [authLoading, user, router]);
 
-  const [activeTab, setActiveTab] = useState<'general' | 'users' | 'tags'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'users' | 'tags' | 'billing'>('general');
   
   // Settings state
   const [settings, setSettings] = useState<SystemSettings>({
@@ -128,6 +129,31 @@ export default function SettingsPage() {
   const [editedTagValue, setEditedTagValue] = useState('');
   const [tagsLoading, setTagsLoading] = useState(false);
 
+  // Billing state
+  const [rateCards, setRateCards] = useState<RateCard[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [showRateCardForm, setShowRateCardForm] = useState(false);
+  const [editingRateCard, setEditingRateCard] = useState<RateCard | null>(null);
+  const [rateCardForm, setRateCardForm] = useState<Record<string, any>>({
+    name: '',
+    baseRatePerKm: 0,
+    baseRatePerKg: 0,
+    minimumCharge: 0,
+    priorityMultipliers: { LOW: 0, NORMAL: 0, HIGH: 0, URGENT: 0 },
+    heavySurcharge: 0,
+    fragileSurcharge: 0,
+    hazardousSurcharge: 0,
+    chemicalSurcharge: 0,
+    temperatureSensitiveSurcharge: 0,
+    verticalStorageSurcharge: 0,
+    insuranceRatePercent: 0,
+    vatPercent: 0,
+  });
+  const [invoiceStatusFilter, setInvoiceStatusFilter] = useState('');
+  const [invoicePage, setInvoicePage] = useState(1);
+  const [invoiceTotalPages, setInvoiceTotalPages] = useState(1);
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -139,7 +165,10 @@ export default function SettingsPage() {
     if (activeTab === 'tags') {
       fetchHandlingTags();
     }
-  }, [activeTab, searchTerm, roleFilter, statusFilter, userPage]);
+    if (activeTab === 'billing') {
+      fetchBilling();
+    }
+  }, [activeTab, searchTerm, roleFilter, statusFilter, userPage, invoiceStatusFilter, invoicePage]);
 
   const fetchSettings = async () => {
     try {
@@ -196,6 +225,27 @@ export default function SettingsPage() {
       setError(err.message || 'Failed to fetch handling tags');
     } finally {
       setTagsLoading(false);
+    }
+  };
+
+  const fetchBilling = async () => {
+    try {
+      setBillingLoading(true);
+      const [rateCardsResponse, invoicesResponse] = await Promise.all([
+        api.getRateCards(),
+        api.getInvoices({
+          status: invoiceStatusFilter || undefined,
+          page: invoicePage,
+          limit: 10,
+        }),
+      ]);
+      setRateCards(rateCardsResponse || []);
+      setInvoices(invoicesResponse.data || []);
+      setInvoiceTotalPages(invoicesResponse.meta?.totalPages || 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch billing data');
+    } finally {
+      setBillingLoading(false);
     }
   };
 
@@ -357,6 +407,118 @@ export default function SettingsPage() {
     setEditedTagValue('');
   };
 
+  const handleCreateRateCard = async () => {
+    try {
+      await api.createRateCard(rateCardForm);
+      setShowRateCardForm(false);
+      resetRateCardForm();
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to create rate card');
+    }
+  };
+
+  const handleUpdateRateCard = async () => {
+    if (!editingRateCard) return;
+    try {
+      await api.updateRateCard(editingRateCard.id, rateCardForm);
+      setEditingRateCard(null);
+      resetRateCardForm();
+      setShowRateCardForm(false);
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to update rate card');
+    }
+  };
+
+  const handleActivateRateCard = async (id: string) => {
+    if (!confirm('Activate this rate card? The current active rate card will be deactivated.')) return;
+    try {
+      await api.activateRateCard(id);
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to activate rate card');
+    }
+  };
+
+  const handleIssueInvoice = async (id: string) => {
+    try {
+      await api.issueInvoice(id);
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to issue invoice');
+    }
+  };
+
+  const handleMarkInvoicePaid = async (id: string) => {
+    try {
+      await api.markInvoicePaid(id);
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to mark invoice as paid');
+    }
+  };
+
+  const handleVoidInvoice = async (id: string) => {
+    if (!confirm('Are you sure you want to void this invoice?')) return;
+    try {
+      await api.voidInvoice(id);
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to void invoice');
+    }
+  };
+
+  const resetRateCardForm = () => {
+    setRateCardForm({
+      name: '',
+      baseRatePerKm: 0,
+      baseRatePerKg: 0,
+      minimumCharge: 0,
+      priorityMultipliers: { LOW: 0, NORMAL: 0, HIGH: 0, URGENT: 0 },
+      heavySurcharge: 0,
+      fragileSurcharge: 0,
+      hazardousSurcharge: 0,
+      chemicalSurcharge: 0,
+      temperatureSensitiveSurcharge: 0,
+      verticalStorageSurcharge: 0,
+      insuranceRatePercent: 0,
+      vatPercent: 0,
+    });
+  };
+
+  const startEditRateCard = (rateCard: RateCard) => {
+    setEditingRateCard(rateCard);
+    setRateCardForm({
+      name: rateCard.name,
+      baseRatePerKm: rateCard.baseRatePerKm,
+      baseRatePerKg: rateCard.baseRatePerKg,
+      minimumCharge: rateCard.minimumCharge,
+      priorityMultipliers: rateCard.priorityMultipliers,
+      heavySurcharge: rateCard.heavySurcharge,
+      fragileSurcharge: rateCard.fragileSurcharge,
+      hazardousSurcharge: rateCard.hazardousSurcharge,
+      chemicalSurcharge: rateCard.chemicalSurcharge,
+      temperatureSensitiveSurcharge: rateCard.temperatureSensitiveSurcharge,
+      verticalStorageSurcharge: rateCard.verticalStorageSurcharge,
+      insuranceRatePercent: rateCard.insuranceRatePercent,
+      vatPercent: rateCard.vatPercent,
+    });
+    setShowRateCardForm(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -480,6 +642,16 @@ export default function SettingsPage() {
               }`}
             >
               Tags Management
+            </button>
+            <button
+              onClick={() => setActiveTab('billing')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'billing'
+                  ? 'bg-blue-900 dark:bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+              }`}
+            >
+              Billing
             </button>
           </div>
         </div>
@@ -738,12 +910,14 @@ export default function SettingsPage() {
                   type="number"
                   min="6"
                   max="20"
+                  placeholder="8"
                   value={settings.security.passwordMinLength}
                   onChange={(e) => setSettings({
                     ...settings,
                     security: { ...settings.security, passwordMinLength: parseInt(e.target.value) }
                   })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div>
@@ -752,12 +926,14 @@ export default function SettingsPage() {
                   type="number"
                   min="5"
                   max="120"
+                  placeholder="30"
                   value={settings.security.sessionTimeout}
                   onChange={(e) => setSettings({
                     ...settings,
                     security: { ...settings.security, sessionTimeout: parseInt(e.target.value) }
                   })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="md:col-span-2">
@@ -818,12 +994,14 @@ export default function SettingsPage() {
                   type="number"
                   min="1"
                   max="100"
+                  placeholder="10"
                   value={settings.operations.maxActiveTrips}
                   onChange={(e) => setSettings({
                     ...settings,
                     operations: { ...settings.operations, maxActiveTrips: parseInt(e.target.value) }
                   })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </div>
@@ -1199,6 +1377,216 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        ) : activeTab === 'billing' ? (
+          <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+            {/* Rate Cards Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                    <CreditCard className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Rate Cards</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Manage pricing rules and surcharges</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingRateCard(null);
+                    resetRateCardForm();
+                    setShowRateCardForm(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-800 hover:to-blue-800 text-white rounded-lg text-sm font-semibold"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Rate Card
+                </button>
+              </div>
+
+              {billingLoading && rateCards.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">Loading rate cards...</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-gray-300">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Name</th>
+                        <th className="px-3 py-2 text-left">Base Rate/km</th>
+                        <th className="px-3 py-2 text-left">Base Rate/kg</th>
+                        <th className="px-3 py-2 text-left">Min Charge</th>
+                        <th className="px-3 py-2 text-left">VAT</th>
+                        <th className="px-3 py-2 text-left">Insurance</th>
+                        <th className="px-3 py-2 text-left">Status</th>
+                        <th className="px-3 py-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                      {rateCards.map((rateCard) => (
+                        <tr key={rateCard.id}>
+                          <td className="px-3 py-3 font-medium text-gray-900 dark:text-white">{rateCard.name}</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400">₦{rateCard.baseRatePerKm}</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400">₦{rateCard.baseRatePerKg}</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400">₦{rateCard.minimumCharge.toLocaleString()}</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400">{(rateCard.vatPercent * 100).toFixed(1)}%</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400">{(rateCard.insuranceRatePercent * 100).toFixed(1)}%</td>
+                          <td className="px-3 py-3">
+                            {rateCard.isActive ? (
+                              <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-xs font-medium">Active</span>
+                            ) : (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">Inactive</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {!rateCard.isActive && (
+                                <button
+                                  onClick={() => handleActivateRateCard(rateCard.id)}
+                                  className="text-green-600 hover:text-green-700 p-1"
+                                  title="Activate"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => startEditRateCard(rateCard)}
+                                disabled={rateCard.isActive}
+                                className="text-blue-600 hover:text-blue-700 p-1 disabled:opacity-40"
+                                title={rateCard.isActive ? 'Deactivate to edit' : 'Edit'}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Invoices Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                    <Receipt className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Invoices</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Manage issued invoices</p>
+                  </div>
+                </div>
+                <select
+                  value={invoiceStatusFilter}
+                  onChange={(e) => { setInvoiceStatusFilter(e.target.value); setInvoicePage(1); }}
+                  className="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-sm"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="ISSUED">Issued</option>
+                  <option value="PAID">Paid</option>
+                  <option value="VOID">Void</option>
+                </select>
+              </div>
+
+              {billingLoading && invoices.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">Loading invoices...</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-gray-300">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Invoice #</th>
+                        <th className="px-3 py-2 text-left">Order #</th>
+                        <th className="px-3 py-2 text-left">Client</th>
+                        <th className="px-3 py-2 text-left">Status</th>
+                        <th className="px-3 py-2 text-right">Total</th>
+                        <th className="px-3 py-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                      {invoices.map((invoice) => (
+                        <tr key={invoice.id}>
+                          <td className="px-3 py-3 font-medium text-gray-900 dark:text-white font-mono">{invoice.invoiceNumber}</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400 font-mono">{invoice.order?.orderNumber || invoice.orderId}</td>
+                          <td className="px-3 py-3 text-gray-600 dark:text-gray-400">
+                            {invoice.order?.client ? `${invoice.order.client.firstName} ${invoice.order.client.lastName}` : 'N/A'}
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              invoice.status === 'PAID'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                : invoice.status === 'ISSUED'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                : invoice.status === 'VOID'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            }`}>
+                              {formatStatus(invoice.status)}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-right text-gray-900 dark:text-white font-mono">₦{invoice.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                          <td className="px-3 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {invoice.status === 'DRAFT' && (
+                                <button
+                                  onClick={() => handleIssueInvoice(invoice.id)}
+                                  className="text-blue-600 hover:text-blue-700 p-1"
+                                  title="Issue"
+                                >
+                                  <Send className="w-4 h-4" />
+                                </button>
+                              )}
+                              {invoice.status === 'ISSUED' && (
+                                <button
+                                  onClick={() => handleMarkInvoicePaid(invoice.id)}
+                                  className="text-green-600 hover:text-green-700 p-1"
+                                  title="Mark Paid"
+                                >
+                                  <DollarSign className="w-4 h-4" />
+                                </button>
+                              )}
+                              {(invoice.status === 'DRAFT' || invoice.status === 'ISSUED') && (
+                                <button
+                                  onClick={() => handleVoidInvoice(invoice.id)}
+                                  className="text-red-600 hover:text-red-700 p-1"
+                                  title="Void"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {invoiceTotalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button
+                    onClick={() => setInvoicePage(p => Math.max(1, p - 1))}
+                    disabled={invoicePage === 1}
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Page {invoicePage} of {invoiceTotalPages}</span>
+                  <button
+                    onClick={() => setInvoicePage(p => Math.min(invoiceTotalPages, p + 1))}
+                    disabled={invoicePage === invoiceTotalPages}
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         ) : null}
 
         {/* Create User Modal */}
@@ -1414,6 +1802,201 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Rate Card Modal */}
+        {showRateCardForm && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pb-24 sm:pb-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowRateCardForm(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full p-4 max-h-[75vh] overflow-y-auto">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                {editingRateCard ? 'Edit Rate Card' : 'Add Rate Card'}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={rateCardForm.name}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base Rate/km (₦)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="50"
+                    value={rateCardForm.baseRatePerKm || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, baseRatePerKm: parseFloat(e.target.value) || 0 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base Rate/kg (₦)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="20"
+                    value={rateCardForm.baseRatePerKg || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, baseRatePerKg: parseFloat(e.target.value) || 0 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Minimum Charge (₦)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="1000"
+                    value={rateCardForm.minimumCharge || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, minimumCharge: parseFloat(e.target.value) || 0 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">VAT %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="7.5"
+                    value={(rateCardForm.vatPercent * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, vatPercent: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Insurance %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="1"
+                    value={(rateCardForm.insuranceRatePercent * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, insuranceRatePercent: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heavy Surcharge %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="10"
+                    value={(rateCardForm.heavySurcharge * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, heavySurcharge: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fragile Surcharge %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="5"
+                    value={(rateCardForm.fragileSurcharge * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, fragileSurcharge: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hazardous Surcharge %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="15"
+                    value={(rateCardForm.hazardousSurcharge * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, hazardousSurcharge: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chemical Surcharge %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="8"
+                    value={(rateCardForm.chemicalSurcharge * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, chemicalSurcharge: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temperature Surcharge %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="5"
+                    value={(rateCardForm.temperatureSensitiveSurcharge * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, temperatureSensitiveSurcharge: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vertical Storage Surcharge %</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="5"
+                    value={(rateCardForm.verticalStorageSurcharge * 100) || ''}
+                    onChange={(e) => setRateCardForm({ ...rateCardForm, verticalStorageSurcharge: (parseFloat(e.target.value) || 0) / 100 })}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority Multipliers</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {['LOW', 'NORMAL', 'HIGH', 'URGENT'].map((key) => (
+                      <div key={key}>
+                        <label className="text-xs text-gray-500 dark:text-gray-400">{key}</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="1"
+                          value={rateCardForm.priorityMultipliers[key] || ''}
+                          onChange={(e) => setRateCardForm({
+                            ...rateCardForm,
+                            priorityMultipliers: {
+                              ...rateCardForm.priorityMultipliers,
+                              [key]: parseFloat(e.target.value) || 0,
+                            },
+                          })}
+                          onWheel={(e) => e.currentTarget.blur()}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setShowRateCardForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={editingRateCard ? handleUpdateRateCard : handleCreateRateCard}
+                  className="flex-1 px-4 py-2 bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  {editingRateCard ? 'Update Rate Card' : 'Create Rate Card'}
+                </button>
+              </div>
             </div>
           </div>
         )}

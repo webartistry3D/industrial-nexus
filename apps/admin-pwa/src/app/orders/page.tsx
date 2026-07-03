@@ -284,7 +284,7 @@ function OrdersPageContent() {
                   onClick={() => setViewMode('list')}
                   className={`p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                   }`}
                   aria-label="List view"
@@ -295,7 +295,7 @@ function OrdersPageContent() {
                   onClick={() => setViewMode('grid')}
                   className={`p-2.5 rounded-xl transition-all duration-300 ${
                     viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                       : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                   }`}
                   aria-label="Grid view"

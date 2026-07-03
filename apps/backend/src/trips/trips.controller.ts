@@ -97,11 +97,13 @@ export class TripsController {
     @Param('id') id: string,
     @Query('filename') filename: string,
     @Query('mimeType') mimeType: string,
+    @Query('type') type?: string,
   ) {
     if (!filename || !mimeType) {
       throw new BadRequestException('filename and mimeType query params are required');
     }
-    return this.storageService.getPresignedUploadUrl('pod-photos', filename, mimeType);
+    const folder = type === 'signature' ? 'pod-signatures' : 'pod-photos';
+    return this.storageService.getPresignedUploadUrl(folder, filename, mimeType);
   }
 
   @Post(':id/pod')
@@ -109,7 +111,7 @@ export class TripsController {
   @HttpCode(HttpStatus.OK)
   submitPOD(
     @Param('id') id: string,
-    @Body() podData: { photoUrl?: string; signatureUrl?: string; notes?: string; lat?: number; lng?: number },
+    @Body() podData: { photoUrl?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number },
     @CurrentUser() user: { userId: string },
   ) {
     return this.tripsService.submitPOD(id, podData, user.userId);

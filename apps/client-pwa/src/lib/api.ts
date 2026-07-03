@@ -13,8 +13,11 @@ export async function refreshAccessToken(): Promise<string | null> {
 
     try {
       const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
-      const { accessToken } = response.data;
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
       localStorage.setItem('accessToken', accessToken);
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
       return accessToken;
     } catch (refreshError) {
       const refreshStatus = (refreshError as AxiosError).response?.status;
@@ -145,6 +148,7 @@ class ApiClient {
     };
     handlingTags?: string[];
     deliveryInstructions?: string;
+    declaredCargoValue?: number;
   }) {
     const response = await this.client.post('/orders', orderData);
     return response.data;
@@ -206,6 +210,26 @@ class ApiClient {
 
   async getHandlingTags() {
     const response = await this.client.get('/settings/handling-tags');
+    return response.data;
+  }
+
+  // Billing
+  async getOrderInvoice(orderId: string) {
+    const response = await this.client.get(`/billing/orders/${orderId}/invoice`);
+    return response.data;
+  }
+
+  async getBillingEstimate(data: {
+    pickupLat: number;
+    pickupLng: number;
+    deliveryLat: number;
+    deliveryLng: number;
+    totalWeight: number;
+    priority: string;
+    handlingTags: string[];
+    declaredCargoValue?: number;
+  }) {
+    const response = await this.client.post('/billing/estimate', data);
     return response.data;
   }
 }

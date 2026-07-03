@@ -272,7 +272,7 @@ export default function TrackingPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-600 shadow-md">
             <Truck className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -299,7 +299,7 @@ export default function TrackingPage() {
                 onClick={() => setViewMode('list')}
                 className={`p-2.5 rounded-xl transition-all duration-300 ${
                   viewMode === 'list'
-                    ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                     : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                 }`}
                 aria-label="List view"
@@ -310,7 +310,7 @@ export default function TrackingPage() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2.5 rounded-xl transition-all duration-300 ${
                   viewMode === 'grid'
-                    ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                     : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                 }`}
                 aria-label="Grid view"

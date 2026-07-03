@@ -196,6 +196,18 @@ export default function TripDetail({ params }: { params: { id: string } }) {
     }
   };
 
+  const dataUriToBlob = (dataUri: string): Blob => {
+    const [header, base64Data] = dataUri.split(',');
+    const mimeMatch = header.match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+    const binary = atob(base64Data);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: mime });
+  };
+
   const handleSubmitPOD = async () => {
     setPodSubmitting(true);
     setPodError(null);
@@ -215,18 +227,31 @@ export default function TripDetail({ params }: { params: { id: string } }) {
           lng = position.coords.longitude;
         } catch (error) {
           console.warn('Failed to get GPS coordinates:', error);
-          // Continue without GPS coordinates
         }
+      }
+
+      // Upload signature to storage if present
+      let signatureUrl: string | undefined;
+      if (podForm.signatureUrl && podForm.signatureUrl.startsWith('data:')) {
+        const signatureBlob = dataUriToBlob(podForm.signatureUrl);
+        const { uploadUrl, finalUrl } = await api.getPodUploadUrl(
+          params.id,
+          'signature.png',
+          'image/png',
+          'signature',
+        );
+        await api.uploadFileToPresignedUrl(uploadUrl, signatureBlob, 'image/png');
+        signatureUrl = finalUrl;
+      } else if (podForm.signatureUrl) {
+        signatureUrl = podForm.signatureUrl;
       }
 
       await api.submitPOD(params.id, {
         photoUrl: podForm.photoUrl || undefined,
-        signatureUrl: podForm.signatureUrl || undefined,
-        notes: [
-          podForm.receiverName ? `Received by: ${podForm.receiverName}` : '',
-          podForm.receiverPhone ? `Phone: ${podForm.receiverPhone}` : '',
-          podForm.notes,
-        ].filter(Boolean).join(' | ') || undefined,
+        signatureUrl,
+        receiverName: podForm.receiverName || undefined,
+        receiverPhone: podForm.receiverPhone || undefined,
+        notes: podForm.notes || undefined,
         lat,
         lng,
       });
@@ -328,17 +353,6 @@ export default function TripDetail({ params }: { params: { id: string } }) {
       </header>
 
       <main className="p-4 space-y-4">
-        {/* Start Trip Button for ASSIGNED status */}
-        {trip.status === 'ASSIGNED' && trip.order?.status === 'ASSIGNED' && (
-          <button
-            onClick={handleStartTrip}
-            disabled={actionLoading}
-            className="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl shadow-lg active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Play className="w-5 h-5" />
-            {actionLoading ? 'Starting...' : 'Start Trip'}
-          </button>
-        )}
         {/* Trip Status */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-2">

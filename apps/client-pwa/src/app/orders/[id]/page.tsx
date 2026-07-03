@@ -31,6 +31,25 @@ interface POD {
   lng?: number;
 }
 
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  status: 'DRAFT' | 'ISSUED' | 'PAID' | 'VOID';
+  distanceKm: number;
+  baseFreightCharge: number;
+  weightCharge: number;
+  handlingSurcharges: Record<string, number>;
+  priorityMultiplier: number;
+  subtotal: number;
+  insurancePremium: number;
+  vatAmount: number;
+  totalAmount: number;
+  issuedAt?: string;
+  paidAt?: string;
+  dueDate?: string;
+  createdAt: string;
+}
+
 interface Order {
   id: string;
   orderNumber: string;
@@ -39,6 +58,7 @@ interface Order {
   deliveryLocation: { lat: number; lng: number; address: string };
   cargoDescription?: string;
   handlingTags?: HandlingTag[];
+  declaredCargoValue?: number;
   trip?: {
     id: string;
     status: string;
@@ -51,6 +71,7 @@ interface Order {
     vehicle?: { plateNumber: string } | null;
     pod?: POD | null;
   };
+  invoice?: Invoice | null;
   createdAt: string;
 }
 
@@ -216,6 +237,61 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </div>
               </div>
             </div>
+
+            {/* Invoice */}
+            {order.invoice && (
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Invoice</h3>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    order.invoice.status === 'PAID'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                      : order.invoice.status === 'ISSUED'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                      : order.invoice.status === 'VOID'
+                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                  }`}>
+                    {formatStatus(order.invoice.status)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-mono mb-4">{order.invoice.invoiceNumber}</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Base Freight</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{order.invoice.baseFreightCharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Weight Charge</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{order.invoice.weightCharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  {Object.entries(order.invoice.handlingSurcharges).map(([tag, amount]) => (
+                    <div key={tag} className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Handling ({tag})</span>
+                      <span className="font-medium text-gray-900 dark:text-white">₦{(amount as number).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-200 dark:border-slate-700 my-2" />
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{order.invoice.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Insurance Premium</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{order.invoice.insurancePremium.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">VAT</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{order.invoice.vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="border-t border-gray-200 dark:border-slate-700 my-2" />
+                  <div className="flex justify-between text-base font-semibold">
+                    <span className="text-gray-900 dark:text-white">Total</span>
+                    <span className="text-blue-600 dark:text-blue-400">₦{order.invoice.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Desktop Grid Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -91,8 +91,8 @@ export default function NewDriverPage() {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-              <Users className="w-6 h-6 text-white" />
+            <div className="p-2.5 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Users className="w-6 h-6 text-white dark:text-black" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Add New Driver</h1>

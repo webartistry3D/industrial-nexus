@@ -41,8 +41,8 @@ function DriverAvatar({ user, size = 'sm' }: { user?: Driver['user']; size?: 'sm
   }
 
   return (
-    <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center`}>
-      <span className={`${textClasses[size]} font-semibold text-white`}>{initials}</span>
+    <div className={`${sizeClasses[size]} bg-blue-900 dark:bg-lime-500 shadow-md flex items-center justify-center`}>
+      <span className={`${textClasses[size]} font-semibold text-white dark:text-black`}>{initials}</span>
     </div>
   );
 }
@@ -447,11 +447,11 @@ export default function DriversPage() {
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <div className="p-2.5 rounded-xl bg-blue-600 shadow-md">
                 {activeTab === 'drivers' ? (
-                  <Users className="w-6 h-6 text-white dark:text-black" />
+                  <Users className="w-6 h-6 text-white" />
                 ) : (
-                  <Truck className="w-6 h-6 text-white dark:text-black" />
+                  <Truck className="w-6 h-6 text-white" />
                 )}
               </div>
               <div>
@@ -470,7 +470,7 @@ export default function DriversPage() {
             {activeTab === 'drivers' ? (
               <button
                 onClick={() => router.push('/drivers/new')}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Add Driver
@@ -478,7 +478,7 @@ export default function DriversPage() {
             ) : (
               <button
                 onClick={() => setShowCreateVehicleModal(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-900 hover:bg-blue-800 dark:bg-lime-500 dark:hover:bg-lime-600 text-white dark:text-black rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Add Vehicle
@@ -580,7 +580,7 @@ export default function DriversPage() {
                     onClick={() => setDriversViewMode('list')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       driversViewMode === 'list'
-                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="List view"
@@ -591,7 +591,7 @@ export default function DriversPage() {
                     onClick={() => setDriversViewMode('grid')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       driversViewMode === 'grid'
-                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="Grid view"
@@ -668,7 +668,7 @@ export default function DriversPage() {
                     onClick={() => setVehiclesViewMode('list')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       vehiclesViewMode === 'list'
-                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="List view"
@@ -679,7 +679,7 @@ export default function DriversPage() {
                     onClick={() => setVehiclesViewMode('grid')}
                     className={`p-2.5 rounded-xl transition-all duration-300 ${
                       vehiclesViewMode === 'grid'
-                        ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md shadow-blue-500/20'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                         : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
                     }`}
                     aria-label="Grid view"
@@ -857,8 +857,8 @@ export default function DriversPage() {
 
                     {driver.vehicle && (
                       <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-slate-700/30 rounded-xl text-sm">
-                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
-                          <Truck className="w-4 h-4 text-white" />
+                        <div className="p-1.5 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                          <Truck className="w-4 h-4 text-white dark:text-black" />
                         </div>
                         <span className="text-gray-700 dark:text-gray-300 font-mono">
                           {driver.vehicle.plateNumber} • {driver.vehicle.category}
@@ -1012,8 +1012,8 @@ export default function DriversPage() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md flex items-center justify-center">
-                          <Truck className="w-6 h-6 text-white" />
+                        <div className="w-12 h-12 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md flex items-center justify-center">
+                          <Truck className="w-6 h-6 text-white dark:text-black" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -1215,8 +1215,8 @@ export default function DriversPage() {
               ) : (
                 <>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                      <Plus className="w-5 h-5 text-white" />
+                    <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                      <Plus className="w-5 h-5 text-white dark:text-black" />
                     </div>
                     Add New Vehicle
                   </h2>
@@ -1322,8 +1322,8 @@ export default function DriversPage() {
           <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                  <Edit className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <Edit className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 Edit Vehicle
               </h2>

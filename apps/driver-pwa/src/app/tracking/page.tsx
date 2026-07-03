@@ -94,8 +94,8 @@ export default function TrackingPage() {
   useEffect(() => {
     if (user) {
       fetchActiveTrip();
-      // Watch for location updates and send to backend
       if ('geolocation' in navigator) {
+        // Set initial location immediately
         navigator.geolocation.getCurrentPosition(
           (position) => {
             setCurrentLocation({
@@ -105,9 +105,15 @@ export default function TrackingPage() {
           },
           (err) => console.error('Geolocation error:', err)
         );
-        
+
+        // Continuous watch for when the device moves
         const watchId = navigator.geolocation.watchPosition(
           (position) => {
+            const location = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            setCurrentLocation(location);
             const trip = currentTripRef.current;
             if (trip?.status === 'IN_TRANSIT') {
               api.updateLocation(
@@ -122,7 +128,34 @@ export default function TrackingPage() {
           { enableHighAccuracy: true, maximumAge: 10000 }
         );
 
-        return () => navigator.geolocation.clearWatch(watchId);
+        // Poll every 30 seconds so the map/updates happen even when stationary
+        const intervalId = setInterval(() => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const location = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+              setCurrentLocation(location);
+              const trip = currentTripRef.current;
+              if (trip?.status === 'IN_TRANSIT') {
+                api.updateLocation(
+                  trip.id,
+                  position.coords.latitude,
+                  position.coords.longitude,
+                  position.coords.accuracy
+                );
+              }
+            },
+            (err) => console.error('Geolocation interval error:', err),
+            { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+          );
+        }, 30000);
+
+        return () => {
+          navigator.geolocation.clearWatch(watchId);
+          clearInterval(intervalId);
+        };
       }
     }
   }, [user]);
@@ -177,7 +210,7 @@ export default function TrackingPage() {
       <main className="pt-20 px-4 pb-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
+          <div className="p-2.5 rounded-xl bg-blue-600 shadow-md">
             <MapPin className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -238,8 +271,8 @@ export default function TrackingPage() {
               </h2>
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-                    <MapPin className="w-5 h-5 text-white" />
+                  <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                    <MapPin className="w-5 h-5 text-white dark:text-black" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">Pickup</p>
@@ -249,8 +282,8 @@ export default function TrackingPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                    <MapPin className="w-5 h-5 text-white" />
+                  <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                    <MapPin className="w-5 h-5 text-white dark:text-black" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">Delivery</p>
@@ -266,8 +299,8 @@ export default function TrackingPage() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 shadow-md">
-                    <Navigation className="w-5 h-5 text-white" />
+                  <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                    <Navigation className="w-5 h-5 text-white dark:text-black" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>

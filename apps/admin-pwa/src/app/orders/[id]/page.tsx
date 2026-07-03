@@ -86,34 +86,34 @@ export default function OrderDetailPage() {
     try {
       if (!silent) setLoading(true);
       setError(null);
-      const response = await api.getOrder(orderId);
+      const response: Order = await api.getOrder(orderId);
       setOrder(response);
       
-      // Build timeline history based on order status
-      const events = [
+      // Build timeline from actual audit history
+      const events: Array<{ status: string; timestamp: Date; description: string }> = [
         {
           status: 'Created',
           timestamp: new Date(response.createdAt),
           description: 'Order created',
         },
       ];
-      
-      // Add status change events based on current status
-      const statusOrder = ['DRAFT', 'SUBMITTED', 'APPROVED', 'KITTING', 'DISPATCH_READY', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'REJECTED', 'CANCELLED'];
-      const currentIndex = statusOrder.indexOf(response.status);
-      
-      if (currentIndex > 0) {
-        for (let i = 1; i <= currentIndex; i++) {
-          const status = statusOrder[i];
-          const description = getStatusDescription(status);
-          events.push({
-            status,
-            timestamp: new Date(response.updatedAt), // Using updatedAt for subsequent events
-            description,
-          });
-        }
+
+      if (response.statusHistory && response.statusHistory.length > 0) {
+        response.statusHistory.forEach((log) => {
+          const newStatus = log.newValue?.status;
+          if (newStatus) {
+            events.push({
+              status: newStatus,
+              timestamp: new Date(log.createdAt),
+              description: getStatusDescription(newStatus),
+            });
+          }
+        });
       }
-      
+
+      // Sort by timestamp ascending
+      events.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
       setTimelineEvents(events);
     } catch (err) {
       console.error('Failed to fetch order:', err);
@@ -481,15 +481,15 @@ export default function OrderDetailPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'DELIVERED':
-        return <CheckCircle2 className="w-6 h-6 text-green-600" />;
+        return <CheckCircle2 className="w-6 h-6 text-white dark:text-black" />;
       case 'CANCELLED':
-        return <XCircle className="w-6 h-6 text-red-600" />;
+        return <XCircle className="w-6 h-6 text-white dark:text-black" />;
       case 'REJECTED':
-        return <XCircle className="w-6 h-6 text-red-600" />;
+        return <XCircle className="w-6 h-6 text-white dark:text-black" />;
       case 'IN_TRANSIT':
-        return <Truck className="w-6 h-6 text-blue-600" />;
+        return <Truck className="w-6 h-6 text-white dark:text-black" />;
       default:
-        return <Package className="w-6 h-6 text-blue-600" />;
+        return <Package className="w-6 h-6 text-white dark:text-black" />;
     }
   };
 
@@ -560,8 +560,8 @@ export default function OrderDetailPage() {
           
           <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-5 shadow-lg shadow-red-500/10">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
-                <AlertCircle className="w-6 h-6 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <AlertCircle className="w-6 h-6 text-white dark:text-black" />
               </div>
               <div>
                 <p className="text-red-700 dark:text-red-400 font-medium">{error || 'Order not found'}</p>
@@ -592,7 +592,7 @@ export default function OrderDetailPage() {
         </button>
 
         <div className="flex items-start gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+          <div className="p-3 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
             {getStatusIcon(order.status)}
           </div>
           <div className="flex-1">
@@ -687,8 +687,8 @@ export default function OrderDetailPage() {
         {order.status === 'KITTING' && (
           <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 dark:from-yellow-500/20 dark:to-yellow-600/10 border border-yellow-200/50 dark:border-yellow-700/50 rounded-2xl shadow-lg shadow-yellow-500/10 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-md">
-                <Wrench className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Wrench className="w-5 h-5 text-white dark:text-black" />
               </div>
               Kitting in Progress
             </h2>
@@ -711,8 +711,8 @@ export default function OrderDetailPage() {
           {/* Cargo Info */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-              <Package className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Package className="w-5 h-5 text-white dark:text-black" />
             </div>
             Cargo Information
           </h2>
@@ -779,8 +779,8 @@ export default function OrderDetailPage() {
         {/* Locations */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-              <MapPin className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <MapPin className="w-5 h-5 text-white dark:text-black" />
             </div>
             Locations
           </h2>
@@ -806,8 +806,8 @@ export default function OrderDetailPage() {
         {/* Client Info */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-              <User className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <User className="w-5 h-5 text-white dark:text-black" />
             </div>
             Client Information
           </h2>
@@ -817,12 +817,141 @@ export default function OrderDetailPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.email || 'N/A'}</p>
         </div>
 
+        {/* Invoice Panel */}
+        {order.invoice && (
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <FileText className="w-5 h-5 text-white dark:text-black" />
+              </div>
+              Invoice
+            </h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Invoice #</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">{order.invoice.invoiceNumber}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  order.invoice.status === 'PAID'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                    : order.invoice.status === 'ISSUED'
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                    : order.invoice.status === 'VOID'
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                }`}>
+                  {formatStatus(order.invoice.status)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Base Freight</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">₦{order.invoice.baseFreightCharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Weight Charge</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">₦{order.invoice.weightCharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              {order.invoice.handlingSurcharges && Object.entries(order.invoice.handlingSurcharges).map(([tag, amount]) => (
+                <div key={tag} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Handling ({tag})</span>
+                  <span className="text-sm text-gray-900 dark:text-white font-mono">₦{(amount as number).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              ))}
+              <div className="border-t border-gray-200 dark:border-slate-700 my-2" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Subtotal</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">₦{order.invoice.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Insurance Premium</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">₦{order.invoice.insurancePremium.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">VAT</span>
+                <span className="text-sm text-gray-900 dark:text-white font-mono">₦{order.invoice.vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="border-t border-gray-200 dark:border-slate-700 my-2" />
+              <div className="flex items-center justify-between font-semibold">
+                <span className="text-sm text-gray-900 dark:text-white">Total</span>
+                <span className="text-sm text-blue-600 dark:text-blue-400 font-mono">₦{order.invoice.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {order.invoice.status === 'DRAFT' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        setActionLoading(true);
+                        await api.issueInvoice(order.invoice!.id);
+                        await fetchOrder();
+                        setActionSuccess(true);
+                        setTimeout(() => setActionSuccess(false), 3000);
+                      } catch (err: any) {
+                        setActionError(err.message || 'Failed to issue invoice');
+                      } finally {
+                        setActionLoading(false);
+                      }
+                    }}
+                    disabled={actionLoading}
+                    className="flex-1 px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+                  >
+                    Issue
+                  </button>
+                )}
+                {order.invoice.status === 'ISSUED' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        setActionLoading(true);
+                        await api.markInvoicePaid(order.invoice!.id);
+                        await fetchOrder();
+                        setActionSuccess(true);
+                        setTimeout(() => setActionSuccess(false), 3000);
+                      } catch (err: any) {
+                        setActionError(err.message || 'Failed to mark invoice as paid');
+                      } finally {
+                        setActionLoading(false);
+                      }
+                    }}
+                    disabled={actionLoading}
+                    className="flex-1 px-3 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+                  >
+                    Mark Paid
+                  </button>
+                )}
+                {(order.invoice.status === 'DRAFT' || order.invoice.status === 'ISSUED') && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        setActionLoading(true);
+                        await api.voidInvoice(order.invoice!.id);
+                        await fetchOrder();
+                        setActionSuccess(true);
+                        setTimeout(() => setActionSuccess(false), 3000);
+                      } catch (err: any) {
+                        setActionError(err.message || 'Failed to void invoice');
+                      } finally {
+                        setActionLoading(false);
+                      }
+                    }}
+                    disabled={actionLoading}
+                    className="flex-1 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+                  >
+                    Void
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Package Tracker Info */}
         {order?.packageTracker && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                <MapPin className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <MapPin className="w-5 h-5 text-white dark:text-black" />
               </div>
               Package Tracker
             </h2>
@@ -868,8 +997,8 @@ export default function OrderDetailPage() {
         {order?.trip && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-md">
-                <Truck className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Truck className="w-5 h-5 text-white dark:text-black" />
               </div>
               Trip Assignment
             </h2>
@@ -921,8 +1050,8 @@ export default function OrderDetailPage() {
         {/* Timeline */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-              <Calendar className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Calendar className="w-5 h-5 text-white dark:text-black" />
             </div>
             Order Timeline
           </h2>

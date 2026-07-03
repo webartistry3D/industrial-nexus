@@ -35,13 +35,20 @@ export async function refreshAccessToken(): Promise<string | null> {
 
     try {
       const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
-      const { accessToken: newAccessToken } = response.data;
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
       accessToken = newAccessToken;
+      if (newRefreshToken) {
+        refreshToken = newRefreshToken;
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
+      localStorage.setItem('accessToken', newAccessToken);
       return newAccessToken;
     } catch (refreshError) {
       const refreshStatus = (refreshError as AxiosError).response?.status;
       if (refreshStatus === 401 || refreshStatus === 403) {
         clearTokens();
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
         if (typeof window !== 'undefined' && !currentPath.includes('/login')) {
           window.location.href = '/login';
@@ -368,17 +375,17 @@ class ApiClient {
   }
 
   async updateDriverStatus(id: string, status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') {
-    const response = await this.client.patch(`/drivers/${id}/status`, { status });
+    const response = await this.client.patch(`/drivers/${id}`, { status });
     return response.data;
   }
 
   async updateDriverKyc(id: string, kycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED') {
-    const response = await this.client.patch(`/drivers/${id}/kyc`, { kycStatus });
+    const response = await this.client.patch(`/drivers/${id}`, { kycStatus });
     return response.data;
   }
 
   async updateDriverAvailability(id: string, availability: 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY') {
-    const response = await this.client.patch(`/drivers/${id}/availability`, { availability });
+    const response = await this.client.patch(`/drivers/${id}`, { availability });
     return response.data;
   }
 
@@ -639,6 +646,68 @@ class ApiClient {
 
   async deleteHandlingTag(id: string) {
     const response = await this.client.delete(`/settings/handling-tags/${id}`);
+    return response.data;
+  }
+
+  // Billing - Rate Cards
+  async getRateCards() {
+    const response = await this.client.get('/billing/rate-cards');
+    return response.data;
+  }
+
+  async createRateCard(data: any) {
+    const response = await this.client.post('/billing/rate-cards', data);
+    return response.data;
+  }
+
+  async updateRateCard(id: string, data: any) {
+    const response = await this.client.patch(`/billing/rate-cards/${id}`, data);
+    return response.data;
+  }
+
+  async activateRateCard(id: string) {
+    const response = await this.client.post(`/billing/rate-cards/${id}/activate`);
+    return response.data;
+  }
+
+  // Billing - Invoices
+  async getInvoices(params?: { status?: string; page?: number; limit?: number }) {
+    const response = await this.client.get('/billing/invoices', { params });
+    return response.data;
+  }
+
+  async getInvoice(id: string) {
+    const response = await this.client.get(`/billing/invoices/${id}`);
+    return response.data;
+  }
+
+  async issueInvoice(id: string) {
+    const response = await this.client.post(`/billing/invoices/${id}/issue`);
+    return response.data;
+  }
+
+  async markInvoicePaid(id: string) {
+    const response = await this.client.post(`/billing/invoices/${id}/mark-paid`);
+    return response.data;
+  }
+
+  async voidInvoice(id: string) {
+    const response = await this.client.post(`/billing/invoices/${id}/void`);
+    return response.data;
+  }
+
+  async getOrderInvoice(orderId: string) {
+    const response = await this.client.get(`/billing/orders/${orderId}/invoice`);
+    return response.data;
+  }
+
+  async getBillingQuote(orderId: string) {
+    const response = await this.client.get(`/billing/quote/${orderId}`);
+    return response.data;
+  }
+
+  async getBillingEstimate(data: any) {
+    const response = await this.client.post('/billing/estimate', data);
     return response.data;
   }
 }

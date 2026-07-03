@@ -57,7 +57,7 @@ async function bootstrap() {
 
   // Serve static uploads only in local dev (production uses S3 URLs directly)
   if (configService.get<string>('NODE_ENV') !== 'production') {
-    app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
+    app.useStaticAssets(join(process.cwd(), 'uploads'), {
       prefix: '/uploads/',
       setHeaders: (res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');

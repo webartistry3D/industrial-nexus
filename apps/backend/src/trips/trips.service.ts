@@ -424,7 +424,7 @@ export class TripsService {
     return trackingPoint;
   }
 
-  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; notes?: string; lat?: number; lng?: number }, userId: string) {
+  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number }, userId: string) {
     const trip = await this.findOne(id);
 
     if (trip.pod) {
@@ -436,6 +436,8 @@ export class TripsService {
         tripId: id,
         imageUrl: podData.photoUrl,
         signatureUrl: podData.signatureUrl,
+        receiverName: podData.receiverName,
+        receiverPhone: podData.receiverPhone,
         notes: podData.notes,
         lat: podData.lat,
         lng: podData.lng,

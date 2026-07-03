@@ -23,6 +23,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
 import { MapsModule } from './maps/maps.module';
 import { MailModule } from './mail/mail.module';
 import { StorageModule } from './storage/storage.module';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { StorageModule } from './storage/storage.module';
     UsersModule,
     AuditModule,
     OrdersModule,
+    BillingModule,
     KittingModule,
     PackageTrackersModule,
     DriversModule,

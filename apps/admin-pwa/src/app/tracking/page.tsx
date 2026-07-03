@@ -332,7 +332,7 @@ function TrackingPageContent() {
       <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl bg-gradient-to-br shadow-md ${packageTrackerId ? 'from-purple-500 to-purple-600' : 'from-blue-600 to-blue-600'}`}>
+            <div className="p-2.5 rounded-xl bg-blue-600 shadow-md">
               {packageTrackerId ? <Package className="w-6 h-6 text-white" /> : <Navigation className="w-6 h-6 text-white" />}
             </div>
             <div>
@@ -428,8 +428,8 @@ function TrackingPageContent() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                  <Navigation className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <Navigation className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Device</p>
@@ -439,8 +439,8 @@ function TrackingPageContent() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                  <MapPin className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <MapPin className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Coordinates</p>
@@ -452,8 +452,8 @@ function TrackingPageContent() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                  <Battery className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <Battery className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Battery</p>
@@ -463,8 +463,8 @@ function TrackingPageContent() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-                  <Activity className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <Activity className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
@@ -518,7 +518,7 @@ function TrackingPageContent() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trip Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-800 dark:bg-lime-500 shadow-md">
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
                   <Truck className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
@@ -529,8 +529,8 @@ function TrackingPageContent() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                  <Navigation className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <Navigation className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Vehicle</p>
@@ -540,8 +540,8 @@ function TrackingPageContent() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-                  <MapPin className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <MapPin className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
@@ -551,8 +551,8 @@ function TrackingPageContent() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                  <Activity className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                  <Activity className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Last Event</p>

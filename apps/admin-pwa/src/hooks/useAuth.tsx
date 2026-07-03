@@ -25,13 +25,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Tokens are intentionally not persisted. Every page/session starts logged out.
-    setIsLoading(false);
+    const token = localStorage.getItem('accessToken');
+    const stored = localStorage.getItem('refreshToken');
+    if (token) {
+      setAccessToken(token);
+      if (stored) setRefreshToken(stored);
+      fetchProfile(token);
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   const logout = () => {
     clearTokens();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     setUser(null);
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   };
 
   const fetchProfile = async (token: string) => {
@@ -41,10 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser({ ...data, userId: data.userId ?? data.id });
     } catch {
       logout();
-      // Redirect to login on auth failure
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
     } finally {
       setIsLoading(false);
     }
@@ -62,6 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setAccessToken(accessToken);
     setRefreshToken(refreshToken);
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
 
     await fetchProfile(accessToken);
   };

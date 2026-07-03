@@ -13,8 +13,11 @@ export async function refreshAccessToken(): Promise<string | null> {
 
     try {
       const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
-      const { accessToken } = response.data;
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
       localStorage.setItem('accessToken', accessToken);
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
       return accessToken;
     } catch (refreshError) {
       const refreshStatus = (refreshError as AxiosError).response?.status;
@@ -155,20 +158,20 @@ class ApiClient {
   }
 
   // POD — presigned upload
-  async getPodUploadUrl(tripId: string, filename: string, mimeType: string): Promise<{
+  async getPodUploadUrl(tripId: string, filename: string, mimeType: string, type?: string): Promise<{
     uploadUrl: string;
     finalUrl: string;
     key: string;
   }> {
     const response = await this.client.get(`/trips/${tripId}/pod/upload-url`, {
-      params: { filename, mimeType },
+      params: { filename, mimeType, type },
     });
     return response.data;
   }
 
-  async uploadFileToPresignedUrl(uploadUrl: string, file: File): Promise<void> {
+  async uploadFileToPresignedUrl(uploadUrl: string, file: File | Blob, contentType?: string): Promise<void> {
     await axios.put(uploadUrl, file, {
-      headers: { 'Content-Type': file.type },
+      headers: { 'Content-Type': contentType || (file instanceof File ? file.type : 'application/octet-stream') },
     });
   }
 
@@ -176,6 +179,8 @@ class ApiClient {
   async submitPOD(tripId: string, podData: {
     photoUrl?: string;
     signatureUrl?: string;
+    receiverName?: string;
+    receiverPhone?: string;
     notes?: string;
     lat?: number;
     lng?: number;

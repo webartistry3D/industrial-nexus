@@ -705,7 +705,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={uploading || !selectedFile}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {uploading ? 'Uploading...' : 'Upload'}
                   </button>
@@ -836,7 +836,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={uploading || !selectedVehicleFile}
-                      className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold active:opacity-80 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {uploading ? 'Uploading...' : 'Upload'}
                     </button>

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
@@ -60,14 +59,23 @@ export default function TripDetailPage() {
     }
   };
 
+  const resolveImageUrl = (url: string): string => {
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Relative path from backend — prepend API base URL
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
+    return `${apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const getStatusIcon = (status?: string) => {
     switch (status) {
       case 'DELIVERED':
-        return <CheckCircle2 className="w-6 h-6 text-green-600" />;
+        return <CheckCircle2 className="w-6 h-6 text-white dark:text-black" />;
       case 'IN_TRANSIT':
-        return <Navigation className="w-6 h-6 text-blue-600 animate-pulse" />;
+        return <Navigation className="w-6 h-6 text-white dark:text-black animate-pulse" />;
       case 'ARRIVED':
-        return <MapPinned className="w-6 h-6 text-green-600" />;
+        return <MapPinned className="w-6 h-6 text-white dark:text-black" />;
       default:
         return <Truck className="w-6 h-6 text-white dark:text-black" />;
     }
@@ -123,8 +131,8 @@ export default function TripDetailPage() {
           
           <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10 border border-red-200/50 dark:border-red-700/50 rounded-2xl p-5 shadow-lg shadow-red-500/10">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-md">
-                <AlertCircle className="w-6 h-6 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <AlertCircle className="w-6 h-6 text-white dark:text-black" />
               </div>
               <div>
                 <p className="text-red-700 dark:text-red-400 font-medium">{error || 'Trip not found'}</p>
@@ -155,7 +163,7 @@ export default function TripDetailPage() {
         </button>
 
         <div className="flex items-start gap-3">
-          <div className="p-3 rounded-xl bg-blue-800 dark:bg-lime-500 shadow-md">
+          <div className="p-3 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
             {getStatusIcon(trip.status)}
           </div>
           <div className="flex-1">
@@ -175,8 +183,8 @@ export default function TripDetailPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
-                <User className="w-4 h-4 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <User className="w-4 h-4 text-white dark:text-black" />
               </div>
               <span className="text-xs font-medium">Driver</span>
             </div>
@@ -189,8 +197,8 @@ export default function TripDetailPage() {
           </div>
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-              <div className="p-2 rounded-xl bg-blue-800 dark:bg-lime-500 shadow-md">
-                
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Truck className="w-4 h-4 text-white dark:text-black" />
               </div>
               <span className="text-xs font-medium">Vehicle</span>
             </div>
@@ -209,8 +217,8 @@ export default function TripDetailPage() {
         {/* Route Info */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-              <Route className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Route className="w-5 h-5 text-white dark:text-black" />
             </div>
             Route
           </h2>
@@ -235,8 +243,8 @@ export default function TripDetailPage() {
         {/* Trip Timeline */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
-              <Calendar className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Calendar className="w-5 h-5 text-white dark:text-black" />
             </div>
             Trip Timeline
           </h2>
@@ -268,8 +276,8 @@ export default function TripDetailPage() {
         {/* Cargo Info */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-              <Package className="w-5 h-5 text-white" />
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Package className="w-5 h-5 text-white dark:text-black" />
             </div>
             Cargo
           </h2>
@@ -284,8 +292,8 @@ export default function TripDetailPage() {
         {geofenceEvents.length > 0 && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-md">
-                <Activity className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Activity className="w-5 h-5 text-white dark:text-black" />
               </div>
               Geofence Events ({geofenceEvents.length})
             </h2>
@@ -305,8 +313,8 @@ export default function TripDetailPage() {
         {trip.status === 'IN_TRANSIT' && (
           <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 rounded-2xl p-5 shadow-lg shadow-blue-500/10">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                <Navigation className="w-5 h-5 text-white animate-pulse" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Navigation className="w-5 h-5 text-white dark:text-black animate-pulse" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Live Tracking Active</p>
@@ -320,8 +328,8 @@ export default function TripDetailPage() {
         {trip.pod && (
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                <CheckCircle2 className="w-5 h-5 text-white" />
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <CheckCircle2 className="w-5 h-5 text-white dark:text-black" />
               </div>
               Proof of Delivery
             </h2>
@@ -335,6 +343,26 @@ export default function TripDetailPage() {
                 </span>
               </div>
               
+              {/* Receiver Info */}
+              {trip.pod?.receiverName && (
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">Receiver:</span>
+                  <span className="text-gray-900 dark:text-white">
+                    {trip.pod.receiverName}
+                  </span>
+                </div>
+              )}
+              {trip.pod?.receiverPhone && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                  <span className="text-gray-900 dark:text-white font-mono">
+                    {trip.pod.receiverPhone}
+                  </span>
+                </div>
+              )}
+
               {/* GPS Coordinates */}
               {trip.pod?.lat && trip.pod?.lng && (
                 <div className="flex items-center gap-2 text-sm">
@@ -350,13 +378,10 @@ export default function TripDetailPage() {
               {trip.pod?.imageUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Delivery Photo</p>
-                  <Image
-                    src={trip.pod.imageUrl}
-                    alt="POD"
-                    width={800}
-                    height={384}
+                  <img
+                    src={resolveImageUrl(trip.pod.imageUrl)}
+                    alt="Delivery photo"
                     className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700"
-                    unoptimized
                   />
                 </div>
               )}
@@ -365,13 +390,10 @@ export default function TripDetailPage() {
               {trip.pod?.signatureUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Receiver Signature</p>
-                  <Image
-                    src={trip.pod.signatureUrl}
-                    alt="Signature"
-                    width={800}
-                    height={256}
+                  <img
+                    src={resolveImageUrl(trip.pod.signatureUrl)}
+                    alt="Receiver signature"
                     className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white"
-                    unoptimized
                   />
                 </div>
               )}

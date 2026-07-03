@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { BillingService } from '../billing/billing.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderFilterDto } from './dto/order-filter.dto';
@@ -26,6 +27,7 @@ export class OrdersService {
     private prisma: PrismaService,
     private auditService: AuditService,
     private notificationsService: NotificationsService,
+    private billingService: BillingService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string, userRole: UserRole) {
@@ -48,6 +50,7 @@ export class OrdersService {
         deliveryLocation: createOrderDto.deliveryLocation,
         cargoDescription: createOrderDto.cargoDescription,
         deliveryInstructions: createOrderDto.deliveryInstructions,
+        declaredCargoValue: createOrderDto.declaredCargoValue,
         kittingStatus: KittingStatus.PENDING,
       },
     });
@@ -192,6 +195,7 @@ export class OrdersService {
           },
         },
         handlingTags: { include: { tag: true } },
+        invoice: true,
         packageTracker: {
           select: {
             id: true,
@@ -248,7 +252,26 @@ export class OrdersService {
       throw new ForbiddenException('You do not have access to this order');
     }
 
-    return order;
+    const statusHistory = await this.prisma.auditLog.findMany({
+      where: {
+        entityType: 'ORDER',
+        entityId: id,
+        action: 'STATUS_CHANGE',
+      },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return { ...order, statusHistory };
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto, userId: string, userRole: UserRole) {
@@ -376,6 +399,11 @@ export class OrdersService {
       where: { id },
       data: updateData,
     });
+
+    if (newStatus === OrderStatus.APPROVED) {
+      this.billingService.generateInvoice(id)
+        .catch(e => console.error('[Billing] Invoice generation failed:', e));
+    }
 
     await this.auditService.log({
       userId,

@@ -31,6 +31,7 @@ model User {
   driver       Driver?
   orders       Order[]    @relation("ClientOrders")
   kittingLogs  KittingLog[]
+  rateCardsCreated RateCard[] @relation("RateCardCreator")
 
   @@map("users")
 }
@@ -211,6 +212,7 @@ model Order {
   cancelledAt        DateTime?    @map("cancelled_at")
 
   packageTrackerId String?      @map("package_tracker_id")
+  declaredCargoValue Float?      @map("declared_cargo_value")
 
   // Relations
   client         User         @relation("ClientOrders", fields: [clientId], references: [id])
@@ -219,6 +221,7 @@ model Order {
   trip           Trip?
   weightRecord   WeightRecord?
   packageTracker PackageTracker? @relation(fields: [packageTrackerId], references: [id])
+  invoice        Invoice?
 
   @@map("orders")
 }
@@ -456,6 +459,62 @@ model POD {
   @@map("pods")
 }
 
+// ==================== BILLING ====================
+
+model RateCard {
+  id                              String   @id @default(uuid())
+  name                            String   @unique
+  isActive                        Boolean  @default(false) @map("is_active")
+  baseRatePerKm                   Float    @map("base_rate_per_km")
+  baseRatePerKg                   Float    @map("base_rate_per_kg")
+  minimumCharge                   Float    @map("minimum_charge")
+  priorityMultipliers             Json     @map("priority_multipliers")
+  heavySurcharge                  Float    @default(0.15) @map("heavy_surcharge")
+  fragileSurcharge                Float    @default(0.10) @map("fragile_surcharge")
+  hazardousSurcharge              Float    @default(0.25) @map("hazardous_surcharge")
+  chemicalSurcharge               Float    @default(0.20) @map("chemical_surcharge")
+  temperatureSensitiveSurcharge   Float    @default(0.12) @map("temperature_sensitive_surcharge")
+  verticalStorageSurcharge        Float    @default(0.08) @map("vertical_storage_surcharge")
+  insuranceRatePercent            Float    @default(0.02) @map("insurance_rate_percent")
+  vatPercent                      Float    @default(0.075) @map("vat_percent")
+  createdAt                       DateTime @default(now()) @map("created_at")
+  updatedAt                       DateTime @updatedAt @map("updated_at")
+  createdById                     String   @map("created_by_id")
+
+  createdBy User      @relation("RateCardCreator", fields: [createdById], references: [id])
+  invoices  Invoice[]
+
+  @@map("rate_cards")
+}
+
+model Invoice {
+  id                String        @id @default(uuid())
+  invoiceNumber     String        @unique @map("invoice_number")
+  orderId           String        @unique @map("order_id")
+  rateCardId        String        @map("rate_card_id")
+  distanceKm        Float         @map("distance_km")
+  baseFreightCharge Float         @map("base_freight_charge")
+  weightCharge      Float         @map("weight_charge")
+  handlingSurcharges Json         @map("handling_surcharges")
+  priorityMultiplier Float        @map("priority_multiplier")
+  subtotal          Float
+  insurancePremium  Float         @map("insurance_premium")
+  vatAmount         Float         @map("vat_amount")
+  totalAmount       Float         @map("total_amount")
+  status            InvoiceStatus @default(DRAFT)
+  issuedAt          DateTime?     @map("issued_at")
+  paidAt            DateTime?     @map("paid_at")
+  dueDate           DateTime?     @map("due_date")
+  notes             String?
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  rateCard RateCard @relation(fields: [rateCardId], references: [id])
+
+  @@map("invoices")
+}
+
 // ==================== ENUMS ====================
 
 enum UserRole {
@@ -650,4 +709,13 @@ enum NotificationType {
   LATE_RISK
   STATIONARY_ALERT
   SYSTEM
+  INVOICE_GENERATED
+  INVOICE_PAID
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  VOID
 }

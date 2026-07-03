@@ -45,6 +45,8 @@ async function main() {
   await prisma.availableHandlingTag.deleteMany();
   await prisma.order.deleteMany();
   await prisma.kycDocument.deleteMany();
+  await prisma.invoice.deleteMany();
+  await prisma.rateCard.deleteMany();
   await prisma.driver.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.refreshToken.deleteMany();
@@ -254,6 +256,46 @@ async function main() {
   }
 
   console.log(`✅ Created ${adminUsers.length} admin users, ${clientUsers.length} client users, ${activeDriverUsers.length} active drivers, ${inactiveDriverUsers.length} inactive drivers`);
+
+  // ==================== RATE CARD ====================
+  console.log('💰 Creating default rate card...');
+  const defaultRateCard = await prisma.rateCard.upsert({
+    where: { name: 'Default Rate Card' },
+    create: {
+      name: 'Default Rate Card',
+      isActive: true,
+      baseRatePerKm: 250,
+      baseRatePerKg: 5,
+      minimumCharge: 5000,
+      priorityMultipliers: { LOW: 0.9, NORMAL: 1.0, HIGH: 1.25, URGENT: 1.6 },
+      heavySurcharge: 0.15,
+      fragileSurcharge: 0.10,
+      hazardousSurcharge: 0.25,
+      chemicalSurcharge: 0.20,
+      temperatureSensitiveSurcharge: 0.12,
+      verticalStorageSurcharge: 0.08,
+      insuranceRatePercent: 0.02,
+      vatPercent: 0.075,
+      createdById: adminUsers[0].id,
+    },
+    update: {
+      isActive: true,
+      baseRatePerKm: 250,
+      baseRatePerKg: 5,
+      minimumCharge: 5000,
+      priorityMultipliers: { LOW: 0.9, NORMAL: 1.0, HIGH: 1.25, URGENT: 1.6 },
+      heavySurcharge: 0.15,
+      fragileSurcharge: 0.10,
+      hazardousSurcharge: 0.25,
+      chemicalSurcharge: 0.20,
+      temperatureSensitiveSurcharge: 0.12,
+      verticalStorageSurcharge: 0.08,
+      insuranceRatePercent: 0.02,
+      vatPercent: 0.075,
+      createdById: adminUsers[0].id,
+    },
+  });
+  console.log('✅ Default rate card created:', defaultRateCard.name);
 
   // ==================== VEHICLES ====================
   console.log('🚚 Creating vehicles...');
@@ -1223,12 +1265,21 @@ async function main() {
   // ==================== POD ====================
   console.log('✍️ Creating POD records...');
 
+  // Placeholder signature SVG as data URI (simulates a real captured signature)
+  const signaturePlaceholder = "data:image/svg+xml;base64," + Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="150" viewBox="0 0 400 150">
+      <rect fill="#fff" width="400" height="150"/>
+      <path d="M30 110 C60 40, 90 80, 120 70 S160 30, 200 60 S250 90, 280 50 S320 30, 360 80" 
+        fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>`
+  ).toString('base64');
+
   const pods = [
     {
       id: id('pod-1'),
       tripId: id('trip-5'),
-      imageUrl: 'https://example.com/pod/trip-5.jpg',
-      signatureUrl: 'https://example.com/signatures/trip-5.png',
+      imageUrl: 'https://placehold.co/800x600/e2e8f0/475569?text=Delivery+Photo',
+      signatureUrl: signaturePlaceholder,
       receiverName: 'John Doe',
       receiverPhone: '+2348012345678',
       notes: 'Package delivered in good condition',
@@ -1240,8 +1291,8 @@ async function main() {
     {
       id: id('pod-9'),
       tripId: id('trip-9'),
-      imageUrl: 'https://example.com/pod/trip-9.jpg',
-      signatureUrl: 'https://example.com/signatures/trip-9.png',
+      imageUrl: 'https://placehold.co/800x600/e2e8f0/475569?text=Delivery+Photo',
+      signatureUrl: signaturePlaceholder,
       receiverName: 'Adeola Johnson',
       receiverPhone: '+2348023456789',
       notes: 'Office furniture delivered successfully',
@@ -1252,8 +1303,8 @@ async function main() {
     {
       id: id('pod-10'),
       tripId: id('trip-10'),
-      imageUrl: 'https://example.com/pod/trip-10.jpg',
-      signatureUrl: 'https://example.com/signatures/trip-10.png',
+      imageUrl: 'https://placehold.co/800x600/e2e8f0/475569?text=Delivery+Photo',
+      signatureUrl: signaturePlaceholder,
       receiverName: 'Chukwuma Okafor',
       receiverPhone: '+2348034567890',
       notes: 'Manufacturing supplies delivered to loading dock',
@@ -1264,8 +1315,8 @@ async function main() {
     {
       id: id('pod-11'),
       tripId: id('trip-11'),
-      imageUrl: 'https://example.com/pod/trip-11.jpg',
-      signatureUrl: 'https://example.com/signatures/trip-11.png',
+      imageUrl: 'https://placehold.co/800x600/e2e8f0/475569?text=Delivery+Photo',
+      signatureUrl: signaturePlaceholder,
       receiverName: 'Dr. Amina Suleiman',
       receiverPhone: '+2348045678901',
       notes: 'Medical supplies delivered - temperature maintained',
@@ -1276,8 +1327,8 @@ async function main() {
     {
       id: id('pod-12'),
       tripId: id('trip-12'),
-      imageUrl: 'https://example.com/pod/trip-12.jpg',
-      signatureUrl: 'https://example.com/signatures/trip-12.png',
+      imageUrl: 'https://placehold.co/800x600/e2e8f0/475569?text=Delivery+Photo',
+      signatureUrl: signaturePlaceholder,
       receiverName: 'Biodun Adeleke',
       receiverPhone: '+2348056789012',
       notes: 'Building materials delivered with assistance',

@@ -37,6 +37,16 @@ export function useTrackingWebSocket() {
         setError(null);
         reconnectAttemptsRef.current = 0;
         console.log('[Tracking WebSocket] Connected');
+
+        // Re-emit any subscriptions that were registered before connection
+        eventHandlersRef.current.forEach((_, eventType) => {
+          if (eventType === 'location:update') {
+            socket.emit('subscribe:fleet');
+          } else if (eventType.startsWith('trip:')) {
+            const tripId = eventType.split(':')[1];
+            socket.emit('subscribe:trip', { tripId });
+          }
+        });
       });
 
       socket.on('disconnect', () => {

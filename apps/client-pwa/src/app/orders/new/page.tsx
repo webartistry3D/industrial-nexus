@@ -48,10 +48,13 @@ export default function NewOrderPage() {
     notes: '',
     totalWeight: 0,
     priority: 'NORMAL' as 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
+    declaredCargoValue: undefined as number | undefined,
   });
 
   const [handlingTagOptions, setHandlingTagOptions] = useState<string[]>([]);
   const [tagsLoading, setTagsLoading] = useState(false);
+  const [estimate, setEstimate] = useState<any>(null);
+  const [estimateLoading, setEstimateLoading] = useState(false);
   const [manualGeocode, setManualGeocode] = useState<{
     pickup: { loading: boolean; error: string | null };
     delivery: { loading: boolean; error: string | null };
@@ -88,6 +91,54 @@ export default function NewOrderPage() {
       }));
     }
   }, [handlingTagOptions]);
+
+  // Fetch cost estimate when all required fields are filled
+  useEffect(() => {
+    const hasCoords =
+      formData.pickupLat !== 0 &&
+      formData.pickupLng !== 0 &&
+      formData.deliveryLat !== 0 &&
+      formData.deliveryLng !== 0;
+    const hasWeight = formData.totalWeight > 0;
+
+    if (!hasCoords || !hasWeight) {
+      setEstimate(null);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        setEstimateLoading(true);
+        const result = await api.getBillingEstimate({
+          pickupLat: formData.pickupLat,
+          pickupLng: formData.pickupLng,
+          deliveryLat: formData.deliveryLat,
+          deliveryLng: formData.deliveryLng,
+          totalWeight: formData.totalWeight,
+          priority: formData.priority,
+          handlingTags: formData.handlingTags,
+          declaredCargoValue: formData.declaredCargoValue,
+        });
+        setEstimate(result);
+      } catch (err) {
+        console.error('Failed to fetch estimate:', err);
+        setEstimate(null);
+      } finally {
+        setEstimateLoading(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timeout);
+  }, [
+    formData.pickupLat,
+    formData.pickupLng,
+    formData.deliveryLat,
+    formData.deliveryLng,
+    formData.totalWeight,
+    formData.priority,
+    formData.handlingTags,
+    formData.declaredCargoValue,
+  ]);
 
   // Live geocode pickup address when manual entry is active
   useEffect(() => {
@@ -252,6 +303,7 @@ export default function NewOrderPage() {
           handlingTags: updatedFormData.handlingTags,
           deliveryInstructions: updatedFormData.notes,
           priority: updatedFormData.priority,
+          declaredCargoValue: updatedFormData.declaredCargoValue,
         };
 
         await api.createOrder(orderData);
@@ -278,6 +330,7 @@ export default function NewOrderPage() {
           handlingTags: formData.handlingTags,
           deliveryInstructions: formData.notes,
           priority: formData.priority,
+          declaredCargoValue: formData.declaredCargoValue,
         };
 
         await api.createOrder(orderData);
@@ -406,6 +459,24 @@ export default function NewOrderPage() {
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 required
               />
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Declared Cargo Value (₦)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.declaredCargoValue || ''}
+                onChange={(e) => setFormData({ ...formData, declaredCargoValue: e.target.value ? parseFloat(e.target.value) : undefined })}
+                placeholder="Optional — used to calculate insurance premium"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                If provided, insurance is mandatory and calculated as a percentage of this value.
+              </p>
             </div>
 
             <div className="mt-4">
@@ -638,6 +709,60 @@ export default function NewOrderPage() {
               </div>
             </div>
           </div>
+
+          {/* Cost Estimate Preview */}
+          {(estimate || estimateLoading) && (
+            <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Estimated Cost
+              </h3>
+              {estimateLoading ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">Calculating estimate...</p>
+              ) : estimate ? (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Base Freight</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{estimate.baseFreightCharge?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Weight Charge</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{estimate.weightCharge?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  {estimate.handlingSurcharges && Object.entries(estimate.handlingSurcharges).map(([tag, amount]) => (
+                    <div key={tag} className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Handling ({tag})</span>
+                      <span className="font-medium text-gray-900 dark:text-white">₦{(amount as number).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Priority Multiplier</span>
+                    <span className="font-medium text-gray-900 dark:text-white">×{estimate.priorityMultiplier}</span>
+                  </div>
+                  <div className="border-t border-gray-200 dark:border-slate-700 my-2" />
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{estimate.subtotal?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Insurance Premium</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{estimate.insurancePremium?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">VAT</span>
+                    <span className="font-medium text-gray-900 dark:text-white">₦{estimate.vatAmount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="border-t border-gray-200 dark:border-slate-700 my-2" />
+                  <div className="flex justify-between text-base font-semibold">
+                    <span className="text-gray-900 dark:text-white">Estimated Total</span>
+                    <span className="text-blue-600 dark:text-blue-400">₦{estimate.totalAmount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Estimate — final invoice generated on approval.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          )}
 
           {/* Submit Button */}
           <button

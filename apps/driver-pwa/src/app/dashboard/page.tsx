@@ -186,7 +186,7 @@ export default function Dashboard() {
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-5 text-gray-900 dark:text-white">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-900">
+              <div className="p-2 rounded-xl bg-blue-600">
                 <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <h2 className="font-bold text-sm sm:text-base">Performance</h2>
@@ -342,7 +342,7 @@ export default function Dashboard() {
               </h2>
               <button
                 onClick={() => router.push('/trips')}
-                className="text-blue-500 dark:text-blue-800 text-sm font-semibold hover:underline"
+                className="text-blue-900 dark:text-white text-sm font-semibold hover:underline"
               >
                 View All
               </button>

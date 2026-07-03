@@ -12,6 +12,13 @@ import {
   FileText, CalendarClock, BadgeCheck, AlertTriangle
 } from 'lucide-react';
 
+interface ConfirmAction {
+  type: 'status' | 'kyc' | 'availability';
+  value: string;
+  title: string;
+  message: string;
+}
+
 function DriverAvatar({ user, size = 'md' }: { user?: Driver['user']; size?: 'sm' | 'md' | 'lg' }) {
   const [error, setError] = useState(false);
   const sizeClasses = {
@@ -66,6 +73,8 @@ export default function DriverDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -140,40 +149,58 @@ export default function DriverDetailPage() {
     return new Date(expiresAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
-  const handleStatusChange = async (newStatus: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') => {
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  const handleStatusChange = (newStatus: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') => {
+    setConfirmAction({
+      type: 'status',
+      value: newStatus,
+      title: 'Change Driver Status',
+      message: `Are you sure you want to set this driver's status to ${formatStatus(newStatus)}?`,
+    });
+  };
+
+  const handleKycChange = (newKycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED') => {
+    setConfirmAction({
+      type: 'kyc',
+      value: newKycStatus,
+      title: 'Change KYC Status',
+      message: `This will update the driver's KYC verification status to ${formatStatus(newKycStatus)}. Continue?`,
+    });
+  };
+
+  const handleAvailabilityChange = (newAvailability: 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY') => {
+    setConfirmAction({
+      type: 'availability',
+      value: newAvailability,
+      title: 'Change Availability',
+      message: `Are you sure you want to set availability to ${formatStatus(newAvailability)}?`,
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+    const { type, value } = confirmAction;
+    setConfirmAction(null);
     try {
       setUpdating(true);
-      await api.updateDriverStatus(driverId, newStatus);
+      if (type === 'status') {
+        await api.updateDriverStatus(driverId, value as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED');
+        showSuccess(`Driver status updated to ${formatStatus(value)}`);
+      } else if (type === 'kyc') {
+        await api.updateDriverKyc(driverId, value as 'PENDING' | 'VERIFIED' | 'REJECTED');
+        showSuccess(`KYC status updated to ${formatStatus(value)}`);
+      } else if (type === 'availability') {
+        await api.updateDriverAvailability(driverId, value as 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY');
+        showSuccess(`Availability updated to ${formatStatus(value)}`);
+      }
       fetchDriver();
     } catch (err) {
-      console.error('Failed to update status:', err);
+      console.error('Failed to update driver:', err);
       alert('Failed to update driver status');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleKycChange = async (newKycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED') => {
-    try {
-      setUpdating(true);
-      await api.updateDriverKyc(driverId, newKycStatus);
-      fetchDriver();
-    } catch (err) {
-      console.error('Failed to update KYC:', err);
-      alert('Failed to update KYC status');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleAvailabilityChange = async (newAvailability: 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY') => {
-    try {
-      setUpdating(true);
-      await api.updateDriverAvailability(driverId, newAvailability);
-      fetchDriver();
-    } catch (err) {
-      console.error('Failed to update availability:', err);
-      alert('Failed to update availability');
     } finally {
       setUpdating(false);
     }
@@ -292,15 +319,15 @@ export default function DriverDetailPage() {
             <div className="space-y-2">
               {driver.user?.email && (
                 <div className="flex items-center gap-3 text-sm">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
-                    <Mail className="w-4 h-4 text-white" />
+                  <div className="p-2 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                    <Mail className="w-4 h-4 text-white dark:text-black" />
                   </div>
                   <span className="text-gray-600 dark:text-gray-400">{driver.user.email}</span>
                 </div>
               )}
               <div className="flex items-center gap-3 text-sm">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm">
-                  <Shield className="w-4 h-4 text-white" />
+                <div className="p-2 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                  <Shield className="w-4 h-4 text-white dark:text-black" />
                 </div>
                 <span className="text-gray-600 dark:text-gray-400 font-mono">License: {driver.licenseNumber}</span>
               </div>
@@ -312,8 +339,8 @@ export default function DriverDetailPage() {
         <div className="px-4 pb-4">
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg">
             <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-sm">
-                <FileText className="w-4 h-4 text-white" />
+              <div className="p-2 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                <FileText className="w-4 h-4 text-white dark:text-black" />
               </div>
               <h2 className="font-semibold text-gray-900 dark:text-white">Driver Documentation</h2>
             </div>
@@ -388,6 +415,13 @@ export default function DriverDetailPage() {
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Status Management</h2>
             
+            {successMessage && (
+              <div className="mb-3 flex items-center gap-2 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-xl">
+                <CheckCircle className="w-4 h-4" />
+                <span className="font-medium">{successMessage}</span>
+              </div>
+            )}
+
             {updating && (
               <div className="mb-3 text-sm text-blue-600 font-medium">Updating...</div>
             )}
@@ -403,10 +437,10 @@ export default function DriverDetailPage() {
                     <button
                       key={status}
                       onClick={() => handleStatusChange(status)}
-                      disabled={updating || driver.status === status}
+                      disabled={updating}
                       className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                         driver.status === status
-                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md'
                           : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
@@ -426,10 +460,10 @@ export default function DriverDetailPage() {
                     <button
                       key={kycStatus}
                       onClick={() => handleKycChange(kycStatus)}
-                      disabled={updating || driver.kycStatus === kycStatus}
+                      disabled={updating}
                       className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                         driver.kycStatus === kycStatus
-                          ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md shadow-green-500/20'
+                          ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md'
                           : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
@@ -449,10 +483,10 @@ export default function DriverDetailPage() {
                     <button
                       key={availability}
                       onClick={() => handleAvailabilityChange(availability)}
-                      disabled={updating || driver.availability === availability}
+                      disabled={updating}
                       className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                         driver.availability === availability
-                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                          ? 'bg-blue-900 text-white dark:bg-lime-500 dark:text-black shadow-md'
                           : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
@@ -472,8 +506,8 @@ export default function DriverDetailPage() {
             
             {driver.vehicle ? (
               <div className="flex items-center gap-3 p-3.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
-                  <Truck className="w-5 h-5 text-white" />
+                <div className="p-2 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                  <Truck className="w-5 h-5 text-white dark:text-black" />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-gray-900 dark:text-white font-mono">{driver.vehicle.plateNumber}</p>
@@ -507,6 +541,37 @@ export default function DriverDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <AlertTriangle className="w-5 h-5 text-white dark:text-black" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{confirmAction.title}</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{confirmAction.message}</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmAction(null)}
+                disabled={updating}
+                className="px-4 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmAction}
+                disabled={updating}
+                className="px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50 transition-all duration-300"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

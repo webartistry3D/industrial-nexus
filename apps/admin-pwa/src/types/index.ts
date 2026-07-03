@@ -8,6 +8,18 @@ export interface User {
   profileImageUrl?: string | null;
 }
 
+export interface AuditLog {
+  id: string;
+  userId?: string;
+  action: string;
+  entityType: string;
+  entityId?: string;
+  oldValue?: any;
+  newValue?: any;
+  createdAt: string;
+  user?: User;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -21,12 +33,15 @@ export interface Order {
   deliveryLocation: Location;
   cargoDescription?: string;
   deliveryInstructions?: string;
+  declaredCargoValue?: number;
   handlingTags: string[];
   createdAt: string;
   updatedAt: string;
   trip?: Trip;
   packageTrackerId?: string;
   packageTracker?: PackageTracker;
+  invoice?: Invoice;
+  statusHistory?: AuditLog[];
 }
 
 export interface PackageTracker {
@@ -239,4 +254,53 @@ export interface PaginatedResponse<T> {
     total: number;
     totalPages: number;
   };
+}
+
+export interface RateCard {
+  id: string;
+  name: string;
+  isActive: boolean;
+  baseRatePerKm: number;
+  baseRatePerKg: number;
+  minimumCharge: number;
+  priorityMultipliers: Record<string, number>;
+  heavySurcharge: number;
+  fragileSurcharge: number;
+  hazardousSurcharge: number;
+  chemicalSurcharge: number;
+  temperatureSensitiveSurcharge: number;
+  verticalStorageSurcharge: number;
+  insuranceRatePercent: number;
+  vatPercent: number;
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+  createdBy?: User;
+}
+
+export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PAID' | 'VOID';
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  orderId: string;
+  order?: Order;
+  rateCardId: string;
+  rateCard?: RateCard;
+  distanceKm: number;
+  baseFreightCharge: number;
+  weightCharge: number;
+  handlingSurcharges: Record<string, number>;
+  priorityMultiplier: number;
+  subtotal: number;
+  insurancePremium: number;
+  vatAmount: number;
+  totalAmount: number;
+  status: InvoiceStatus;
+  issuedAt?: string;
+  paidAt?: string;
+  dueDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }

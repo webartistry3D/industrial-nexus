@@ -36,7 +36,8 @@ export function MobileNav({ role }: MobileNavProps) {
       <div className="flex items-end justify-around max-w-lg mx-auto">
         {links.map((link) => {
           const Icon = link.icon;
-          const isActive = pathname === link.path;
+          const isActive = pathname === link.path || pathname.startsWith(`${link.path}/`) ||
+            (link.label === 'Drivers' && pathname.startsWith('/vehicles/'));
           
           return (
             <button

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsEnum, IsObject, ValidateNested, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum, IsObject, ValidateNested, IsArray, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Sanitize } from '../../common/decorators/sanitize.decorator';
@@ -65,4 +65,11 @@ export class CreateOrderDto {
   @IsArray()
   @IsString({ each: true })
   handlingTags?: string[];
+
+  @ApiPropertyOptional({ example: 100000, description: 'Declared cargo value for insurance calculation' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  declaredCargoValue?: number;
 }

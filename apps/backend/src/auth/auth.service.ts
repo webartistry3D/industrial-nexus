@@ -347,7 +347,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: refreshTokenString,
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '60m'),
+      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '1h'),
       tokenType: 'Bearer',
     };
   }
