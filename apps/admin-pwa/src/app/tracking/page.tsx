@@ -332,8 +332,8 @@ function TrackingPageContent() {
       <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-600 shadow-md">
-              {packageTrackerId ? <Package className="w-6 h-6 text-white" /> : <Navigation className="w-6 h-6 text-white" />}
+            <div className="p-2.5 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              {packageTrackerId ? <Package className="w-6 h-6 text-white dark:text-black" /> : <Navigation className="w-6 h-6 text-white dark:text-black" />}
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">

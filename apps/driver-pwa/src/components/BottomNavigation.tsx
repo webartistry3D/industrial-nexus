@@ -23,7 +23,7 @@ export default function BottomNavigation() {
       
       <div className="flex items-end justify-around max-w-lg mx-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = pathname === item.path || (item.path === '/trips' && pathname.startsWith('/trips/'));
           const Icon = item.icon;
           
           return (

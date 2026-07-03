@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
-import { MapPin, Package, CheckCircle, Camera, Pen, Navigation, Clock, Truck, Calendar, Play, Send, X, RotateCcw, ImageIcon, User, Phone, StickyNote, FileCheck, Upload } from 'lucide-react';
+import { MapPin, Package, CheckCircle, CheckCircle2, Camera, Pen, Navigation, Clock, Truck, Calendar, Play, Send, X, RotateCcw, ImageIcon, User, Phone, StickyNote, FileCheck, Upload, ArrowLeft, Route } from 'lucide-react';
 
 const sopChecklist = [
   { id: 'vehicleInspected', label: 'Vehicle inspected', completed: false },
@@ -303,8 +303,9 @@ export default function TripDetail({ params }: { params: { id: string } }) {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+        <PageHeader />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-900 dark:bg-lime-500 shadow-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white dark:border-black border-t-transparent"></div>
         </div>
       </div>
     );
@@ -325,76 +326,224 @@ export default function TripDetail({ params }: { params: { id: string } }) {
   const isInTransit = trip.status === 'IN_TRANSIT';
 
   return (
-    <div className="min-h-screen pb-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <PageHeader />
       {/* Header */}
-      <header className="pt-20 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white p-4 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <button onClick={() => router.back()} className="text-white hover:text-blue-200 transition-colors">
-            ← Back
-          </button>
-          <h1 className="text-lg font-semibold ml-2">Trip <span className="font-mono">{trip.order?.orderNumber}</span></h1>
-        </div>
+      <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5 pt-20">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Trips
+        </button>
 
-        {/* Action Messages */}
-        <div className="mt-3 space-y-2">
-          {actionSuccess && (
-            <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-xl text-green-100 text-sm flex items-center gap-2 backdrop-blur-sm">
-              <CheckCircle className="w-4 h-4" />
-              Trip started successfully
-            </div>
-          )}
-          {actionError && (
-            <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-100 text-sm backdrop-blur-sm">
-              {actionError}
-            </div>
-          )}
-        </div>
-      </header>
-
-      <main className="p-4 space-y-4">
-        {/* Trip Status */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              trip.status === 'IN_TRANSIT' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' :
-              trip.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
-              trip.status === 'ASSIGNED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' :
-              'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-            }`}>
-              {formatStatus(trip.status)}
-            </span>
+        <div className="flex items-start gap-3">
+          <div className="p-3 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+            {trip.status === 'DELIVERED' ? <CheckCircle2 className="w-6 h-6 text-white dark:text-black" /> :
+             trip.status === 'IN_TRANSIT' ? <Navigation className="w-6 h-6 text-white dark:text-black animate-pulse" /> :
+             <Truck className="w-6 h-6 text-white dark:text-black" />}
           </div>
-          {trip.eta && (
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200/50 dark:border-slate-700/50">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
-                <Clock className="w-4 h-4 text-white" />
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">{trip.order?.orderNumber}</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                trip.status === 'IN_TRANSIT' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' :
+                trip.status === 'DELIVERED' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                trip.status === 'ASSIGNED' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+              }`}>
+                {formatStatus(trip.status) || 'Unknown'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 pb-24 space-y-4">
+        {/* Driver & Vehicle */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <User className="w-4 h-4 text-white dark:text-black" />
+              </div>
+              <span className="text-xs font-medium">Driver</span>
+            </div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {trip.driver?.user?.firstName} {trip.driver?.user?.lastName}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+              {trip.driver?.licenseNumber}
+            </p>
+          </div>
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Truck className="w-4 h-4 text-white dark:text-black" />
+              </div>
+              <span className="text-xs font-medium">Vehicle</span>
+            </div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white font-mono">
+              {trip.vehicle?.plateNumber}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {trip.vehicle?.category}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">
+              {trip.vehicle?.capacityKg} kg
+            </p>
+          </div>
+        </div>
+
+        {/* Route Info */}
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Route className="w-5 h-5 text-white dark:text-black" />
+            </div>
+            Route
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Pickup</p>
+                <p className="text-sm text-gray-900 dark:text-white">{trip.order?.pickupLocation?.address || 'N/A'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Delivery</p>
+                <p className="text-sm text-gray-900 dark:text-white">{trip.order?.deliveryLocation?.address || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Trip Timeline */}
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Calendar className="w-5 h-5 text-white dark:text-black" />
+            </div>
+            Trip Timeline
+          </h2>
+          <div className="space-y-3">
+            {trip.startedAt && (
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-gray-500 dark:text-gray-400 w-20">Started</span>
+                <span className="text-gray-900 dark:text-white">{new Date(trip.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            )}
+            {trip.eta && (
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-2 h-2 rounded-full bg-orange-500" />
+                <span className="text-gray-500 dark:text-gray-400 w-20">ETA</span>
+                <span className="text-gray-900 dark:text-white font-mono">{new Date(trip.eta).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            )}
+            {trip.completedAt && (
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-gray-500 dark:text-gray-400 w-20">Completed</span>
+                <span className="text-gray-900 dark:text-white">{new Date(trip.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Cargo Info */}
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+              <Package className="w-5 h-5 text-white dark:text-black" />
+            </div>
+            Cargo
+          </h2>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">{trip.order?.cargoDescription || 'No description'}</p>
+          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-mono">Weight: {trip.order?.totalWeight || 0} kg</span>
+            <span>Priority: {formatStatus(trip.order?.priority)}</span>
+          </div>
+        </div>
+
+        {/* Live Tracking */}
+        {trip.status === 'IN_TRANSIT' && (
+          <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 border border-blue-200/50 dark:border-blue-700/50 rounded-2xl p-5 shadow-lg shadow-blue-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <Navigation className="w-5 h-5 text-white dark:text-black animate-pulse" />
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">ETA</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white font-mono">
-                  {new Date(trip.eta).toLocaleString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Live Tracking Active</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-mono">Tracking enabled</p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Live Tracking Button */}
-        {(trip.status === 'IN_TRANSIT' || trip.status === 'ASSIGNED') && (
-          <button
-            onClick={() => router.push('/tracking')}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white rounded-xl p-4 flex items-center justify-center gap-2 shadow-lg active:opacity-80 transition-opacity duration-150 border border-blue-500/30 dark:border-blue-400/30"
-          >
-            <Navigation className="w-5 h-5" />
-            <span className="font-semibold">View Live Tracking</span>
-          </button>
+        {/* Proof of Delivery */}
+        {(trip as any).pod && (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+            <h2 className="font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600">
+                <FileCheck className="w-4 h-4 text-white" />
+              </div>
+              Proof of Delivery
+            </h2>
+            <div className="space-y-3">
+              {(trip as any).pod.receiverName && (
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">Receiver:</span>
+                  <span className="text-gray-900 dark:text-white">{(trip as any).pod.receiverName}</span>
+                </div>
+              )}
+              {(trip as any).pod.receiverPhone && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                  <span className="text-gray-900 dark:text-white font-mono">{(trip as any).pod.receiverPhone}</span>
+                </div>
+              )}
+              {(trip as any).pod.capturedAt && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">Captured:</span>
+                  <span className="text-gray-900 dark:text-white font-mono">
+                    {new Date((trip as any).pod.capturedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
+              {(trip as any).pod.imageUrl && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Delivery Photo</p>
+                  <img src={(trip as any).pod.imageUrl} alt="POD" className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700" />
+                </div>
+              )}
+              {(trip as any).pod.signatureUrl && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 mt-3">Receiver Signature</p>
+                  <img src={(trip as any).pod.signatureUrl} alt="Signature" className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white" />
+                </div>
+              )}
+              {(trip as any).pod.notes && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Notes</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-xl">{(trip as any).pod.notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Trip Details */}
@@ -402,8 +551,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
           <h2 className="font-semibold text-gray-800 dark:text-white mb-3">Order Details</h2>
           <div className="space-y-3 text-sm">
             <div className="flex items-start gap-2">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm">
-                <MapPin className="w-4 h-4 text-white mt-0.5" />
+              <div className="p-1.5 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                <MapPin className="w-4 h-4 text-white dark:text-black mt-0.5" />
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">Pickup</p>
@@ -411,8 +560,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
-                <MapPin className="w-4 h-4 text-white mt-0.5" />
+              <div className="p-1.5 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                <MapPin className="w-4 h-4 text-white dark:text-black mt-0.5" />
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">Delivery</p>
@@ -420,8 +569,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-sm">
-                <Package className="w-4 h-4 text-white mt-0.5" />
+              <div className="p-1.5 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                <Package className="w-4 h-4 text-white dark:text-black mt-0.5" />
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">Cargo</p>
@@ -437,8 +586,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
           <div className="space-y-3 text-sm">
             {trip.startedAt && (
               <div className="flex items-start gap-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
-                  <Clock className="w-4 h-4 text-white mt-0.5" />
+                <div className="p-1.5 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                  <Clock className="w-4 h-4 text-white dark:text-black mt-0.5" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Started</p>
@@ -455,8 +604,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
             )}
             {trip.completedAt && (
               <div className="flex items-start gap-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
-                  <CheckCircle className="w-4 h-4 text-white mt-0.5" />
+                <div className="p-1.5 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                  <CheckCircle className="w-4 h-4 text-white dark:text-black mt-0.5" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Completed</p>
@@ -521,21 +670,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                 </div>
               )}
 
-              {/* POD section — shows existing POD or capture form toggle */}
-              {(trip as any).pod ? (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600">
-                      <FileCheck className="w-4 h-4 text-white" />
-                    </div>
-                    <p className="font-semibold text-gray-900 dark:text-white text-sm">POD Captured</p>
-                    <span className="ml-auto px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-semibold rounded-full">Done</span>
-                  </div>
-                  {(trip as any).pod.imageUrl && (
-                    <img src={(trip as any).pod.imageUrl} alt="POD" className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700" />
-                  )}
-                </div>
-              ) : (
+              {/* POD section — shows capture form toggle when no POD exists */}
+              {!(trip as any).pod && (
                 <>
                   <button
                     onClick={() => setShowPODForm(!showPODForm)}
@@ -701,7 +837,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
             </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

@@ -195,8 +195,8 @@ function OrdersPageContent() {
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-xl bg-gradient-to-br shadow-md ${activeTab === 'trackers' ? 'from-blue-800 to-blue-800 dark:from-blue-600 dark:to-blue-600' : 'from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600'}`}>
-                {activeTab === 'trackers' ? <Navigation className="w-6 h-6 text-white" /> : <Package className="w-6 h-6 text-white" />}
+              <div className="p-2.5 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                {activeTab === 'trackers' ? <Navigation className="w-6 h-6 text-white dark:text-black" /> : <Package className="w-6 h-6 text-white dark:text-black" />}
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">

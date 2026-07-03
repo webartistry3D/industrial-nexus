@@ -7,7 +7,7 @@ import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
-import { Activity, Award, AlertCircle, CheckCircle, Clock, MapPin, Package, TrendingUp, Truck, Wifi, WifiOff } from 'lucide-react';
+import { Activity, Award, AlertCircle, CheckCircle, Clock, MapPin, Package, TrendingUp, Truck, Wifi, WifiOff, XCircle } from 'lucide-react';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
 import { PageHeader } from '@/components/PageHeader';
@@ -25,6 +25,9 @@ export default function Dashboard() {
   const [thisWeekCompleted, setThisWeekCompleted] = useState(0);
   const [onTimeRate, setOnTimeRate] = useState(0);
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | 'last_7_days' | 'last_30_days'>('last_7_days');
+  const [totalTrips, setTotalTrips] = useState(0);
+  const [inTransit, setInTransit] = useState(0);
+  const [cancelled, setCancelled] = useState(0);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -100,6 +103,11 @@ export default function Dashboard() {
           return completedAt >= startDate && completedAt <= endDate;
         }
       });
+      
+      // Calculate overall stats
+      setTotalTrips(tripData.length);
+      setInTransit(tripData.filter(t => t.status === 'IN_TRANSIT').length);
+      setCancelled(tripData.filter(t => t.status === 'CANCELLED').length);
       
       // Count completed based on filter
       const completedCount = filteredTrips.length || 0;
@@ -182,70 +190,12 @@ export default function Dashboard() {
           <WeatherWidget />
         </div>
 
-        {/* Performance Overview */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-5 text-gray-900 dark:text-white">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-600">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <h2 className="font-bold text-sm sm:text-base">Performance</h2>
-            </div>
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value as any)}
-              className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700/50 px-2 sm:px-3 py-1 rounded-full border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="today">Today</option>
-              <option value="yesterday">Yesterday</option>
-              <option value="last_7_days">Last 7 Days</option>
-              <option value="last_30_days">Last 30 Days</option>
-            </select>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2">
-            <StatCard icon={Truck} label="Active" value={loading ? '...' : activeTrips.length.toString()} color="blue" />
-            <StatCard icon={CheckCircle} label="Today" value={loading ? '...' : completedToday.toString()} color="green" />
-            <StatCard icon={TrendingUp} label={dateFilter === 'today' ? 'Today' : dateFilter === 'yesterday' ? 'Yesterday' : dateFilter === 'last_7_days' ? '7 Days' : '30 Days'} value={loading ? '...' : thisWeekCompleted.toString()} color="purple" />
-            <StatCard icon={Award} label="Total" value={loading ? '...' : totalCompleted.toString()} color="yellow" />
-          </div>
-        </div>
-
-        {/* Detailed Metrics */}
+        {/* Trip Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
-            <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <div>
-                <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Average Time</span>
-                <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Efficiency Metric</div>
-              </div>
-            </div>
-            <div className="flex items-end justify-between">
-              <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-mono">
-                {loading ? '...' : `${avgDeliveryTime}h`}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">per trip</div>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-3 sm:p-4 flex flex-col justify-between">
-            <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-900 text-white dark:bg-lime-500 dark:text-black">
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <div>
-                <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">On-Time Rate</span>
-                <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">SLA Compliance</div>
-              </div>
-            </div>
-            <div className="flex items-end justify-between">
-              <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-mono">
-                {loading ? '...' : `${onTimeRate}%`}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">12h SLA</div>
-            </div>
-          </div>
+          <StatCard icon={Truck} label="Total Trips" value={loading ? '...' : totalTrips.toString()} color="blue" onClick={() => router.push('/trips?filter=all')} />
+          <StatCard icon={CheckCircle} label="Completed" value={loading ? '...' : totalCompleted.toString()} color="green" onClick={() => router.push('/history?filter=completed')} />
+          <StatCard icon={Clock} label="In Transit" value={loading ? '...' : inTransit.toString()} color="yellow" onClick={() => router.push('/trips?filter=active')} />
+          <StatCard icon={XCircle} label="Cancelled" value={loading ? '...' : cancelled.toString()} color="red" onClick={() => router.push('/history?filter=cancelled')} />
         </div>
 
         {/* Quick Actions */}

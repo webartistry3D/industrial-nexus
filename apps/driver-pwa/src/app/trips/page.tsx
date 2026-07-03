@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
@@ -12,6 +12,7 @@ import { StatCard } from '@/components/stat-card';
 
 export default function TripsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,13 @@ export default function TripsPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    const filterParam = searchParams.get('filter');
+    if (filterParam === 'all' || filterParam === 'active' || filterParam === 'completed') {
+      setFilter(filterParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!authLoading && !user) {

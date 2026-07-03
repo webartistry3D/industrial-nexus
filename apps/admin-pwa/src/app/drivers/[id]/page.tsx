@@ -5,11 +5,11 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
-import { Driver, Vehicle, KycDocument, KycDocumentType, KycDocumentStatus } from '@/types';
+import { Driver, Vehicle, KycDocument, KycDocumentType, KycDocumentTypeValue, KycDocumentStatus } from '@/types';
 import { 
   ArrowLeft, Users, Mail, Shield, Truck, MapPin, 
   CheckCircle, XCircle, AlertCircle, Clock, UserCheck,
-  FileText, CalendarClock, BadgeCheck, AlertTriangle
+  FileText, CalendarClock, BadgeCheck, AlertTriangle, Upload, Trash2
 } from 'lucide-react';
 
 interface ConfirmAction {
@@ -75,6 +75,11 @@ export default function DriverDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<KycDocumentTypeValue>(KycDocumentType.GOVERNMENT_ID);
+  const [docExpiry, setDocExpiry] = useState('');
 
   // Scroll to top on page load
   useEffect(() => {
@@ -161,6 +166,46 @@ export default function DriverDetailPage() {
       title: 'Change Driver Status',
       message: `Are you sure you want to set this driver's status to ${formatStatus(newStatus)}?`,
     });
+  };
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile) {
+      setError('Please select a file to upload');
+      return;
+    }
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError(null);
+      await api.uploadDriverKycDocument(driverId, selectedFile, selectedDocType, docExpiry || undefined);
+      await fetchKycDocuments();
+      setSelectedFile(null);
+      setDocExpiry('');
+      setShowUploadForm(false);
+      showSuccess('KYC document uploaded successfully');
+    } catch (err: any) {
+      console.error('Failed to upload KYC document:', err);
+      setError(err.response?.data?.message || 'Failed to upload KYC document. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to delete this KYC document?')) return;
+    try {
+      await api.deleteKycDocument(documentId);
+      await fetchKycDocuments();
+      showSuccess('KYC document deleted successfully');
+    } catch (err: any) {
+      console.error('Failed to delete KYC document:', err);
+      setError(err.response?.data?.message || 'Failed to delete KYC document.');
+    }
   };
 
   const handleKycChange = (newKycStatus: 'PENDING' | 'VERIFIED' | 'REJECTED') => {
@@ -338,12 +383,68 @@ export default function DriverDetailPage() {
         {/* Driver Documentation */}
         <div className="px-4 pb-4">
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-4 shadow-lg">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
-                <FileText className="w-4 h-4 text-white dark:text-black" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-blue-900 dark:bg-lime-500 shadow-sm">
+                  <FileText className="w-4 h-4 text-white dark:text-black" />
+                </div>
+                <h2 className="font-semibold text-gray-900 dark:text-white">Driver Documentation</h2>
               </div>
-              <h2 className="font-semibold text-gray-900 dark:text-white">Driver Documentation</h2>
+              <button
+                onClick={() => setShowUploadForm(!showUploadForm)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-800 hover:to-blue-800 text-white rounded-xl text-sm font-semibold transition-all duration-300"
+              >
+                <Upload className="w-4 h-4" />
+                {showUploadForm ? 'Cancel' : 'Upload Document'}
+              </button>
             </div>
+
+            {showUploadForm && (
+              <form onSubmit={handleUpload} className="mb-4 p-4 bg-gray-50/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-slate-600/50 space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Document Type</label>
+                  <select
+                    value={selectedDocType}
+                    onChange={(e) => setSelectedDocType(e.target.value as KycDocumentTypeValue)}
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-900"
+                  >
+                    <option value={KycDocumentType.GOVERNMENT_ID}>Government ID</option>
+                    <option value={KycDocumentType.DRIVERS_LICENSE}>Driver's License</option>
+                    <option value={KycDocumentType.PROOF_OF_ADDRESS}>Proof of Address</option>
+                    <option value={KycDocumentType.VEHICLE_REGISTRATION}>Vehicle Registration</option>
+                    <option value={KycDocumentType.INSURANCE_CERTIFICATE}>Insurance Certificate</option>
+                    <option value={KycDocumentType.PROFESSIONAL_CERTIFICATION}>Professional Certification</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiry Date (optional)</label>
+                  <input
+                    type="date"
+                    value={docExpiry}
+                    onChange={(e) => setDocExpiry(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select File (PDF, JPG, PNG - Max 10MB)</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-900"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={uploading || !selectedFile}
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-800 hover:to-blue-800 text-white rounded-xl text-sm font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {uploading ? 'Uploading...' : 'Upload'}
+                  </button>
+                </div>
+              </form>
+            )}
 
             {kycDocuments.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No documents on file</p>

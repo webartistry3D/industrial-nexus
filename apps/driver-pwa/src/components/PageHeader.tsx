@@ -69,6 +69,10 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
   };
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(notifications.length / itemsPerPage);
+  const paginatedNotifications = notifications.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const formatTime = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -110,7 +114,7 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
 
             {showNotifications && (
               <>
-                <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(120vw-12rem)] bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
+                <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(80vw-2rem)] bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50 right-0 md:right-0 left-1/2 md:left-auto -translate-x-1/2 md:translate-x-0">
                   <div className="px-4 py-2 border-b border-gray-100 dark:border-slate-700">
                     <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                   </div>
@@ -127,19 +131,49 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
                   {notifications.length === 0 ? (
                     <div className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No notifications</div>
                   ) : (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        onClick={() => handleNotificationClick(notification)}
-                        className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors border-l-4 ${
-                          !notification.isRead ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40' : 'border-transparent'
-                        }`}
-                      >
-                        <p className={`text-sm ${!notification.isRead ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-900 dark:text-white font-medium'}`}>{notification.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{notification.message}</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">{formatTime(notification.createdAt)}</p>
+                    <>
+                      <div className="max-h-[180px] overflow-y-auto">
+                        {paginatedNotifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => handleNotificationClick(notification)}
+                            className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors border-l-4 ${
+                              !notification.isRead ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40' : 'border-transparent'
+                            }`}
+                          >
+                            <p className={`text-sm ${!notification.isRead ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-900 dark:text-white font-medium'}`}>{notification.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{notification.message}</p>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{formatTime(notification.createdAt)}</p>
+                              {notification.userName && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{notification.userName}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))
+                      {totalPages > 1 && (
+                        <div className="px-4 py-2 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                          <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                            Page {page} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="px-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 {/* Click outside to close dropdown */}

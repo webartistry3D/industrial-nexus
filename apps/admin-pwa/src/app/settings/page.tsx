@@ -135,6 +135,8 @@ export default function SettingsPage() {
   const [billingLoading, setBillingLoading] = useState(false);
   const [showRateCardForm, setShowRateCardForm] = useState(false);
   const [editingRateCard, setEditingRateCard] = useState<RateCard | null>(null);
+  const [showActivateModal, setShowActivateModal] = useState(false);
+  const [activatingRateCard, setActivatingRateCard] = useState<RateCard | null>(null);
   const [rateCardForm, setRateCardForm] = useState<Record<string, any>>({
     name: '',
     baseRatePerKm: 0,
@@ -436,14 +438,32 @@ export default function SettingsPage() {
   };
 
   const handleActivateRateCard = async (id: string) => {
-    if (!confirm('Activate this rate card? The current active rate card will be deactivated.')) return;
     try {
       await api.activateRateCard(id);
       await fetchBilling();
+      setShowActivateModal(false);
+      setActivatingRateCard(null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Failed to activate rate card');
+    }
+  };
+
+  const openActivateModal = (rateCard: RateCard) => {
+    setActivatingRateCard(rateCard);
+    setShowActivateModal(true);
+  };
+
+  const handleDeleteRateCard = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this rate card? This action cannot be undone.')) return;
+    try {
+      await api.deleteRateCard(id);
+      await fetchBilling();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to delete rate card');
     }
   };
 
@@ -1441,8 +1461,8 @@ export default function SettingsPage() {
                             <div className="flex items-center justify-end gap-1">
                               {!rateCard.isActive && (
                                 <button
-                                  onClick={() => handleActivateRateCard(rateCard.id)}
-                                  className="text-green-600 hover:text-green-700 p-1"
+                                  onClick={() => openActivateModal(rateCard)}
+                                  className="bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400 p-1.5 rounded-lg cursor-pointer transition-colors"
                                   title="Activate"
                                 >
                                   <Check className="w-4 h-4" />
@@ -1451,11 +1471,20 @@ export default function SettingsPage() {
                               <button
                                 onClick={() => startEditRateCard(rateCard)}
                                 disabled={rateCard.isActive}
-                                className="text-blue-600 hover:text-blue-700 p-1 disabled:opacity-40"
+                                className="bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 title={rateCard.isActive ? 'Deactivate to edit' : 'Edit'}
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
+                              {!rateCard.isActive && (
+                                <button
+                                  onClick={() => handleDeleteRateCard(rateCard.id)}
+                                  className="bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 p-1.5 rounded-lg cursor-pointer transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -1995,6 +2024,46 @@ export default function SettingsPage() {
                   className="flex-1 px-4 py-2 bg-blue-900 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   {editingRateCard ? 'Update Rate Card' : 'Create Rate Card'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Activate Rate Card Confirmation Modal */}
+        {showActivateModal && activatingRateCard && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowActivateModal(false)} />
+            <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                  <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Activate Rate Card</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Confirm activation</p>
+                </div>
+              </div>
+              <div className="mb-6">
+                <p className="text-gray-700 dark:text-gray-300 mb-2">
+                  Are you sure you want to activate <span className="font-semibold text-gray-900 dark:text-white">{activatingRateCard.name}</span>?
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  The current active rate card will be deactivated automatically.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowActivateModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleActivateRateCard(activatingRateCard.id)}
+                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                >
+                  Activate
                 </button>
               </div>
             </div>

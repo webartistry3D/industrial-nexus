@@ -427,6 +427,18 @@ class ApiClient {
     return response.data;
   }
 
+  async uploadDriverKycDocument(driverId: string, file: File, documentType: string, expiresAt?: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('documentType', documentType);
+    if (expiresAt) formData.append('expiresAt', expiresAt);
+
+    const response = await this.client.post(`/drivers/${driverId}/kyc/documents/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
   async updateKycDocument(documentId: string, data: { status?: string; rejectionReason?: string }) {
     const response = await this.client.patch(`/drivers/kyc/documents/${documentId}`, data);
     return response.data;
@@ -667,6 +679,11 @@ class ApiClient {
 
   async activateRateCard(id: string) {
     const response = await this.client.post(`/billing/rate-cards/${id}/activate`);
+    return response.data;
+  }
+
+  async deleteRateCard(id: string) {
+    const response = await this.client.delete(`/billing/rate-cards/${id}`);
     return response.data;
   }
 
