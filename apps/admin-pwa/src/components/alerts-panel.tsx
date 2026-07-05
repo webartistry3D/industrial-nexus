@@ -45,7 +45,7 @@ export function AlertsPanel({ alerts, loading = false, onAlertClick }: AlertsPan
   }
 
   const activeAlerts = alerts.filter(
-    a => a.status === 'WARNING' || a.status === 'NEAR_CAPACITY' || a.status === 'OVERLOADED'
+    a => (a.status === 'WARNING' || a.status === 'NEAR_CAPACITY' || a.status === 'OVERLOADED') && a.trip?.status !== 'DELIVERED'
   );
 
   return (
