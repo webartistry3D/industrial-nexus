@@ -349,7 +349,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => router.push('/orders/new')}
-              className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
+              className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg">
                 <Plus className="w-4 h-4" />
@@ -358,7 +358,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => router.push('/tracking')}
-              className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
+              className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg">
                 <MapPin className="w-4 h-4" />

@@ -815,6 +815,17 @@ export default function OrderDetailPage() {
             {order.client?.firstName || ''} {order.client?.lastName || ''}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">{order.client?.email || 'N/A'}</p>
+          {(order.requesterName || order.requesterPhone) && (
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-600">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Requester</p>
+              {order.requesterName && (
+                <p className="text-sm text-gray-900 dark:text-white mt-1">{order.requesterName}</p>
+              )}
+              {order.requesterPhone && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{order.requesterPhone}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Invoice Panel */}

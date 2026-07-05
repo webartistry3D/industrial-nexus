@@ -213,6 +213,8 @@ model Order {
 
   packageTrackerId String?      @map("package_tracker_id")
   declaredCargoValue Float?      @map("declared_cargo_value")
+  requesterName      String?      @map("requester_name")
+  requesterPhone     String?      @map("requester_phone")
 
   // Relations
   client         User         @relation("ClientOrders", fields: [clientId], references: [id])

@@ -50,6 +50,8 @@ export default function NewOrderPage() {
   const [clientsLoading, setClientsLoading] = useState(true);
   const [formData, setFormData] = useState({
     clientId: '',
+    requesterName: '',
+    requesterPhone: '',
     cargoDescription: '',
     pickupAddress: '',
     deliveryAddress: '',
@@ -231,6 +233,8 @@ export default function NewOrderPage() {
         // Transform data to match backend DTO structure
         const orderData = {
           clientId: updatedFormData.clientId,
+          requesterName: updatedFormData.requesterName,
+          requesterPhone: updatedFormData.requesterPhone,
           totalWeight: updatedFormData.totalWeight,
           cargoDescription: updatedFormData.cargoDescription,
           pickupLocation: {
@@ -259,6 +263,8 @@ export default function NewOrderPage() {
         // Transform data to match backend DTO structure
         const orderData = {
           clientId: formData.clientId,
+          requesterName: formData.requesterName,
+          requesterPhone: formData.requesterPhone,
           totalWeight: formData.totalWeight,
           cargoDescription: formData.cargoDescription,
           pickupLocation: {
@@ -367,6 +373,33 @@ export default function NewOrderPage() {
                 </p>
               )}
             </div>
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Requester Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.requesterName}
+                  onChange={(e) => setFormData({ ...formData, requesterName: e.target.value })}
+                  placeholder="Person requesting on behalf of client"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Requester Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.requesterPhone}
+                  onChange={(e) => setFormData({ ...formData, requesterPhone: e.target.value })}
+                  placeholder="+2348012345678"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Cargo Description */}
@@ -407,22 +440,32 @@ export default function NewOrderPage() {
                 <option value="URGENT">Urgent</option>
               </select>
               <div className="mt-2 text-xs">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="font-semibold text-gray-600 dark:text-gray-400">LOW:</span>
-                  <span className="text-gray-600 dark:text-gray-400">Non-urgent, 5-7 day delivery window, routine restocking</span>
-                </div>
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">NORMAL:</span>
-                  <span className="text-blue-600 dark:text-blue-400">Standard 2-3 day delivery, most orders</span>
-                </div>
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="font-semibold text-orange-600 dark:text-orange-400">HIGH:</span>
-                  <span className="text-orange-600 dark:text-orange-400">Time-sensitive, 24-48 hours, important commitments</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-red-600 dark:text-red-400">URGENT:</span>
-                  <span className="text-red-600 dark:text-red-400">Same-day/overnight, critical operations, emergencies</span>
-                </div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-slate-600">
+                      <th className="text-left py-1 px-2 font-semibold text-gray-700 dark:text-gray-300">Priority</th>
+                      <th className="text-left py-1 px-2 font-semibold text-gray-700 dark:text-gray-300">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-100 dark:border-slate-700">
+                      <td className="py-1 px-2 font-semibold text-gray-600 dark:text-gray-400">LOW</td>
+                      <td className="py-1 px-2 text-gray-600 dark:text-gray-400">Non-urgent, 5-7 day delivery window, routine restocking</td>
+                    </tr>
+                    <tr className="border-b border-gray-100 dark:border-slate-700">
+                      <td className="py-1 px-2 font-semibold text-blue-600 dark:text-blue-400">NORMAL</td>
+                      <td className="py-1 px-2 text-blue-600 dark:text-blue-400">Standard 2-3 day delivery, most orders</td>
+                    </tr>
+                    <tr className="border-b border-gray-100 dark:border-slate-700">
+                      <td className="py-1 px-2 font-semibold text-orange-600 dark:text-orange-400">HIGH</td>
+                      <td className="py-1 px-2 text-orange-600 dark:text-orange-400">Time-sensitive, 24-48 hours, important commitments</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 px-2 font-semibold text-red-600 dark:text-red-400">URGENT</td>
+                      <td className="py-1 px-2 text-red-600 dark:text-red-400">Same-day/overnight, critical operations, emergencies</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -475,10 +518,7 @@ export default function NewOrderPage() {
           {/* Pickup & Delivery Locations with Map */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
-                  <MapPin className="w-5 h-5 text-white" />
-                </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Locations
               </h3>
               <div className="flex gap-2">

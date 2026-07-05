@@ -51,6 +51,8 @@ export class OrdersService {
         cargoDescription: createOrderDto.cargoDescription,
         deliveryInstructions: createOrderDto.deliveryInstructions,
         declaredCargoValue: createOrderDto.declaredCargoValue,
+        requesterName: createOrderDto.requesterName,
+        requesterPhone: createOrderDto.requesterPhone,
         kittingStatus: KittingStatus.PENDING,
       },
     });

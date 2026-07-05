@@ -156,7 +156,7 @@ export function TrackersTab() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 text-sm"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 text-sm"
         >
           <Plus className="w-4 h-4" />
           Add Tracker
@@ -168,7 +168,7 @@ export function TrackersTab() {
             onClick={() => setViewMode('list')}
             className={`p-2.5 rounded-xl transition-all duration-300 ${
               viewMode === 'list'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-600 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
             }`}
             aria-label="List view"
@@ -179,7 +179,7 @@ export function TrackersTab() {
             onClick={() => setViewMode('grid')}
             className={`p-2.5 rounded-xl transition-all duration-300 ${
               viewMode === 'grid'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-600 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
             }`}
             aria-label="Grid view"
@@ -192,7 +192,7 @@ export function TrackersTab() {
             onClick={() => setViewMode('list')}
             className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
               viewMode === 'list'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-600 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
             }`}
             aria-label="List view"
@@ -203,7 +203,7 @@ export function TrackersTab() {
             onClick={() => setViewMode('grid')}
             className={`w-12 p-2.5 rounded-xl transition-all duration-300 ${
               viewMode === 'grid'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-600 text-white shadow-md shadow-blue-500/20'
                 : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
             }`}
             aria-label="Grid view"

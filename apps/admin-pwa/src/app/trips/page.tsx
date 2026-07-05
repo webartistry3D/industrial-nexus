@@ -294,7 +294,7 @@ function TripsPageContent() {
         {/* Header */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 px-4 py-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-900 to-blue-900 dark:from-blue-600 dark:to-blue-600 shadow-md">
+            <div className="p-2.5 rounded-xl bg-blue-600 shadow-md">
               {activeTab === 'trips' ? <Truck className="w-6 h-6 text-white" /> : <BarChart2 className="w-6 h-6 text-white" />}
             </div>
             <div className="flex-1">
@@ -316,7 +316,7 @@ function TripsPageContent() {
             {activeTab === 'trips' && (
               <button
                 onClick={() => router.push('/trips/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Create Trip
@@ -330,7 +330,7 @@ function TripsPageContent() {
               onClick={() => setActiveTab('trips')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'trips'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-600 dark:to-lime-600 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >
@@ -341,7 +341,7 @@ function TripsPageContent() {
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeTab === 'analytics'
-                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-600 dark:to-lime-600 text-white dark:text-black shadow-md shadow-blue-500/20'
                   : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
               }`}
             >

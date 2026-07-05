@@ -186,19 +186,19 @@ export default function Dashboard() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button onClick={() => router.push('/orders/new')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/orders/new')} className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Plus className="w-4 h-4" /></div>
               <span>Create Order</span>
             </button>
-            <button onClick={() => router.push('/orders')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/orders')} className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Package className="w-4 h-4" /></div>
               <span>View Orders</span>
             </button>
-            <button onClick={() => router.push('/trips')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/trips')} className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Route className="w-4 h-4" /></div>
               <span>View Trips</span>
             </button>
-            <button onClick={() => router.push('/drivers')} className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <button onClick={() => router.push('/drivers')} className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><UserPlus className="w-4 h-4" /></div>
               <span>View Drivers</span>
             </button>

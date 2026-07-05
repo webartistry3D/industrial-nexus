@@ -72,4 +72,16 @@ export class CreateOrderDto {
   @Min(0)
   @Type(() => Number)
   declaredCargoValue?: number;
+
+  @ApiPropertyOptional({ example: 'John Doe', description: 'Name of the personnel requesting the order on behalf of the client company' })
+  @IsOptional()
+  @IsString()
+  @Sanitize()
+  requesterName?: string;
+
+  @ApiPropertyOptional({ example: '+2348012345678', description: 'Phone number of the personnel requesting the order on behalf of the client company' })
+  @IsOptional()
+  @IsString()
+  @Sanitize()
+  requesterPhone?: string;
 }

@@ -34,6 +34,8 @@ export interface Order {
   cargoDescription?: string;
   deliveryInstructions?: string;
   declaredCargoValue?: number;
+  requesterName?: string;
+  requesterPhone?: string;
   handlingTags: string[];
   createdAt: string;
   updatedAt: string;

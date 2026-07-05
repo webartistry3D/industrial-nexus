@@ -193,27 +193,33 @@ export default function Dashboard() {
         {/* Trip Stats */}
         <div className="grid grid-cols-2 gap-3">
           <StatCard icon={Truck} label="Total Trips" value={loading ? '...' : totalTrips.toString()} color="blue" onClick={() => router.push('/trips?filter=all')} />
-          <StatCard icon={CheckCircle} label="Completed" value={loading ? '...' : totalCompleted.toString()} color="green" onClick={() => router.push('/history?filter=completed')} />
+          <StatCard icon={CheckCircle} label="Completed" value={loading ? '...' : totalCompleted.toString()} color="green" onClick={() => router.push('/trips?filter=completed')} />
           <StatCard icon={Clock} label="In Transit" value={loading ? '...' : inTransit.toString()} color="yellow" onClick={() => router.push('/trips?filter=active')} />
-          <StatCard icon={XCircle} label="Cancelled" value={loading ? '...' : cancelled.toString()} color="red" onClick={() => router.push('/history?filter=cancelled')} />
+          <StatCard icon={XCircle} label="Cancelled" value={loading ? '...' : cancelled.toString()} color="red" onClick={() => router.push('/trips?filter=all')} />
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => router.push('/trips')}
-            className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-          >
-            <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Truck className="w-4 h-4" /></div>
-            <span>View All Trips</span>
-          </button>
-          <button
-            onClick={() => router.push('/tracking')}
-            className="group flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-          >
-            <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><MapPin className="w-4 h-4" /></div>
-            <span>Live Tracking</span>
-          </button>
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-lg p-5">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => router.push('/trips')}
+              className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><Truck className="w-4 h-4" /></div>
+              <span>View All Trips</span>
+            </button>
+            <button
+              onClick={() => router.push('/tracking')}
+              className="group flex items-center gap-3 p-4 bg-gray-100 dark:bg-[#10172A] rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><MapPin className="w-4 h-4" /></div>
+              <span>Live Tracking</span>
+            </button>
+          </div>
         </div>
 
         {/* Performance Badge */}
