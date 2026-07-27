@@ -7,6 +7,8 @@ import { ServerOptions } from 'socket.io';
 import { join } from 'path';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { Request, Response, NextFunction } from 'express';
+import { timingSafeEqual } from 'crypto';
 import { AppModule } from './app.module';
 
 class CorsIoAdapter extends IoAdapter {
@@ -40,19 +42,51 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Swagger API docs — only available outside production
-  if (configService.get<string>('NODE_ENV') !== 'production') {
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('Industrial Nexus API')
-      .setDescription('Logistics platform REST API')
-      .setVersion('1.0')
-      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
-      .build();
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: { persistAuthorization: true },
+  // Swagger API docs — available in all environments
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Industrial Nexus API')
+    .setDescription('Logistics platform REST API')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+  // Optional Basic Auth protection for production
+  const docsUsername = configService.get<string>('DOCS_USERNAME');
+  const docsPassword = configService.get<string>('DOCS_PASSWORD');
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+
+  if (isProduction && docsUsername && docsPassword) {
+    const docsPath = '/api/docs';
+    app.use(docsPath, (req: Request, res: Response, next: NextFunction) => {
+      const auth = req.headers.authorization;
+      if (!auth || !auth.startsWith('Basic ')) {
+        res.set('WWW-Authenticate', 'Basic realm="API Docs"');
+        return res.status(401).send('Authentication required');
+      }
+      const [providedUser, providedPass] = Buffer.from(auth.slice(6), 'base64')
+        .toString('utf8')
+        .split(':');
+      const userMatch = safeCompare(providedUser ?? '', docsUsername);
+      const passMatch = safeCompare(providedPass ?? '', docsPassword);
+      if (!userMatch || !passMatch) {
+        res.set('WWW-Authenticate', 'Basic realm="API Docs"');
+        return res.status(401).send('Invalid credentials');
+      }
+      next();
     });
-    console.log(`Swagger docs available at http://localhost:${configService.get('PORT', 3001)}/api/docs`);
+  }
+
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
+  console.log(`Swagger docs available at http://localhost:${configService.get('PORT', 3001)}/api/docs`);
+
+  function safeCompare(a: string, b: string): boolean {
+    const bufA = Buffer.from(a);
+    const bufB = Buffer.from(b);
+    if (bufA.length !== bufB.length) return false;
+    return timingSafeEqual(bufA, bufB);
   }
 
   // Serve static uploads only in local dev (production uses S3 URLs directly)

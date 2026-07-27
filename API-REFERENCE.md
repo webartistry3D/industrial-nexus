@@ -1,7 +1,7 @@
 # Industrial Nexus — API Reference
 
-**Base URL:** `http://localhost:3001` (dev) · `https://api.yourdomain.com` (prod)  
-**Interactive Docs (dev only):** `http://localhost:3001/api/docs`  
+**Base URL:** `http://localhost:3001` (dev) · `https://industrial-nexus-api.onrender.com` (prod)  
+**Interactive Docs:** `http://localhost:3001/api/docs` (dev) · `https://industrial-nexus-api.onrender.com/api/docs` (prod)  
 **Auth:** All protected endpoints require `Authorization: Bearer <accessToken>`  
 **Rate limits:** Login — 10 req/min · Password reset request — 5 req/min
 
