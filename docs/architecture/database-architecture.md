@@ -41,15 +41,14 @@ Industrial Nexus uses **PostgreSQL** as the primary transactional database, acce
 ### Trip & Tracking
 
 - **Trip** — assigned order, driver, vehicle, ETA, status lifecycle.
-- **DriverAssignment** — historical trip-to-driver/vehicle assignments.
-- **TrackingPoint** — GPS points per trip (lat, lng, accuracy, speed, heading, timestamp).
+- **DriverAssignment** — historical trip-to-driver/vehicle assignments, including `isDispatchError` and `errorType` for KPI tracking.
 - **PackageTracker** — IoT package tracker devices with last-seen location.
 - **PackageTrackingPoint** — GPS points per package tracker.
 
 ### Weight & Compliance
 
 - **WeightRecord** — cargo weight, vehicle capacity, utilization ratio, weight status.
-- **POD** — proof of delivery (image, signature, receiver details, GPS).
+- **POD** — proof of delivery (image, signature, receiver details, GPS, damage reported flag).
 
 ### Geofencing
 
@@ -65,7 +64,7 @@ Industrial Nexus uses **PostgreSQL** as the primary transactional database, acce
 - `UserRole`, `UserStatus`, `DriverStatus`, `DriverAvailability`, `KycStatus`
 - `VehicleCategory`, `VehicleStatus`
 - `OrderStatus`, `Priority`, `KittingStatus`, `KittingStage`
-- `TripStatus`, `GeofenceType`, `GeofenceEventType`
+- `TripStatus`, `GeofenceType`, `GeofenceEventType`, `DispatchErrorType`
 - `KycDocumentType`, `KycDocumentStatus`, `VehicleDocumentType`, `VehicleDocumentStatus`
 - `WeightStatus`, `PackageTrackerStatus`, `NotificationType`, `AuditAction`
 

@@ -232,6 +232,12 @@ class ApiClient {
     const response = await this.client.post('/billing/estimate', data);
     return response.data;
   }
+
+  // Analytics
+  async getSmartKpis() {
+    const response = await this.client.get('/analytics/smart-kpis');
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

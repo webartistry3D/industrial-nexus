@@ -307,6 +307,17 @@ class ApiClient {
     return response.data;
   }
 
+  async reassignTrip(id: string, data: {
+    driverId: string;
+    vehicleId: string;
+    reason?: string;
+    isDispatchError?: boolean;
+    errorType?: string;
+  }) {
+    const response = await this.client.post(`/trips/${id}/reassign`, data);
+    return response.data;
+  }
+
   async completeTrip(id: string) {
     const response = await this.client.post(`/trips/${id}/complete`);
     return response.data;
@@ -543,6 +554,11 @@ class ApiClient {
 
   async getDeliveryTrends(days = 30) {
     const response = await this.client.get('/analytics/trends', { params: { days } });
+    return response.data;
+  }
+
+  async getSmartKpis() {
+    const response = await this.client.get('/analytics/smart-kpis');
     return response.data;
   }
 

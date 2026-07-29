@@ -634,7 +634,9 @@ Submit Proof of Delivery.
   "signatureUrl": "data:image/png;base64,...",
   "notes": "Received by: John | Phone: 080...",
   "lat": 6.5244,
-  "lng": 3.3792
+  "lng": 3.3792,
+  "damageReported": true,
+  "damageDescription": "Corner of crate dented, seal broken"
 }
 ```
 **200** `Trip`
@@ -662,7 +664,17 @@ Submit SOP pre-trip checklist.
 Reassign trip to a different driver/vehicle.  
 **Roles:** SUPER_ADMIN, OPERATIONS
 
-**Body** `{ "driverId": "uuid", "vehicleId": "uuid" }`  
+**Body**
+```json
+{
+  "driverId": "uuid",
+  "vehicleId": "uuid",
+  "reason": "Vehicle breakdown",
+  "isDispatchError": true,
+  "errorType": "VEHICLE_MISMATCH"
+}
+```
+`errorType` values: `WRONG_DRIVER_ASSIGNED`, `VEHICLE_MISMATCH`, `LATE_ASSIGNMENT`, `ADDRESS_ERROR`, `DUPLICATE_DISPATCH`, `OTHER`  
 **200** `Trip`
 
 ---
@@ -785,6 +797,24 @@ Per-driver performance metrics.
 Delivery volume by day over a period.  
 **Query:** `days` (default 30)  
 **200** `{ date, deliveries, onTime, late }[]`
+
+---
+
+### `GET /analytics/smart-kpis`
+Company-wide SMART KPIs, all returned as percentages for display on the dashboards.  
+**200**
+```json
+{
+  "onTimeDeliveryRate": 94,
+  "transitDamageRate": 2,
+  "dispatchErrorRate": 5,
+  "leadTimeReductionRate": 12
+}
+```
+- `onTimeDeliveryRate`: % of delivered trips completed at/before ETA.
+- `transitDamageRate`: % of submitted PODs with `damageReported` set to `true`.
+- `dispatchErrorRate`: % of all trips that had at least one reassignment flagged as `isDispatchError`.
+- `leadTimeReductionRate`: % reduction in average order-to-delivery time over the last 30 days vs. the previous 30-day period.
 
 ---
 

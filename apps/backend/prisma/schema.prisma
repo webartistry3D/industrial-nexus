@@ -10,38 +10,38 @@ datasource db {
 // ==================== CORE ENTITIES ====================
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  firstName    String   @map("first_name")
-  lastName     String   @map("last_name")
-  phoneNumber     String?  @map("phone_number")
-  profileImageUrl String?  @map("profile_image_url")
-  role            UserRole @default(CLIENT)
+  id              String     @id @default(uuid())
+  email           String     @unique
+  passwordHash    String     @map("password_hash")
+  firstName       String     @map("first_name")
+  lastName        String     @map("last_name")
+  phoneNumber     String?    @map("phone_number")
+  profileImageUrl String?    @map("profile_image_url")
+  role            UserRole   @default(CLIENT)
   status          UserStatus @default(ACTIVE)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+  lastLoginAt     DateTime?  @map("last_login_at")
 
   // Relations
-  auditLogs    AuditLog[]
-  refreshTokens RefreshToken[]
+  auditLogs           AuditLog[]
+  refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
-  sessions     Session[]
-  driver       Driver?
-  orders       Order[]    @relation("ClientOrders")
-  kittingLogs  KittingLog[]
-  rateCardsCreated RateCard[] @relation("RateCardCreator")
+  sessions            Session[]
+  driver              Driver?
+  orders              Order[]              @relation("ClientOrders")
+  kittingLogs         KittingLog[]
+  rateCardsCreated    RateCard[]           @relation("RateCardCreator")
 
   @@map("users")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
   revokedAt DateTime? @map("revoked_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -50,11 +50,11 @@ model RefreshToken {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
   usedAt    DateTime? @map("used_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -63,16 +63,16 @@ model PasswordResetToken {
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  token     String   @unique
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  isActive  Boolean  @default(true) @map("is_active")
-  lastActivityAt DateTime @default(now()) @map("last_activity_at")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  revokedAt DateTime? @map("revoked_at")
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  token          String    @unique
+  ipAddress      String?   @map("ip_address")
+  userAgent      String?   @map("user_agent")
+  isActive       Boolean   @default(true) @map("is_active")
+  lastActivityAt DateTime  @default(now()) @map("last_activity_at")
+  expiresAt      DateTime  @map("expires_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  revokedAt      DateTime? @map("revoked_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -80,16 +80,16 @@ model Session {
 }
 
 model AuditLog {
-  id          String    @id @default(uuid())
-  userId      String?   @map("user_id")
-  action      AuditAction
-  entityType  String    @map("entity_type")
-  entityId    String?   @map("entity_id")
-  oldValue    Json?     @map("old_value")
-  newValue    Json?     @map("new_value")
-  ipAddress   String?   @map("ip_address")
-  userAgent   String?   @map("user_agent")
-  createdAt   DateTime  @default(now()) @map("created_at")
+  id         String      @id @default(uuid())
+  userId     String?     @map("user_id")
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String?     @map("entity_id")
+  oldValue   Json?       @map("old_value")
+  newValue   Json?       @map("new_value")
+  ipAddress  String?     @map("ip_address")
+  userAgent  String?     @map("user_agent")
+  createdAt  DateTime    @default(now()) @map("created_at")
 
   user User? @relation(fields: [userId], references: [id])
 
@@ -102,29 +102,29 @@ model AuditLog {
 // ==================== DRIVER & VEHICLE ====================
 
 model KycDocument {
-  id              String           @id @default(uuid())
-  driverId        String           @map("driver_id")
-  documentType    KycDocumentType  @map("document_type")
-  fileUrl         String           @map("file_url")
-  fileName        String           @map("file_name")
-  fileSize        Int              @map("file_size")
-  mimeType        String           @map("mime_type")
+  id              String            @id @default(uuid())
+  driverId        String            @map("driver_id")
+  documentType    KycDocumentType   @map("document_type")
+  fileUrl         String            @map("file_url")
+  fileName        String            @map("file_name")
+  fileSize        Int               @map("file_size")
+  mimeType        String            @map("mime_type")
   status          KycDocumentStatus @default(PENDING)
-  submittedAt     DateTime         @default(now()) @map("submitted_at")
-  reviewedAt      DateTime?        @map("reviewed_at")
-  reviewedBy      String?          @map("reviewed_by")
-  rejectionReason String?          @map("rejection_reason")
-  expiresAt       DateTime?        @map("expires_at")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
+  submittedAt     DateTime          @default(now()) @map("submitted_at")
+  reviewedAt      DateTime?         @map("reviewed_at")
+  reviewedBy      String?           @map("reviewed_by")
+  rejectionReason String?           @map("rejection_reason")
+  expiresAt       DateTime?         @map("expires_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
 
   // Relations
-  driver          Driver           @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
 
-  @@map("kyc_documents")
   @@index([driverId])
   @@index([status])
   @@index([documentType])
+  @@map("kyc_documents")
 }
 
 model VehicleDocument {
@@ -145,43 +145,43 @@ model VehicleDocument {
   updatedAt       DateTime              @updatedAt @map("updated_at")
 
   // Relations
-  vehicle         Vehicle               @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 
-  @@map("vehicle_documents")
   @@index([vehicleId])
   @@index([status])
   @@index([documentType])
+  @@map("vehicle_documents")
 }
 
 model Driver {
-  id            String      @id @default(uuid())
-  userId        String      @unique @map("user_id")
-  licenseNumber String      @map("license_number")
-  kycStatus     KycStatus   @default(PENDING) @map("kyc_status")
-  status        DriverStatus @default(ACTIVE)
+  id            String             @id @default(uuid())
+  userId        String             @unique @map("user_id")
+  licenseNumber String             @map("license_number")
+  kycStatus     KycStatus          @default(PENDING) @map("kyc_status")
+  status        DriverStatus       @default(ACTIVE)
   availability  DriverAvailability @default(AVAILABLE) @map("availability")
-  vehicleId     String?     @map("vehicle_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  vehicleId     String?            @map("vehicle_id")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
 
   // Relations
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vehicle       Vehicle?     @relation(fields: [vehicleId], references: [id])
-  trips         Trip[]
-  kycDocuments  KycDocument[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle      Vehicle?      @relation(fields: [vehicleId], references: [id])
+  trips        Trip[]
+  kycDocuments KycDocument[]
 
   @@map("drivers")
 }
 
 model Vehicle {
-  id           String         @id @default(uuid())
-  plateNumber  String         @unique @map("plate_number")
-  category     VehicleCategory
-  capacityKg   Float          @map("capacity_kg")
-  status       VehicleStatus  @default(ACTIVE)
-  isPartitioned Boolean       @default(false) @map("is_partitioned")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  id            String          @id @default(uuid())
+  plateNumber   String          @unique @map("plate_number")
+  category      VehicleCategory
+  capacityKg    Float           @map("capacity_kg")
+  status        VehicleStatus   @default(ACTIVE)
+  isPartitioned Boolean         @default(false) @map("is_partitioned")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
 
   // Relations
   drivers          Driver[]
@@ -194,35 +194,35 @@ model Vehicle {
 // ==================== ORDER & KITTING ====================
 
 model Order {
-  id                 String       @id @default(uuid())
-  orderNumber        String       @unique @map("order_number")
-  clientId           String       @map("client_id")
-  status             OrderStatus  @default(DRAFT)
-  totalWeight        Float        @map("total_weight")
-  priority           Priority     @default(NORMAL)
-  pickupLocation     Json         @map("pickup_location")
-  deliveryLocation   Json         @map("delivery_location")
-  cargoDescription   String?      @map("cargo_description")
-  deliveryInstructions String?    @map("delivery_instructions")
-  kittingStatus      KittingStatus @default(PENDING) @map("kitting_status")
-  createdAt          DateTime     @default(now()) @map("created_at")
-  updatedAt          DateTime     @updatedAt @map("updated_at")
-  submittedAt        DateTime?    @map("submitted_at")
-  approvedAt         DateTime?    @map("approved_at")
-  cancelledAt        DateTime?    @map("cancelled_at")
+  id                   String        @id @default(uuid())
+  orderNumber          String        @unique @map("order_number")
+  clientId             String        @map("client_id")
+  status               OrderStatus   @default(DRAFT)
+  totalWeight          Float         @map("total_weight")
+  priority             Priority      @default(NORMAL)
+  pickupLocation       Json          @map("pickup_location")
+  deliveryLocation     Json          @map("delivery_location")
+  cargoDescription     String?       @map("cargo_description")
+  deliveryInstructions String?       @map("delivery_instructions")
+  kittingStatus        KittingStatus @default(PENDING) @map("kitting_status")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+  submittedAt          DateTime?     @map("submitted_at")
+  approvedAt           DateTime?     @map("approved_at")
+  cancelledAt          DateTime?     @map("cancelled_at")
 
-  packageTrackerId String?      @map("package_tracker_id")
-  declaredCargoValue Float?      @map("declared_cargo_value")
-  requesterName      String?      @map("requester_name")
-  requesterPhone     String?      @map("requester_phone")
+  packageTrackerId   String? @map("package_tracker_id")
+  declaredCargoValue Float?  @map("declared_cargo_value")
+  requesterName      String? @map("requester_name")
+  requesterPhone     String? @map("requester_phone")
 
   // Relations
-  client         User         @relation("ClientOrders", fields: [clientId], references: [id])
+  client         User               @relation("ClientOrders", fields: [clientId], references: [id])
   handlingTags   OrderHandlingTag[]
   kittingLogs    KittingLog[]
   trip           Trip?
   weightRecord   WeightRecord?
-  packageTracker PackageTracker? @relation(fields: [packageTrackerId], references: [id])
+  packageTracker PackageTracker?    @relation(fields: [packageTrackerId], references: [id])
   invoice        Invoice?
 
   @@map("orders")
@@ -240,11 +240,11 @@ model AvailableHandlingTag {
 }
 
 model OrderHandlingTag {
-  id        String   @id @default(uuid())
-  orderId   String   @map("order_id")
-  tagId     String   @map("tag_id")
+  id      String @id @default(uuid())
+  orderId String @map("order_id")
+  tagId   String @map("tag_id")
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
   tag   AvailableHandlingTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, tagId])
@@ -252,16 +252,16 @@ model OrderHandlingTag {
 }
 
 model KittingLog {
-  id          String       @id @default(uuid())
-  orderId     String       @map("order_id")
-  stage       KittingStage
-  operatorId  String       @map("operator_id")
-  barcodeVerified Boolean  @default(false) @map("barcode_verified")
-  notes       String?
-  createdAt   DateTime     @default(now()) @map("created_at")
+  id              String       @id @default(uuid())
+  orderId         String       @map("order_id")
+  stage           KittingStage
+  operatorId      String       @map("operator_id")
+  barcodeVerified Boolean      @default(false) @map("barcode_verified")
+  notes           String?
+  createdAt       DateTime     @default(now()) @map("created_at")
 
-  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  operator  User  @relation(fields: [operatorId], references: [id])
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  operator User  @relation(fields: [operatorId], references: [id])
 
   @@map("kitting_logs")
 }
@@ -281,9 +281,9 @@ model Trip {
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
   // Relations
-  order          Order           @relation(fields: [orderId], references: [id])
-  driver         Driver          @relation(fields: [driverId], references: [id])
-  vehicle        Vehicle?        @relation(fields: [vehicleId], references: [id])
+  order          Order              @relation(fields: [orderId], references: [id])
+  driver         Driver             @relation(fields: [driverId], references: [id])
+  vehicle        Vehicle?           @relation(fields: [vehicleId], references: [id])
   trackingPoints TrackingPoint[]
   weightRecords  WeightRecord[]
   pod            POD?
@@ -294,30 +294,32 @@ model Trip {
 }
 
 model DriverAssignment {
-  id          String    @id @default(uuid())
-  tripId      String    @map("trip_id")
-  driverId    String    @map("driver_id")
-  vehicleId   String    @map("vehicle_id")
-  assignedAt  DateTime  @default(now()) @map("assigned_at")
-  assignedBy  String    @map("assigned_by")
-  unassignedAt DateTime? @map("unassigned_at")
-  reason      String?
+  id              String             @id @default(uuid())
+  tripId          String             @map("trip_id")
+  driverId        String             @map("driver_id")
+  vehicleId       String             @map("vehicle_id")
+  assignedAt      DateTime           @default(now()) @map("assigned_at")
+  assignedBy      String             @map("assigned_by")
+  unassignedAt    DateTime?          @map("unassigned_at")
+  reason          String?
+  isDispatchError Boolean            @default(false) @map("is_dispatch_error")
+  errorType       DispatchErrorType? @map("error_type")
 
-  trip    Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@map("driver_assignments")
 }
 
 model TrackingPoint {
-  id          String   @id @default(uuid())
-  tripId      String   @map("trip_id")
-  lat         Float
-  lng         Float
-  accuracy    Float?
-  speed       Float?
-  heading     Float?
-  timestamp   DateTime
-  receivedAt  DateTime @default(now()) @map("received_at")
+  id         String   @id @default(uuid())
+  tripId     String   @map("trip_id")
+  lat        Float
+  lng        Float
+  accuracy   Float?
+  speed      Float?
+  heading    Float?
+  timestamp  DateTime
+  receivedAt DateTime @default(now()) @map("received_at")
 
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
@@ -327,20 +329,20 @@ model TrackingPoint {
 }
 
 model PackageTracker {
-  id             String               @id @default(uuid())
-  deviceId       String               @unique @map("device_id")
-  name           String?
-  status         PackageTrackerStatus @default(ACTIVE)
-  batteryLevel   Float?               @map("battery_level")
-  lastLat        Float?               @map("last_lat")
-  lastLng        Float?               @map("last_lng")
-  lastSeenAt     DateTime?            @map("last_seen_at")
-  createdAt      DateTime             @default(now()) @map("created_at")
-  updatedAt      DateTime             @updatedAt @map("updated_at")
+  id           String               @id @default(uuid())
+  deviceId     String               @unique @map("device_id")
+  name         String?
+  status       PackageTrackerStatus @default(ACTIVE)
+  batteryLevel Float?               @map("battery_level")
+  lastLat      Float?               @map("last_lat")
+  lastLng      Float?               @map("last_lng")
+  lastSeenAt   DateTime?            @map("last_seen_at")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
 
   // Relations
-  orders          Order[]
-  trackingPoints  PackageTrackingPoint[]
+  orders         Order[]
+  trackingPoints PackageTrackingPoint[]
 
   @@map("package_trackers")
 }
@@ -366,14 +368,14 @@ model PackageTrackingPoint {
 // ==================== WEIGHT WATCH ====================
 
 model WeightRecord {
-  id           String       @id @default(uuid())
-  tripId       String?      @map("trip_id")
-  orderId      String?      @unique @map("order_id")
-  cargoWeight  Float        @map("cargo_weight")
-  vehicleCapacity Float?    @map("vehicle_capacity")
-  utilization  Float
-  status       WeightStatus @default(SAFE)
-  checkedAt    DateTime     @default(now()) @map("checked_at")
+  id              String       @id @default(uuid())
+  tripId          String?      @map("trip_id")
+  orderId         String?      @unique @map("order_id")
+  cargoWeight     Float        @map("cargo_weight")
+  vehicleCapacity Float?       @map("vehicle_capacity")
+  utilization     Float
+  status          WeightStatus @default(SAFE)
+  checkedAt       DateTime     @default(now()) @map("checked_at")
 
   trip  Trip?  @relation(fields: [tripId], references: [id])
   order Order? @relation(fields: [orderId], references: [id])
@@ -384,18 +386,18 @@ model WeightRecord {
 // ==================== GEOFENCING ====================
 
 model Geofence {
-  id          String        @id @default(uuid())
-  name        String
-  type        GeofenceType
-  centerLat   Float?        @map("center_lat")
-  centerLng   Float?        @map("center_lng")
-  radiusA     Float?        @map("radius_a")
-  radiusB     Float?        @map("radius_b")
-  radiusC     Float?        @map("radius_c")
-  radiusD     Float?        @map("radius_d")
-  polygon     Json?
-  isActive    Boolean       @default(true) @map("is_active")
-  createdAt   DateTime      @default(now()) @map("created_at")
+  id        String       @id @default(uuid())
+  name      String
+  type      GeofenceType
+  centerLat Float?       @map("center_lat")
+  centerLng Float?       @map("center_lng")
+  radiusA   Float?       @map("radius_a")
+  radiusB   Float?       @map("radius_b")
+  radiusC   Float?       @map("radius_c")
+  radiusD   Float?       @map("radius_d")
+  polygon   Json?
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
 
   events GeofenceEvent[]
 
@@ -403,14 +405,14 @@ model Geofence {
 }
 
 model GeofenceEvent {
-  id          String          @id @default(uuid())
-  tripId      String          @map("trip_id")
-  geofenceId  String          @map("geofence_id")
+  id          String            @id @default(uuid())
+  tripId      String            @map("trip_id")
+  geofenceId  String            @map("geofence_id")
   eventType   GeofenceEventType @map("event_type")
   lat         Float
   lng         Float
-  triggeredAt DateTime        @map("triggered_at")
-  createdAt   DateTime        @default(now()) @map("created_at")
+  triggeredAt DateTime          @map("triggered_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
 
   trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   geofence Geofence @relation(fields: [geofenceId], references: [id])
@@ -424,16 +426,16 @@ model GeofenceEvent {
 // ==================== NOTIFICATIONS ====================
 
 model Notification {
-  id        String           @id @default(uuid())
-  userId    String           @map("user_id")
-  type      NotificationType
-  title     String
-  message   String
-  entityId  String?          @map("entity_id")
-  entityType String?         @map("entity_type")
-  isRead    Boolean          @default(false) @map("is_read")
-  readAt    DateTime?        @map("read_at")
-  createdAt DateTime         @default(now()) @map("created_at")
+  id         String           @id @default(uuid())
+  userId     String           @map("user_id")
+  type       NotificationType
+  title      String
+  message    String
+  entityId   String?          @map("entity_id")
+  entityType String?          @map("entity_type")
+  isRead     Boolean          @default(false) @map("is_read")
+  readAt     DateTime?        @map("read_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([isRead])
@@ -444,17 +446,19 @@ model Notification {
 // ==================== POD ====================
 
 model POD {
-  id           String   @id @default(uuid())
-  tripId       String   @unique @map("trip_id")
-  imageUrl     String   @map("image_url")
-  signatureUrl String?  @map("signature_url")
-  receiverName String? @map("receiver_name")
-  receiverPhone String? @map("receiver_phone")
-  notes        String?
-  capturedAt   DateTime @map("captured_at")
-  lat          Float?
-  lng          Float?
-  createdAt    DateTime @default(now()) @map("created_at")
+  id                String   @id @default(uuid())
+  tripId            String   @unique @map("trip_id")
+  imageUrl          String   @map("image_url")
+  signatureUrl      String?  @map("signature_url")
+  receiverName      String?  @map("receiver_name")
+  receiverPhone     String?  @map("receiver_phone")
+  notes             String?
+  capturedAt        DateTime @map("captured_at")
+  lat               Float?
+  lng               Float?
+  damageReported    Boolean  @default(false) @map("damage_reported")
+  damageDescription String?  @map("damage_description")
+  createdAt         DateTime @default(now()) @map("created_at")
 
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
@@ -464,24 +468,24 @@ model POD {
 // ==================== BILLING ====================
 
 model RateCard {
-  id                              String   @id @default(uuid())
-  name                            String   @unique
-  isActive                        Boolean  @default(false) @map("is_active")
-  baseRatePerKm                   Float    @map("base_rate_per_km")
-  baseRatePerKg                   Float    @map("base_rate_per_kg")
-  minimumCharge                   Float    @map("minimum_charge")
-  priorityMultipliers             Json     @map("priority_multipliers")
-  heavySurcharge                  Float    @default(0.15) @map("heavy_surcharge")
-  fragileSurcharge                Float    @default(0.10) @map("fragile_surcharge")
-  hazardousSurcharge              Float    @default(0.25) @map("hazardous_surcharge")
-  chemicalSurcharge               Float    @default(0.20) @map("chemical_surcharge")
-  temperatureSensitiveSurcharge   Float    @default(0.12) @map("temperature_sensitive_surcharge")
-  verticalStorageSurcharge        Float    @default(0.08) @map("vertical_storage_surcharge")
-  insuranceRatePercent            Float    @default(0.02) @map("insurance_rate_percent")
-  vatPercent                      Float    @default(0.075) @map("vat_percent")
-  createdAt                       DateTime @default(now()) @map("created_at")
-  updatedAt                       DateTime @updatedAt @map("updated_at")
-  createdById                     String   @map("created_by_id")
+  id                            String   @id @default(uuid())
+  name                          String   @unique
+  isActive                      Boolean  @default(false) @map("is_active")
+  baseRatePerKm                 Float    @map("base_rate_per_km")
+  baseRatePerKg                 Float    @map("base_rate_per_kg")
+  minimumCharge                 Float    @map("minimum_charge")
+  priorityMultipliers           Json     @map("priority_multipliers")
+  heavySurcharge                Float    @default(0.15) @map("heavy_surcharge")
+  fragileSurcharge              Float    @default(0.10) @map("fragile_surcharge")
+  hazardousSurcharge            Float    @default(0.25) @map("hazardous_surcharge")
+  chemicalSurcharge             Float    @default(0.20) @map("chemical_surcharge")
+  temperatureSensitiveSurcharge Float    @default(0.12) @map("temperature_sensitive_surcharge")
+  verticalStorageSurcharge      Float    @default(0.08) @map("vertical_storage_surcharge")
+  insuranceRatePercent          Float    @default(0.02) @map("insurance_rate_percent")
+  vatPercent                    Float    @default(0.075) @map("vat_percent")
+  createdAt                     DateTime @default(now()) @map("created_at")
+  updatedAt                     DateTime @updatedAt @map("updated_at")
+  createdById                   String   @map("created_by_id")
 
   createdBy User      @relation("RateCardCreator", fields: [createdById], references: [id])
   invoices  Invoice[]
@@ -490,26 +494,26 @@ model RateCard {
 }
 
 model Invoice {
-  id                String        @id @default(uuid())
-  invoiceNumber     String        @unique @map("invoice_number")
-  orderId           String        @unique @map("order_id")
-  rateCardId        String        @map("rate_card_id")
-  distanceKm        Float         @map("distance_km")
-  baseFreightCharge Float         @map("base_freight_charge")
-  weightCharge      Float         @map("weight_charge")
-  handlingSurcharges Json         @map("handling_surcharges")
-  priorityMultiplier Float        @map("priority_multiplier")
-  subtotal          Float
-  insurancePremium  Float         @map("insurance_premium")
-  vatAmount         Float         @map("vat_amount")
-  totalAmount       Float         @map("total_amount")
-  status            InvoiceStatus @default(DRAFT)
-  issuedAt          DateTime?     @map("issued_at")
-  paidAt            DateTime?     @map("paid_at")
-  dueDate           DateTime?     @map("due_date")
-  notes             String?
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
+  id                 String        @id @default(uuid())
+  invoiceNumber      String        @unique @map("invoice_number")
+  orderId            String        @unique @map("order_id")
+  rateCardId         String        @map("rate_card_id")
+  distanceKm         Float         @map("distance_km")
+  baseFreightCharge  Float         @map("base_freight_charge")
+  weightCharge       Float         @map("weight_charge")
+  handlingSurcharges Json          @map("handling_surcharges")
+  priorityMultiplier Float         @map("priority_multiplier")
+  subtotal           Float
+  insurancePremium   Float         @map("insurance_premium")
+  vatAmount          Float         @map("vat_amount")
+  totalAmount        Float         @map("total_amount")
+  status             InvoiceStatus @default(DRAFT)
+  issuedAt           DateTime?     @map("issued_at")
+  paidAt             DateTime?     @map("paid_at")
+  dueDate            DateTime?     @map("due_date")
+  notes              String?
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
 
   order    Order    @relation(fields: [orderId], references: [id])
   rateCard RateCard @relation(fields: [rateCardId], references: [id])
@@ -672,6 +676,15 @@ enum TripStatus {
   ARRIVED
   DELIVERED
   CANCELLED
+}
+
+enum DispatchErrorType {
+  WRONG_DRIVER_ASSIGNED
+  VEHICLE_MISMATCH
+  LATE_ASSIGNMENT
+  ADDRESS_ERROR
+  DUPLICATE_DISPATCH
+  OTHER
 }
 
 enum WeightStatus {

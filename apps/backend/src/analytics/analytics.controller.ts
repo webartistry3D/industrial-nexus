@@ -24,4 +24,9 @@ export class AnalyticsController {
   async getDeliveryTrends(@Query('days') days?: string) {
     return this.analyticsService.getDeliveryTrends(days ? parseInt(days, 10) : 30);
   }
+
+  @Get('smart-kpis')
+  async getSmartKpis() {
+    return this.analyticsService.getSmartKpis();
+  }
 }

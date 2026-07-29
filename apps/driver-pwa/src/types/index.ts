@@ -115,6 +115,8 @@ export interface Order {
   totalWeight: number;
   handlingTags: string[];
   priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  requesterName?: string;
+  requesterPhone?: string;
 }
 
 export interface Trip {
@@ -147,6 +149,8 @@ export interface POD {
   photoUrl?: string;
   signatureUrl?: string;
   notes?: string;
+  damageReported?: boolean;
+  damageDescription?: string;
   capturedAt: string;
   gpsLocation: {
     lat: number;

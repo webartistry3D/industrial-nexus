@@ -424,7 +424,7 @@ export class TripsService {
     return trackingPoint;
   }
 
-  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number }, userId: string) {
+  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number; damageReported?: boolean; damageDescription?: string }, userId: string) {
     const trip = await this.findOne(id);
 
     if (trip.pod) {
@@ -441,6 +441,8 @@ export class TripsService {
         notes: podData.notes,
         lat: podData.lat,
         lng: podData.lng,
+        damageReported: podData.damageReported ?? false,
+        damageDescription: podData.damageReported ? podData.damageDescription : undefined,
         capturedAt: new Date(),
       },
     });
@@ -450,7 +452,7 @@ export class TripsService {
       action: 'CREATE',
       entityType: 'POD',
       entityId: pod.id,
-      newValue: { tripId: id, imageUrl: podData.photoUrl, lat: podData.lat, lng: podData.lng },
+      newValue: { tripId: id, imageUrl: podData.photoUrl, lat: podData.lat, lng: podData.lng, damageReported: podData.damageReported ?? false },
     });
 
     return pod;
@@ -523,6 +525,12 @@ export class TripsService {
       data: { availability: DriverAvailability.AVAILABLE },
     });
 
+    // Close out the currently active assignment record for this trip, if any
+    await this.prisma.driverAssignment.updateMany({
+      where: { tripId: id, unassignedAt: null },
+      data: { unassignedAt: new Date() },
+    });
+
     // Update trip
     const updatedTrip = await this.prisma.trip.update({
       where: { id },
@@ -546,6 +554,8 @@ export class TripsService {
         vehicleId: assignDriverDto.vehicleId,
         assignedBy: userId,
         reason: assignDriverDto.reason,
+        isDispatchError: assignDriverDto.isDispatchError ?? false,
+        errorType: assignDriverDto.isDispatchError ? assignDriverDto.errorType : undefined,
       },
     });
 

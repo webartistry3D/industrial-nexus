@@ -184,6 +184,8 @@ class ApiClient {
     notes?: string;
     lat?: number;
     lng?: number;
+    damageReported?: boolean;
+    damageDescription?: string;
   }) {
     const response = await this.client.post(`/trips/${tripId}/pod`, podData);
     return response.data;
@@ -302,6 +304,12 @@ class ApiClient {
 
   async triggerDocumentExpiryCheck() {
     const response = await this.client.post('/notifications/trigger-expiry-check');
+    return response.data;
+  }
+
+  // Analytics
+  async getSmartKpis() {
+    const response = await this.client.get('/analytics/smart-kpis');
     return response.data;
   }
 }

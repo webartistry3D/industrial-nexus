@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
-import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp, Plus, MapPin } from 'lucide-react';
+import { Package, Truck, Clock, AlertCircle, CheckCircle, TrendingUp, Plus, MapPin, ShieldAlert, ClipboardX, TrendingDown } from 'lucide-react';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
 import { StatCard } from '@/components/stat-card';
@@ -43,6 +43,12 @@ export default function DashboardPage() {
   const [activeShipments, setActiveShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [smartKpis, setSmartKpis] = useState<{
+    onTimeDeliveryRate: number;
+    transitDamageRate: number;
+    dispatchErrorRate: number;
+    leadTimeReductionRate: number;
+  } | null>(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -88,6 +94,9 @@ export default function DashboardPage() {
       setActiveShipments(orders.filter((o: Shipment) => 
         o.trip?.status === 'IN_TRANSIT' || o.trip?.status === 'ASSIGNED'
       ));
+
+      const kpis = await api.getSmartKpis().catch(() => null);
+      setSmartKpis(kpis);
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
       setError('Failed to load dashboard data');
@@ -184,6 +193,39 @@ export default function DashboardPage() {
           <StatCard icon={Clock} label="In Transit" value={loading ? '...' : (stats?.inTransit || 0).toString()} color="green" onClick={() => router.push('/orders?status=IN_TRANSIT')} />
           <StatCard icon={AlertCircle} label="Delayed" value={loading ? '...' : (stats?.delayed || 0).toString()} color={(stats?.delayed || 0) > 0 ? 'red' : 'green'} onClick={() => router.push('/orders?status=DELAYED')} />
           <StatCard icon={CheckCircle} label="Delivered" value={loading ? '...' : (stats?.delivered || 0).toString()} color="purple" onClick={() => router.push('/orders?status=DELIVERED')} />
+        </div>
+
+        {/* SMART KPIs */}
+        <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl p-5">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              SMART KPIs
+            </h2>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">Company-wide</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <Clock className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.onTimeDeliveryRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">On-Time Delivery</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <ShieldAlert className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.transitDamageRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Transit Damage Rate</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <ClipboardX className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.dispatchErrorRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Dispatch Errors</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <TrendingDown className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.leadTimeReductionRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Lead Time Reduction</div>
+            </div>
+          </div>
         </div>
 
         {/* SLA Status */}

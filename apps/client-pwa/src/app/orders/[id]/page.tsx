@@ -59,6 +59,8 @@ interface Order {
   cargoDescription?: string;
   handlingTags?: HandlingTag[];
   declaredCargoValue?: number;
+  requesterName?: string;
+  requesterPhone?: string;
   trip?: {
     id: string;
     status: string;
@@ -207,6 +209,33 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 Created: {new Date(order.createdAt).toLocaleString()}
               </div>
             </div>
+
+            {/* Client Information */}
+            {(order.requesterName || order.requesterPhone) && (
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  Client Information
+                </h3>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Requester</p>
+                  {order.requesterName && (
+                    <p className="text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-400" />
+                      {order.requesterName}
+                    </p>
+                  )}
+                  {order.requesterPhone && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 font-mono flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      {order.requesterPhone}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Locations */}
             <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">

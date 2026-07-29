@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { geocodeAddress } from '@/lib/geocoding';
-import { Package, ArrowLeft, MapPin, Check } from 'lucide-react';
+import { Package, ArrowLeft, MapPin, Check, User } from 'lucide-react';
 import { PlacesAutocomplete } from '@/components/maps/PlacesAutocomplete';
 import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
 import { MapMarker } from '@/components/maps/MapMarker';
@@ -37,6 +37,8 @@ export default function NewOrderPage() {
   const [useManualCoords, setUseManualCoords] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [formData, setFormData] = useState({
+    requesterName: '',
+    requesterPhone: '',
     cargoDescription: '',
     pickupAddress: '',
     deliveryAddress: '',
@@ -288,6 +290,8 @@ export default function NewOrderPage() {
 
         // Transform data to match backend DTO structure
         const orderData = {
+          requesterName: updatedFormData.requesterName,
+          requesterPhone: updatedFormData.requesterPhone,
           totalWeight: updatedFormData.totalWeight,
           cargoDescription: updatedFormData.cargoDescription,
           pickupLocation: {
@@ -315,6 +319,8 @@ export default function NewOrderPage() {
         // If coordinates are already set or manual coords are provided, proceed directly
         // Transform data to match backend DTO structure
         const orderData = {
+          requesterName: formData.requesterName,
+          requesterPhone: formData.requesterPhone,
           totalWeight: formData.totalWeight,
           cargoDescription: formData.cargoDescription,
           pickupLocation: {
@@ -390,6 +396,42 @@ export default function NewOrderPage() {
               {error}
             </div>
           )}
+
+          {/* Requester Details */}
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              Requester Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Requester Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.requesterName}
+                  onChange={(e) => setFormData({ ...formData, requesterName: e.target.value })}
+                  placeholder="Person requesting this order"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Requester Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.requesterPhone}
+                  onChange={(e) => setFormData({ ...formData, requesterPhone: e.target.value })}
+                  placeholder="+2348012345678"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Cargo Description */}
           <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">

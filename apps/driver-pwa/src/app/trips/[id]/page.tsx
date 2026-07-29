@@ -22,6 +22,8 @@ interface PODForm {
   receiverName: string;
   receiverPhone: string;
   notes: string;
+  damageReported: boolean;
+  damageDescription: string;
 }
 
 export default function TripDetail({ params }: { params: { id: string } }) {
@@ -44,7 +46,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
   // POD state
   const [showPODForm, setShowPODForm] = useState(false);
-  const [podForm, setPodForm] = useState<PODForm>({ photoUrl: '', signatureUrl: '', receiverName: '', receiverPhone: '', notes: '' });
+  const [podForm, setPodForm] = useState<PODForm>({ photoUrl: '', signatureUrl: '', receiverName: '', receiverPhone: '', notes: '', damageReported: false, damageDescription: '' });
   const [podSubmitting, setPodSubmitting] = useState(false);
   const [podError, setPodError] = useState<string | null>(null);
   const [podSuccess, setPodSuccess] = useState(false);
@@ -254,6 +256,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
         notes: podForm.notes || undefined,
         lat,
         lng,
+        damageReported: podForm.damageReported,
+        damageDescription: podForm.damageReported ? (podForm.damageDescription || undefined) : undefined,
       });
       setPodSuccess(true);
       setShowPODForm(false);
@@ -422,6 +426,33 @@ export default function TripDetail({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
+
+        {/* Client Information */}
+        {(trip.order?.requesterName || trip.order?.requesterPhone) && (
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                <User className="w-5 h-5 text-white dark:text-black" />
+              </div>
+              Client Information
+            </h2>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Requester</p>
+              {trip.order?.requesterName && (
+                <p className="text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-400" />
+                  {trip.order.requesterName}
+                </p>
+              )}
+              {trip.order?.requesterPhone && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-mono flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  {trip.order.requesterPhone}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Trip Timeline */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
@@ -802,11 +833,33 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                             className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-none"
                           />
                         </div>
+
+                        {/* Damage reporting */}
+                        <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={podForm.damageReported}
+                              onChange={e => setPodForm(f => ({ ...f, damageReported: e.target.checked }))}
+                              className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                            />
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Report cargo damage</span>
+                          </label>
+                          {podForm.damageReported && (
+                            <textarea
+                              placeholder="Describe the damage (required)"
+                              value={podForm.damageDescription}
+                              onChange={e => setPodForm(f => ({ ...f, damageDescription: e.target.value }))}
+                              rows={2}
+                              className="w-full mt-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-none"
+                            />
+                          )}
+                        </div>
                       </div>
 
                       <button
                         onClick={handleSubmitPOD}
-                        disabled={podSubmitting || photoUploading || (!podForm.photoUrl && !hasSignature)}
+                        disabled={podSubmitting || photoUploading || (!podForm.photoUrl && !hasSignature) || (podForm.damageReported && !podForm.damageDescription.trim())}
                         className="w-full bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 active:opacity-80 transition-opacity duration-150"
                       >
                         <Send className="w-4 h-4" />

@@ -7,7 +7,7 @@ import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { api } from '@/lib/api';
 import { formatStatus } from '@/lib/formatting';
 import { Trip } from '@/types';
-import { Activity, Award, AlertCircle, CheckCircle, Clock, MapPin, Package, TrendingUp, Truck, Wifi, WifiOff, XCircle } from 'lucide-react';
+import { Activity, Award, AlertCircle, CheckCircle, Clock, MapPin, Package, TrendingUp, Truck, Wifi, WifiOff, XCircle, ShieldAlert, ClipboardX, TrendingDown } from 'lucide-react';
 import AnalogClock from '@/components/AnalogClock';
 import WeatherWidget from '@/components/WeatherWidget';
 import { PageHeader } from '@/components/PageHeader';
@@ -28,6 +28,12 @@ export default function Dashboard() {
   const [totalTrips, setTotalTrips] = useState(0);
   const [inTransit, setInTransit] = useState(0);
   const [cancelled, setCancelled] = useState(0);
+  const [smartKpis, setSmartKpis] = useState<{
+    onTimeDeliveryRate: number;
+    transitDamageRate: number;
+    dispatchErrorRate: number;
+    leadTimeReductionRate: number;
+  } | null>(null);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -147,6 +153,9 @@ export default function Dashboard() {
         return hours <= 12;
       }).length;
       setOnTimeRate(completedTrips.length > 0 ? Math.round((onTimeTrips / completedTrips.length) * 100) : 0);
+
+      const kpis = await api.getSmartKpis().catch(() => null);
+      setSmartKpis(kpis);
     } catch (error) {
       console.error('Failed to fetch trips:', error);
     } finally {
@@ -219,6 +228,39 @@ export default function Dashboard() {
               <div className="p-2 bg-blue-900 text-white dark:bg-lime-500 dark:text-black rounded-lg group-hover:scale-110 transition-transform"><MapPin className="w-4 h-4" /></div>
               <span>Live Tracking</span>
             </button>
+          </div>
+        </div>
+
+        {/* SMART KPIs */}
+        <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl p-5">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              SMART KPIs
+            </h2>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">Company-wide</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <Clock className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.onTimeDeliveryRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">On-Time Delivery</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <ShieldAlert className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.transitDamageRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Transit Damage Rate</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <ClipboardX className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.dispatchErrorRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Dispatch Errors</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <TrendingDown className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.leadTimeReductionRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Lead Time Reduction</div>
+            </div>
           </div>
         </div>
 

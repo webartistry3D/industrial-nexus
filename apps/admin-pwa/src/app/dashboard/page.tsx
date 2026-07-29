@@ -8,6 +8,7 @@ import { DashboardStats, Trip, WeightAlert, Order } from '@/types';
 import {
   Package, Truck, Scale, AlertTriangle,
   Route, Radio, UserPlus, Plus,
+  Clock, ShieldAlert, ClipboardX, TrendingDown,
 } from 'lucide-react';
 import { StatCard } from '@/components/stat-card';
 import { AlertsPanel } from '@/components/alerts-panel';
@@ -28,6 +29,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liveLocations, setLiveLocations] = useState<Map<string, { lat: number; lng: number; speed?: number }>>(new Map());
+  const [smartKpis, setSmartKpis] = useState<{
+    onTimeDeliveryRate: number;
+    transitDamageRate: number;
+    dispatchErrorRate: number;
+    leadTimeReductionRate: number;
+  } | null>(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -47,12 +54,13 @@ export default function Dashboard() {
     try {
       setLoading(true);
       setError(null);
-      const [statsData, tripsData, alertsData, ordersData, allOrdersData] = await Promise.all([
+      const [statsData, tripsData, alertsData, ordersData, allOrdersData, smartKpisData] = await Promise.all([
         api.getDashboardStats().catch(() => null),
         api.getTrips({ status: 'IN_TRANSIT', limit: 5 }).catch(() => ({ data: [] })),
         api.getWeightAlerts().catch(() => []),
         api.getOrders({ kittingStatus: 'PENDING', limit: 5 }).catch(() => ({ data: [] })),
         api.getOrders({ limit: 100 }).catch(() => ({ data: [] })),
+        api.getSmartKpis().catch(() => null),
       ]);
       const allOrders = allOrdersData.data || [];
       const activeStatuses = ['SUBMITTED', 'APPROVED', 'DISPATCH_READY', 'ASSIGNED', 'IN_TRANSIT'];
@@ -62,6 +70,7 @@ export default function Dashboard() {
       setActiveOrders(activeOrders);
       setAlerts(alertsData || []);
       setPendingOrders(ordersData.data || []);
+      setSmartKpis(smartKpisData);
       const fleetLocations = await api.getActiveFleetLocations('IN_TRANSIT').catch(() => []);
       if (Array.isArray(fleetLocations)) {
         const locationsMap = new Map<string, { lat: number; lng: number; speed?: number }>();
@@ -151,6 +160,38 @@ export default function Dashboard() {
             <button onClick={fetchDashboardData} className="ml-auto text-sm text-blue-600 hover:underline">Retry</button>
           </div>
         )}
+
+        <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl p-5">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              SMART KPIs
+            </h2>
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">Company-wide</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <Clock className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.onTimeDeliveryRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">On-Time Delivery</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <ShieldAlert className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.transitDamageRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Transit Damage Rate</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <ClipboardX className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.dispatchErrorRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Dispatch Errors</div>
+            </div>
+            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+              <TrendingDown className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.leadTimeReductionRate ?? 0}%`}</div>
+              <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Lead Time Reduction</div>
+            </div>
+          </div>
+        </div>
 
         <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl p-5">
           <div className="flex items-center justify-between mb-5">

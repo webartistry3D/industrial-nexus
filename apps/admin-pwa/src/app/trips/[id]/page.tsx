@@ -9,8 +9,17 @@ import { Trip, GeofenceEvent, TrackingPoint } from '@/types';
 import { 
   Truck, ArrowLeft, MapPin, Clock, Navigation, X, 
   User, Package, Route, Calendar, Activity, MapPinned, Phone,
-  AlertCircle, CheckCircle2, ChevronRight
+  AlertCircle, CheckCircle2, ChevronRight, Repeat
 } from 'lucide-react';
+
+const DISPATCH_ERROR_TYPES = [
+  'WRONG_DRIVER_ASSIGNED',
+  'VEHICLE_MISMATCH',
+  'LATE_ASSIGNMENT',
+  'ADDRESS_ERROR',
+  'DUPLICATE_DISPATCH',
+  'OTHER',
+];
 
 export default function TripDetailPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -30,6 +39,18 @@ export default function TripDetailPage() {
   const [trackingPoints, setTrackingPoints] = useState<TrackingPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Reassign Driver state
+  const [showReassignModal, setShowReassignModal] = useState(false);
+  const [reassignDrivers, setReassignDrivers] = useState<any[]>([]);
+  const [reassignVehicles, setReassignVehicles] = useState<any[]>([]);
+  const [selectedDriver, setSelectedDriver] = useState('');
+  const [selectedVehicle, setSelectedVehicle] = useState('');
+  const [reassignReason, setReassignReason] = useState('');
+  const [isDispatchError, setIsDispatchError] = useState(false);
+  const [errorType, setErrorType] = useState('');
+  const [reassignLoading, setReassignLoading] = useState(false);
+  const [reassignError, setReassignError] = useState<string | null>(null);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -56,6 +77,54 @@ export default function TripDetailPage() {
       setError('Failed to load trip details. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenReassignModal = async () => {
+    setReassignError(null);
+    setSelectedDriver('');
+    setSelectedVehicle('');
+    setReassignReason('');
+    setIsDispatchError(false);
+    setErrorType('');
+    setShowReassignModal(true);
+    try {
+      const [drivers, vehicles] = await Promise.all([
+        api.getDrivers({ status: 'ACTIVE', availability: 'AVAILABLE' }),
+        api.getVehicles({ status: 'ACTIVE' }),
+      ]);
+      setReassignDrivers(drivers.data || []);
+      setReassignVehicles(Array.isArray(vehicles) ? vehicles : (vehicles.data || []));
+    } catch (err) {
+      console.error('Failed to fetch drivers/vehicles:', err);
+    }
+  };
+
+  const handleReassignSubmit = async () => {
+    if (!selectedDriver || !selectedVehicle) {
+      setReassignError('Please select a driver and a vehicle');
+      return;
+    }
+    if (isDispatchError && !errorType) {
+      setReassignError('Please select the type of dispatch error');
+      return;
+    }
+    try {
+      setReassignLoading(true);
+      setReassignError(null);
+      await api.reassignTrip(tripId, {
+        driverId: selectedDriver,
+        vehicleId: selectedVehicle,
+        reason: reassignReason || undefined,
+        isDispatchError,
+        errorType: isDispatchError ? errorType : undefined,
+      });
+      setShowReassignModal(false);
+      await fetchTrip();
+    } catch (err: any) {
+      setReassignError(err.response?.data?.message || err.message || 'Failed to reassign driver');
+    } finally {
+      setReassignLoading(false);
     }
   };
 
@@ -213,6 +282,17 @@ export default function TripDetailPage() {
             </p>
           </div>
         </div>
+
+        {(user?.role === 'SUPER_ADMIN' || user?.role === 'OPERATIONS') &&
+          trip.status !== 'DELIVERED' && (
+          <button
+            onClick={handleOpenReassignModal}
+            className="w-full flex items-center justify-center gap-2 p-3 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 rounded-xl text-gray-700 dark:text-gray-300 text-sm font-semibold hover:shadow-lg transition-all duration-300"
+          >
+            <Repeat className="w-4 h-4" />
+            Reassign Driver / Vehicle
+          </button>
+        )}
 
         {/* Route Info */}
         <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-5">
@@ -407,6 +487,19 @@ export default function TripDetailPage() {
                   </p>
                 </div>
               )}
+
+              {/* Damage Report */}
+              {trip.pod?.damageReported && (
+                <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200/50 dark:border-red-700/50 rounded-xl p-3">
+                  <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-red-700 dark:text-red-400">Cargo Damage Reported</p>
+                    {trip.pod.damageDescription && (
+                      <p className="text-sm text-red-600 dark:text-red-300 mt-1">{trip.pod.damageDescription}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -422,6 +515,97 @@ export default function TripDetailPage() {
           </button>
         )}
       </div>
+
+      {/* Reassign Driver Modal */}
+      {showReassignModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-slate-700">
+              <h2 className="font-semibold text-gray-900 dark:text-white">Reassign Driver / Vehicle</h2>
+              <button onClick={() => setShowReassignModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              {reassignError && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-xl p-3 text-sm text-red-700 dark:text-red-400">
+                  {reassignError}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Driver</label>
+                <select
+                  value={selectedDriver}
+                  onChange={(e) => setSelectedDriver(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">Select a driver</option>
+                  {reassignDrivers.map((d: any) => (
+                    <option key={d.id} value={d.id}>
+                      {d.user?.firstName} {d.user?.lastName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Vehicle</label>
+                <select
+                  value={selectedVehicle}
+                  onChange={(e) => setSelectedVehicle(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">Select a vehicle</option>
+                  {reassignVehicles.map((v: any) => (
+                    <option key={v.id} value={v.id}>
+                      {v.plateNumber} ({v.category})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason (optional)</label>
+                <textarea
+                  value={reassignReason}
+                  onChange={(e) => setReassignReason(e.target.value)}
+                  rows={2}
+                  placeholder="e.g. Driver reported a vehicle breakdown"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white resize-none"
+                />
+              </div>
+              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isDispatchError}
+                    onChange={(e) => setIsDispatchError(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">This reassignment was due to a dispatch error</span>
+                </label>
+                {isDispatchError && (
+                  <select
+                    value={errorType}
+                    onChange={(e) => setErrorType(e.target.value)}
+                    className="w-full mt-3 px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select error type</option>
+                    {DISPATCH_ERROR_TYPES.map((type) => (
+                      <option key={type} value={type}>{formatStatus(type)}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <button
+                onClick={handleReassignSubmit}
+                disabled={reassignLoading}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50 hover:shadow-lg transition-all duration-300"
+              >
+                {reassignLoading ? 'Reassigning...' : 'Confirm Reassignment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

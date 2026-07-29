@@ -63,6 +63,7 @@ export default function NewOrderPage() {
     notes: '',
     totalWeight: 0,
     priority: 'NORMAL' as 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
+    declaredCargoValue: undefined as number | undefined,
   });
 
   const [handlingTagOptions, setHandlingTagOptions] = useState<string[]>([]);
@@ -237,6 +238,7 @@ export default function NewOrderPage() {
           requesterPhone: updatedFormData.requesterPhone,
           totalWeight: updatedFormData.totalWeight,
           cargoDescription: updatedFormData.cargoDescription,
+          declaredCargoValue: updatedFormData.declaredCargoValue,
           pickupLocation: {
             lat: updatedFormData.pickupLat,
             lng: updatedFormData.pickupLng,
@@ -267,6 +269,7 @@ export default function NewOrderPage() {
           requesterPhone: formData.requesterPhone,
           totalWeight: formData.totalWeight,
           cargoDescription: formData.cargoDescription,
+          declaredCargoValue: formData.declaredCargoValue,
           pickupLocation: {
             lat: formData.pickupLat,
             lng: formData.pickupLng,
@@ -480,6 +483,24 @@ export default function NewOrderPage() {
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300"
                 required
               />
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Declared Cargo Value (₦)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.declaredCargoValue || ''}
+                onChange={(e) => setFormData({ ...formData, declaredCargoValue: e.target.value ? parseFloat(e.target.value) : undefined })}
+                placeholder="Optional — used to calculate insurance premium"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                If provided, insurance is mandatory and calculated as a percentage of this value.
+              </p>
             </div>
 
             <div className="mt-4">

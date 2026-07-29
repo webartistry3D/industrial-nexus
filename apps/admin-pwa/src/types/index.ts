@@ -142,6 +142,8 @@ export interface POD {
   receiverName?: string;
   receiverPhone?: string;
   notes?: string;
+  damageReported?: boolean;
+  damageDescription?: string;
   capturedAt: string;
   lat?: number;
   lng?: number;
