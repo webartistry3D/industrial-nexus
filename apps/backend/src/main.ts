@@ -34,11 +34,12 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  const corsOrigins = configService.get<string>('CORS_ORIGIN', '')
-    ? configService.get<string>('CORS_ORIGIN', '').split(',')
-    : true;
+  const corsOriginList = (configService.get<string>('FRONTEND_URL') || configService.get<string>('CORS_ORIGIN') || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
   app.enableCors({
-    origin: corsOrigins,
+    origin: corsOriginList.length > 0 ? corsOriginList : true,
     credentials: true,
   });
 
