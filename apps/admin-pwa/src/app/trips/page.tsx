@@ -126,9 +126,6 @@ function TripsPageContent() {
   }, [activeTab]);
 
   useEffect(() => {
-    if (filterParam === 'analytics') {
-      setActiveTab('analytics');
-    }
     fetchTrips();
     if (filterParam === 'weight-alerts') fetchWeightAlerts();
   }, [page, statusFilter, filterParam]);
