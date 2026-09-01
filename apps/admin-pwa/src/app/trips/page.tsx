@@ -126,6 +126,9 @@ function TripsPageContent() {
   }, [activeTab]);
 
   useEffect(() => {
+    if (filterParam === 'analytics') {
+      setActiveTab('analytics');
+    }
     fetchTrips();
     if (filterParam === 'weight-alerts') fetchWeightAlerts();
   }, [page, statusFilter, filterParam]);
@@ -278,7 +281,7 @@ function TripsPageContent() {
       result = result.filter(trip => trip.pod?.damageReported === true);
     } else if (filterParam === 'dispatch-errors') {
       result = result.filter(trip =>
-        (trip as any).assignments?.some((a: any) => a.isDispatchError === true),
+        trip.assignments?.some(a => a.isDispatchError === true),
       );
     }
     
@@ -296,6 +299,14 @@ function TripsPageContent() {
 
   const userRole = (user?.role?.toLowerCase() as 'admin' | 'client' | 'driver') || 'admin';
 
+  const filterLabels: Record<string, string> = {
+    'weight-alerts': 'Weight Alerts',
+    'delivered': 'Delivered Trips',
+    'damaged': 'Damaged Trips (POD)',
+    'dispatch-errors': 'Dispatch Errors',
+  };
+  const activeFilterLabel = filterParam ? filterLabels[filterParam] : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950">
       <main className="pb-24">
@@ -310,6 +321,11 @@ function TripsPageContent() {
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   {activeTab === 'trips' ? 'Trips' : 'Analytics'}
                 </h1>
+                {activeTab === 'trips' && activeFilterLabel && (
+                  <span className="text-xs font-semibold text-blue-700 dark:text-lime-400 bg-blue-100 dark:bg-lime-900/30 px-2.5 py-1 rounded-full">
+                    {activeFilterLabel}
+                  </span>
+                )}
                 {activeTab === 'trips' && (filterParam || statusFilter) && (
                   <button
                     onClick={() => { setStatusFilter(''); router.push('/trips'); }}
@@ -390,6 +406,25 @@ function TripsPageContent() {
                   <option value="ARRIVED">Arrived</option>
                   <option value="DELIVERED">Delivered</option>
                   <option value="DELAYED">Delayed (Past ETA)</option>
+                </select>
+
+                <select
+                  value={filterParam || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value) {
+                      router.push(`/trips?filter=${value}`);
+                    } else {
+                      router.push('/trips');
+                    }
+                  }}
+                  className="flex-none w-auto min-w-[140px] px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:shadow-lg focus:shadow-blue-500/10 transition-all"
+                >
+                  <option value="">All Trips</option>
+                  <option value="delivered">Delivered Only</option>
+                  <option value="damaged">Damaged (POD)</option>
+                  <option value="dispatch-errors">Dispatch Errors</option>
+                  <option value="weight-alerts">Weight Alerts</option>
                 </select>
 
                 {/* View Toggle Buttons */}

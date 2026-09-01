@@ -170,6 +170,12 @@ export interface Trip {
   trackingPoints?: TrackingPoint[];
   geofenceEvents?: GeofenceEvent[];
   pod?: POD;
+  assignments?: Array<{
+    id: string;
+    isDispatchError: boolean;
+    errorType?: string;
+    assignedAt: string;
+  }>;
 }
 
 export interface Driver {

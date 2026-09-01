@@ -185,7 +185,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.dispatchErrorRate ?? 0}%`}</div>
               <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Dispatch Errors</div>
             </div>
-            <div onClick={() => router.push('/trips?filter=delivered')} className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <div onClick={() => router.push('/trips?filter=analytics')} className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <TrendingDown className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.leadTimeReductionRate ?? 0}%`}</div>
               <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Lead Time Reduction</div>

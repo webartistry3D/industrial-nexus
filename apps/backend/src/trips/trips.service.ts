@@ -190,6 +190,24 @@ export class TripsService {
             },
           },
           vehicle: true,
+          pod: {
+            select: {
+              id: true,
+              damageReported: true,
+              damageDescription: true,
+              receiverName: true,
+              capturedAt: true,
+            },
+          },
+          assignments: {
+            select: {
+              id: true,
+              isDispatchError: true,
+              errorType: true,
+              assignedAt: true,
+            },
+            orderBy: { assignedAt: 'desc' },
+          },
           weightRecords: {
             orderBy: { checkedAt: 'desc' },
             take: 1,
