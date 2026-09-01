@@ -52,6 +52,10 @@ export default function TripDetailPage() {
   const [reassignLoading, setReassignLoading] = useState(false);
   const [reassignError, setReassignError] = useState<string | null>(null);
 
+  // POD signed URLs
+  const [podPhotoUrl, setPodPhotoUrl] = useState<string | null>(null);
+  const [podSignatureUrl, setPodSignatureUrl] = useState<string | null>(null);
+
   // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -72,6 +76,24 @@ export default function TripDetailPage() {
       setTrip(tripData);
       setGeofenceEvents(tripData.geofenceEvents || []);
       setTrackingPoints(tripData.trackingPoints || []);
+
+      // Resolve POD signed URLs if POD exists
+      setPodPhotoUrl(null);
+      setPodSignatureUrl(null);
+      if (tripData.pod) {
+        try {
+          if (tripData.pod.imageKey || tripData.pod.imageUrl) {
+            const { url } = await api.getPODPhotoUrl(tripId);
+            setPodPhotoUrl(url);
+          }
+          if (tripData.pod.signatureKey || tripData.pod.signatureUrl) {
+            const { url } = await api.getPODSignatureUrl(tripId);
+            setPodSignatureUrl(url);
+          }
+        } catch (e) {
+          console.warn('Failed to load POD signed URLs:', e);
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch trip:', err);
       setError('Failed to load trip details. Please try again.');
@@ -126,15 +148,6 @@ export default function TripDetailPage() {
     } finally {
       setReassignLoading(false);
     }
-  };
-
-  const resolveImageUrl = (url: string): string => {
-    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
-    }
-    // Relative path from backend — prepend API base URL
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
-    return `${apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const getStatusIcon = (status?: string) => {
@@ -455,23 +468,23 @@ export default function TripDetailPage() {
               )}
               
               {/* Photo */}
-              {trip.pod?.imageUrl && (
+              {podPhotoUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Delivery Photo</p>
                   <img
-                    src={resolveImageUrl(trip.pod.imageUrl)}
+                    src={podPhotoUrl}
                     alt="Delivery photo"
                     className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700"
                   />
                 </div>
               )}
-              
+
               {/* Signature */}
-              {trip.pod?.signatureUrl && (
+              {podSignatureUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Receiver Signature</p>
                   <img
-                    src={resolveImageUrl(trip.pod.signatureUrl)}
+                    src={podSignatureUrl}
                     alt="Receiver signature"
                     className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white"
                   />

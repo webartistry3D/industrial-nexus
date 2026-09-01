@@ -39,4 +39,8 @@ export class UpdateMyProfileDto {
   @IsOptional()
   @IsString()
   profileImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  profileImageKey?: string;
 }

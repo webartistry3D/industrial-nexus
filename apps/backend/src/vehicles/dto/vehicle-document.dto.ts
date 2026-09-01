@@ -5,8 +5,13 @@ export class CreateVehicleDocumentDto {
   @IsEnum(VehicleDocumentType)
   documentType: VehicleDocumentType;
 
+  @IsOptional()
   @IsString()
-  fileUrl: string;
+  fileUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  fileKey?: string;
 
   @IsString()
   fileName: string;

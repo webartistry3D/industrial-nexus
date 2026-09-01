@@ -15,9 +15,7 @@
     "seed": "npx ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1075.0",
-    "@aws-sdk/lib-storage": "^3.1075.0",
-    "@aws-sdk/s3-request-presigner": "^3.1075.0",
+    "@google-cloud/storage": "^8.0.1",
     "@nestjs-modules/mailer": "^2.3.7",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.1.0",
@@ -41,7 +39,6 @@
     "helmet": "^8.2.0",
     "ioredis": "^5.3.2",
     "multer": "^2.0.2",
-    "multer-s3": "^3.0.1",
     "nodemailer": "^9.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

@@ -46,3 +46,7 @@ prisma/migrations/*/migration_lock.toml
 
 # Uploaded files (avatars, KYC docs, vehicle docs)
 apps/backend/uploads/
+
+# GCS service account key (do not commit)
+industrial-nexus-gcs.json
+*-gcs.json

@@ -6,6 +6,7 @@ export interface User {
   role: 'SUPER_ADMIN' | 'OPERATIONS' | 'CLIENT' | 'DRIVER';
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   profileImageUrl?: string | null;
+  profileImageKey?: string | null;
 }
 
 export interface AuditLog {
@@ -111,7 +112,8 @@ export interface KycDocument {
   driverId: string;
   documentType: KycDocumentTypeValue;
   fileName: string;
-  fileUrl: string;
+  fileUrl?: string;
+  fileKey?: string;
   fileSize: number;
   status: KycDocumentStatusValue;
   rejectionReason?: string;
@@ -125,7 +127,8 @@ export interface VehicleDocument {
   vehicleId: string;
   documentType: VehicleDocumentTypeValue;
   fileName: string;
-  fileUrl: string;
+  fileUrl?: string;
+  fileKey?: string;
   fileSize: number;
   status: VehicleDocumentStatusValue;
   rejectionReason?: string;
@@ -138,7 +141,9 @@ export interface POD {
   id: string;
   tripId: string;
   imageUrl?: string;
+  imageKey?: string;
   signatureUrl?: string;
+  signatureKey?: string;
   receiverName?: string;
   receiverPhone?: string;
   notes?: string;

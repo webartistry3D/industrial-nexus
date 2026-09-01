@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -116,11 +117,11 @@ export class VehiclesController {
       throw new BadRequestException('File is required');
     }
 
-    const { url: fileUrl } = await this.storageService.upload(file, 'vehicle-docs');
+    const { key: fileKey } = await this.storageService.upload(file, 'vehicle-docs');
 
     const createVehicleDocumentDto: CreateVehicleDocumentDto = {
       documentType: documentType as any,
-      fileUrl,
+      fileKey,
       fileName: file.originalname,
       fileSize: file.size,
       mimeType: file.mimetype,
@@ -166,6 +167,16 @@ export class VehiclesController {
     @CurrentUser() user: { userId: string },
   ) {
     return this.vehiclesService.updateVehicleDocument(documentId, updateVehicleDocumentDto, user.userId);
+  }
+
+  @Get('documents/:documentId/signed-url')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER)
+  @HttpCode(HttpStatus.OK)
+  async getVehicleDocumentSignedUrl(@Param('documentId') documentId: string) {
+    const document = await this.vehiclesService.findOneVehicleDocument(documentId);
+    if (document.fileKey) return this.storageService.getReadSignedUrl(document.fileKey);
+    if (document.fileUrl) return { url: document.fileUrl, expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
+    throw new NotFoundException('Vehicle document file not found');
   }
 
   @Delete('documents/:documentId')

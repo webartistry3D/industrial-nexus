@@ -152,6 +152,31 @@ class ApiClient {
     return response.data;
   }
 
+  async getAvatarUrl() {
+    const response = await this.client.get('/users/me/avatar-url');
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getPODPhotoUrl(tripId: string) {
+    const response = await this.client.get(`/trips/${tripId}/pod/photo-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getPODSignatureUrl(tripId: string) {
+    const response = await this.client.get(`/trips/${tripId}/pod/signature-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getKycDocumentSignedUrl(documentId: string) {
+    const response = await this.client.get(`/drivers/kyc/documents/${documentId}/signed-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getVehicleDocumentSignedUrl(documentId: string) {
+    const response = await this.client.get(`/vehicles/documents/${documentId}/signed-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
   // Orders
   async getOrders(params?: { status?: string; kittingStatus?: string; page?: number; limit?: number }) {
     const response = await this.client.get('/orders', { params });

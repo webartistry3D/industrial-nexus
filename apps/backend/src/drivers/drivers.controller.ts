@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -125,11 +126,11 @@ export class DriversController {
       throw new BadRequestException('File is required');
     }
 
-    const { url: fileUrl } = await this.storageService.upload(file, 'kyc-docs');
+    const { key: fileKey } = await this.storageService.upload(file, 'kyc-docs');
 
     const createKycDocumentDto: CreateKycDocumentDto = {
       documentType: documentType as any,
-      fileUrl,
+      fileKey,
       fileName: file.originalname,
       fileSize: file.size,
       mimeType: file.mimetype,
@@ -172,6 +173,16 @@ export class DriversController {
     @CurrentUser() user: { userId: string },
   ) {
     return this.driversService.updateKycDocument(documentId, updateKycDocumentDto, user.userId);
+  }
+
+  @Get('kyc/documents/:documentId/signed-url')
+  @Roles(UserRole.DRIVER, UserRole.SUPER_ADMIN, UserRole.OPERATIONS)
+  @HttpCode(HttpStatus.OK)
+  async getKycDocumentSignedUrl(@Param('documentId') documentId: string) {
+    const document = await this.driversService.findKycDocumentById(documentId);
+    if (document.fileKey) return this.storageService.getReadSignedUrl(document.fileKey);
+    if (document.fileUrl) return { url: document.fileUrl, expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
+    throw new NotFoundException('KYC document file not found');
   }
 
   @Delete('kyc/documents/:documentId')

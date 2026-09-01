@@ -36,15 +36,21 @@ export default function ProfilePage() {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log('[Avatar] File selected:', file?.name, file?.size, file?.type);
     if (!file) return;
     try {
       setUploadingImage(true);
       setError(null);
       const updated = await api.uploadProfileImage(file);
-      console.log('[Avatar] Upload response:', JSON.stringify(updated));
-      console.log('[Avatar] profileImageUrl from response:', updated.profileImageUrl);
-      setProfileImageUrl(updated.profileImageUrl || null);
+      if (updated.profileImageKey) {
+        try {
+          const { url } = await api.getAvatarUrl();
+          setProfileImageUrl(url);
+        } catch {
+          setProfileImageUrl(updated.profileImageUrl || null);
+        }
+      } else if (updated.profileImageUrl) {
+        setProfileImageUrl(updated.profileImageUrl);
+      }
     } catch (err: any) {
       console.error('[Avatar] Upload error:', err.response?.data);
       setError(err.response?.data?.message || 'Failed to upload image');
@@ -55,10 +61,9 @@ export default function ProfilePage() {
 
   const getAvatarUrl = () => {
     if (profileImageUrl) {
+      if (profileImageUrl.startsWith('http') || profileImageUrl.startsWith('data:')) return profileImageUrl;
       const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const fullUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${base}${profileImageUrl}`;
-      console.log('[Avatar] Resolved URL:', fullUrl);
-      return fullUrl;
+      return `${base}${profileImageUrl}`;
     }
     return null;
   };
@@ -83,9 +88,18 @@ export default function ProfilePage() {
       const response = await api.getProfile();
       const driverData = response.driver || response;
       setDriver(driverData);
-      // Set profile image URL if present
-      if (response.profileImageUrl) {
+      // Resolve avatar via signed URL when key is present
+      if (response.profileImageKey) {
+        try {
+          const { url } = await api.getAvatarUrl();
+          setProfileImageUrl(url);
+        } catch {
+          setProfileImageUrl(response.profileImageUrl || null);
+        }
+      } else if (response.profileImageUrl) {
         setProfileImageUrl(response.profileImageUrl);
+      } else {
+        setProfileImageUrl(null);
       }
       setFormData({
         firstName: response.firstName || '',

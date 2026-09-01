@@ -147,7 +147,9 @@ export interface POD {
   id: string;
   tripId: string;
   photoUrl?: string;
+  photoKey?: string;
   signatureUrl?: string;
+  signatureKey?: string;
   notes?: string;
   damageReported?: boolean;
   damageDescription?: string;

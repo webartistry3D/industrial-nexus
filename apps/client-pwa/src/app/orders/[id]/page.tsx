@@ -22,7 +22,9 @@ interface HandlingTag {
 interface POD {
   id: string;
   imageUrl?: string;
+  imageKey?: string;
   signatureUrl?: string;
+  signatureKey?: string;
   receiverName?: string;
   receiverPhone?: string;
   notes?: string;
@@ -85,10 +87,35 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState(false);
+  const [podPhotoUrl, setPodPhotoUrl] = useState<string | null>(null);
+  const [podSignatureUrl, setPodSignatureUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrder();
   }, [params.id]);
+
+  useEffect(() => {
+    const loadPodUrls = async () => {
+      setPodPhotoUrl(null);
+      setPodSignatureUrl(null);
+      const trip = order?.trip;
+      const pod = trip?.pod;
+      if (!trip || !pod) return;
+      try {
+        if (pod.imageKey || pod.imageUrl) {
+          const { url } = await api.getPODPhotoUrl(trip.id);
+          setPodPhotoUrl(url);
+        }
+        if (pod.signatureKey || pod.signatureUrl) {
+          const { url } = await api.getPODSignatureUrl(trip.id);
+          setPodSignatureUrl(url);
+        }
+      } catch (e) {
+        console.warn('Failed to load POD signed URLs:', e);
+      }
+    };
+    loadPodUrls();
+  }, [order]);
 
   const fetchOrder = async () => {
     try {
@@ -417,14 +444,14 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
                 <div className="space-y-4">
                   {/* POD Image */}
-                  {order.trip.pod.imageUrl && (
+                  {podPhotoUrl && (
                     <div>
                       <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
                         <ImageIcon className="w-3.5 h-3.5" /> Delivery Photo
                       </p>
                       <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900">
                         <img
-                          src={order.trip.pod.imageUrl}
+                          src={podPhotoUrl}
                           alt="Proof of delivery photo"
                           className="w-full max-h-64 object-contain"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -434,14 +461,14 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                   )}
 
                   {/* Signature */}
-                  {order.trip.pod.signatureUrl && (
+                  {podSignatureUrl && (
                     <div>
                       <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
                         <FileCheck className="w-3.5 h-3.5" /> Receiver Signature
                       </p>
                       <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2">
                         <img
-                          src={order.trip.pod.signatureUrl}
+                          src={podSignatureUrl}
                           alt="Receiver signature"
                           className="w-full max-h-32 object-contain"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

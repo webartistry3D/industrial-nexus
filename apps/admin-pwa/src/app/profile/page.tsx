@@ -75,20 +75,26 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Fetch full profile to get profileImageUrl
+  // Fetch full profile to get profileImageKey
   useEffect(() => {
     const fetchFullProfile = async () => {
       if (user) {
         try {
           setLoading(true);
           const fullProfile = await api.getProfile();
-          console.log('[Avatar] Full profile fetched:', JSON.stringify(fullProfile));
-          console.log('[Avatar] profileImageUrl from profile fetch:', fullProfile.profileImageUrl);
-          if (fullProfile.profileImageUrl) {
-            setProfileImageUrl(fullProfile.profileImageUrl);
-          }
           if (fullProfile.phoneNumber) {
             setProfileData(prev => ({ ...prev, phoneNumber: fullProfile.phoneNumber || '' }));
+          }
+          // Resolve avatar via signed-URL endpoint when key is present
+          if (fullProfile.profileImageKey) {
+            try {
+              const { url } = await api.getAvatarUrl();
+              setProfileImageUrl(url);
+            } catch (e) {
+              console.warn('[Avatar] Failed to fetch signed URL:', e);
+            }
+          } else if (fullProfile.profileImageUrl) {
+            setProfileImageUrl(fullProfile.profileImageUrl);
           }
         } catch (err) {
           console.error('[Avatar] Failed to fetch full profile:', err);
@@ -122,22 +128,26 @@ export default function ProfilePage() {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log('[Avatar] File selected:', file?.name, file?.size, file?.type);
     if (!file) return;
     try {
       setUploadingImage(true);
       setError(null);
-      console.log('[Avatar] Uploading to POST /users/me/avatar...');
       const updated = await api.uploadProfileImage(file);
-      console.log('[Avatar] Upload response:', JSON.stringify(updated));
-      console.log('[Avatar] profileImageUrl from response:', updated.profileImageUrl);
-      setProfileImageUrl(updated.profileImageUrl || null);
-      console.log('[Avatar] profileImageUrl state set to:', updated.profileImageUrl || null);
+      // Backend now stores profileImageKey; fetch a fresh signed URL
+      if (updated.profileImageKey) {
+        try {
+          const { url } = await api.getAvatarUrl();
+          setProfileImageUrl(url);
+        } catch {
+          setProfileImageUrl(updated.profileImageUrl || null);
+        }
+      } else if (updated.profileImageUrl) {
+        setProfileImageUrl(updated.profileImageUrl);
+      }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       console.error('[Avatar] Upload error:', err);
-      console.error('[Avatar] Error response:', err.response?.data);
       setError(err.response?.data?.message || 'Failed to upload image');
     } finally {
       setUploadingImage(false);
@@ -145,12 +155,12 @@ export default function ProfilePage() {
   };
 
   const getAvatarUrl = () => {
-    console.log('[Avatar] getAvatarUrl called, profileImageUrl state:', profileImageUrl);
     if (profileImageUrl) {
+      if (profileImageUrl.startsWith('http') || profileImageUrl.startsWith('data:')) {
+        return profileImageUrl;
+      }
       const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const fullUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${base}${profileImageUrl}`;
-      console.log('[Avatar] Resolved URL:', fullUrl);
-      return fullUrl;
+      return `${base}${profileImageUrl}`;
     }
     return null;
   };

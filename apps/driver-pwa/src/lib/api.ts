@@ -121,6 +121,11 @@ class ApiClient {
     return response.data;
   }
 
+  async getAvatarUrl() {
+    const response = await this.client.get('/users/me/avatar-url');
+    return response.data as { url: string; expiresAt: string };
+  }
+
   // Trips - Driver specific
   async getMyTrips(params?: { page?: number; limit?: number }) {
     const response = await this.client.get('/trips/my-trips', { params });
@@ -160,7 +165,6 @@ class ApiClient {
   // POD — presigned upload
   async getPodUploadUrl(tripId: string, filename: string, mimeType: string, type?: string): Promise<{
     uploadUrl: string;
-    finalUrl: string;
     key: string;
   }> {
     const response = await this.client.get(`/trips/${tripId}/pod/upload-url`, {
@@ -177,7 +181,9 @@ class ApiClient {
 
   // POD
   async submitPOD(tripId: string, podData: {
+    photoKey?: string;
     photoUrl?: string;
+    signatureKey?: string;
     signatureUrl?: string;
     receiverName?: string;
     receiverPhone?: string;
@@ -189,6 +195,16 @@ class ApiClient {
   }) {
     const response = await this.client.post(`/trips/${tripId}/pod`, podData);
     return response.data;
+  }
+
+  async getPODPhotoUrl(tripId: string) {
+    const response = await this.client.get(`/trips/${tripId}/pod/photo-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getPODSignatureUrl(tripId: string) {
+    const response = await this.client.get(`/trips/${tripId}/pod/signature-url`);
+    return response.data as { url: string; expiresAt: string };
   }
 
   // SOP Checklist

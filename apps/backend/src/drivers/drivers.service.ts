@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { DriverFilterDto } from './dto/driver-filter.dto';
@@ -12,6 +13,7 @@ export class DriversService {
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
+    private storageService: StorageService,
   ) {}
 
   async create(createDriverDto: CreateDriverDto, userId: string) {
@@ -272,6 +274,7 @@ export class DriversService {
         driverId,
         documentType: createKycDocumentDto.documentType,
         fileUrl: createKycDocumentDto.fileUrl,
+        fileKey: createKycDocumentDto.fileKey,
         fileName: createKycDocumentDto.fileName,
         fileSize: createKycDocumentDto.fileSize,
         mimeType: createKycDocumentDto.mimeType,
@@ -406,6 +409,18 @@ export class DriversService {
     });
   }
 
+  async findKycDocumentById(documentId: string) {
+    const document = await this.prisma.kycDocument.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new NotFoundException('KYC document not found');
+    }
+
+    return document;
+  }
+
   async deleteKycDocument(documentId: string, userId: string) {
     const document = await this.prisma.kycDocument.findUnique({
       where: { id: documentId },
@@ -419,6 +434,10 @@ export class DriversService {
       throw new BadRequestException('Cannot delete verified documents');
     }
 
+    if (document.fileKey) {
+      await this.storageService.delete(document.fileKey);
+    }
+
     await this.prisma.kycDocument.delete({
       where: { id: documentId },
     });
@@ -428,7 +447,7 @@ export class DriversService {
       action: 'DELETE',
       entityType: 'KYC_DOCUMENT',
       entityId: documentId,
-      oldValue: { documentType: document.documentType, driverId: document.driverId },
+      oldValue: { documentType: document.documentType, driverId: document.driverId, fileKey: document.fileKey },
     });
 
     return { message: 'Document deleted successfully' };

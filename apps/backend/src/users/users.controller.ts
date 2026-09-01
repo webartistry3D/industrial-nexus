@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -60,6 +61,17 @@ export class UsersController {
     return this.usersService.findOne(user.userId);
   }
 
+  @Get('me/avatar-url')
+  @HttpCode(HttpStatus.OK)
+  async getAvatarUrl(@CurrentUser() user: { userId: string }) {
+    const u = await this.usersService.findOne(user.userId);
+    const key = u.profileImageKey;
+    const legacy = u.profileImageUrl;
+    if (key) return this.storageService.getReadSignedUrl(key);
+    if (legacy) return { url: legacy, expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
+    throw new NotFoundException('Avatar not found');
+  }
+
   @Patch('me')
   updateMyProfile(
     @CurrentUser() user: { userId: string },
@@ -90,8 +102,8 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('Image file is required');
     }
-    const { url: profileImageUrl } = await this.storageService.upload(file, 'avatars');
-    return this.usersService.updateMyProfile(user.userId, { profileImageUrl });
+    const { key: profileImageKey } = await this.storageService.upload(file, 'avatars');
+    return this.usersService.updateMyProfile(user.userId, { profileImageKey });
   }
 
   @Get(':id')

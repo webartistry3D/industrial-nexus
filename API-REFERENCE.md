@@ -180,7 +180,13 @@ Update own profile.
 Upload profile photo. `multipart/form-data`, field: `avatar`.  
 **Roles:** All authenticated  
 Allowed: jpg, jpeg, png, webp · Max: 5 MB  
-**200** `User`
+**200** `User` (now includes `profileImageKey` — the GCS object key)
+
+### `GET /users/me/avatar-url`
+Resolve a short-lived signed read URL for the current user's avatar.  
+**Roles:** All authenticated  
+**200** `{ url: "https://storage.googleapis.com/...", expiresAt: "2026-09-01T03:00:00.000Z" }`  
+**404** if no avatar is set.
 
 ---
 
@@ -613,13 +619,26 @@ Update driver GPS location for a trip.
 ---
 
 ### `GET /trips/:id/pod/upload-url`
-Get a presigned S3 PUT URL for POD photo upload (prod) or local upload URL (dev).  
+Get a presigned GCS PUT URL for POD photo upload (prod) or local upload URL (dev).  
 **Roles:** SUPER_ADMIN, OPERATIONS, DRIVER  
-**Query:** `filename=photo.jpg&mimeType=image/jpeg`  
-**200** `{ uploadUrl: "https://...", finalUrl: "https://...", key: "pod-photos/uuid.jpg" }`
+**Query:** `filename=photo.jpg&mimeType=image/jpeg` (optional `type=signature` to upload into `pod-signatures/`)  
+**200** `{ uploadUrl: "https://storage.googleapis.com/...", key: "pod-photos/uuid.jpg" }`
 
 > Upload the file via `PUT <uploadUrl>` with `Content-Type: image/jpeg` directly (no auth header).  
-> Then pass `finalUrl` as `photoUrl` in `POST /trips/:id/pod`.
+> Then pass `key` as `photoKey` (or `signatureKey`) in `POST /trips/:id/pod`. The backend stores the GCS object key, not a public URL.
+
+---
+
+### `GET /trips/:id/pod/photo-url`
+Resolve a short-lived signed read URL for the submitted POD photo.  
+**Roles:** SUPER_ADMIN, OPERATIONS, DRIVER, CLIENT  
+**200** `{ url: "https://storage.googleapis.com/...", expiresAt: "2026-09-01T03:00:00.000Z" }`  
+**404** if no POD photo exists.
+
+### `GET /trips/:id/pod/signature-url`
+Resolve a short-lived signed read URL for the receiver signature.  
+**Roles:** SUPER_ADMIN, OPERATIONS, DRIVER, CLIENT  
+**200** `{ url, expiresAt }` · **404** if no signature exists.
 
 ---
 
@@ -630,8 +649,8 @@ Submit Proof of Delivery.
 **Body**
 ```json
 {
-  "photoUrl": "https://bucket.s3.region.amazonaws.com/pod-photos/uuid.jpg",
-  "signatureUrl": "data:image/png;base64,...",
+  "photoKey": "pod-photos/uuid.jpg",
+  "signatureKey": "pod-signatures/uuid.png",
   "notes": "Received by: John | Phone: 080...",
   "lat": 6.5244,
   "lng": 3.3792,
@@ -639,6 +658,8 @@ Submit Proof of Delivery.
   "damageDescription": "Corner of crate dented, seal broken"
 }
 ```
+> Legacy `photoUrl` / `signatureUrl` fields are still accepted for backward compatibility, but new uploads should use `photoKey` / `signatureKey`. The persisted `POD` row stores both `imageKey`/`imageUrl` and `signatureKey`/`signatureUrl`.
+
 **200** `Trip`
 
 ---
@@ -1100,12 +1121,24 @@ Get active weight overload alerts.
 
 ## Storage `/storage`
 
+The backend now uses **Google Cloud Storage** as the primary object store, with a local-disk fallback for development. Configuration is via `STORAGE_PROVIDER=gcs|local`, `GCS_BUCKET_NAME`, `GCS_PROJECT_ID`, and either `GCS_KEYFILE_PATH` or `GCS_KEYFILE_JSON` (see `.env.example`). All presigned upload endpoints return `{ uploadUrl, key }`; clients upload the raw bytes to `uploadUrl` and persist `key` as the object reference. Read access for private objects is via the dedicated `*-url` endpoints below.
+
 ### `PUT /storage/local-upload/:key`
 **Dev only.** Receives raw file bytes for local disk storage (called internally by the presigned upload flow in dev mode).  
 **Auth:** Bearer  
 **Body:** Raw binary file bytes  
 **Content-Type:** `<file mime type>`  
 **200** `{ ok: true }`
+
+### `GET /drivers/kyc/documents/:documentId/signed-url`
+Resolve a short-lived signed read URL for a KYC document file.  
+**Roles:** DRIVER, SUPER_ADMIN, OPERATIONS  
+**200** `{ url, expiresAt }` · **404** if the document has no file.
+
+### `GET /vehicles/documents/:documentId/signed-url`
+Resolve a short-lived signed read URL for a vehicle document file.  
+**Roles:** SUPER_ADMIN, OPERATIONS, DRIVER  
+**200** `{ url, expiresAt }` · **404** if the document has no file.
 
 ---
 

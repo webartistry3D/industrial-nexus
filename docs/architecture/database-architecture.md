@@ -48,7 +48,7 @@ Industrial Nexus uses **PostgreSQL** as the primary transactional database, acce
 ### Weight & Compliance
 
 - **WeightRecord** — cargo weight, vehicle capacity, utilization ratio, weight status.
-- **POD** — proof of delivery (image, signature, receiver details, GPS, damage reported flag).
+- **POD** — proof of delivery (image, signature, receiver details, GPS, damage reported flag). Stores both legacy `imageUrl`/`signatureUrl` and new GCS object keys `imageKey`/`signatureKey`.
 
 ### Geofencing
 
@@ -58,6 +58,17 @@ Industrial Nexus uses **PostgreSQL** as the primary transactional database, acce
 ### Notifications
 
 - **Notification** — per-user notifications with title, message, entity references, and read state.
+
+## Object Storage Keys
+
+File-bearing tables now persist a GCS **object key** alongside the legacy public URL, so the backend can issue short-lived signed read URLs without storing long-lived public links:
+
+- **User.** `profileImageUrl` (legacy) · `profileImageKey` (GCS key)
+- **KycDocument.** `fileUrl` (legacy) · `fileKey` (GCS key)
+- **VehicleDocument.** `fileUrl` (legacy) · `fileKey` (GCS key)
+- **POD.** `imageUrl`/`signatureUrl` (legacy) · `imageKey`/`signatureKey` (GCS keys)
+
+The `key` columns are nullable to preserve existing rows; new uploads write the `key` and leave the legacy URL column for backward compatibility. Read endpoints (`/users/me/avatar-url`, `/trips/:id/pod/photo-url`, `/trips/:id/pod/signature-url`, `/drivers/kyc/documents/:id/signed-url`, `/vehicles/documents/:id/signed-url`) prefer the `key` and fall back to the legacy URL when only that is present.
 
 ## Key Enums
 

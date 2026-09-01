@@ -424,7 +424,7 @@ export class TripsService {
     return trackingPoint;
   }
 
-  async submitPOD(id: string, podData: { photoUrl?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number; damageReported?: boolean; damageDescription?: string }, userId: string) {
+  async submitPOD(id: string, podData: { photoKey?: string; photoUrl?: string; signatureKey?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number; damageReported?: boolean; damageDescription?: string }, userId: string) {
     const trip = await this.findOne(id);
 
     if (trip.pod) {
@@ -434,7 +434,9 @@ export class TripsService {
     const pod = await this.prisma.pOD.create({
       data: {
         tripId: id,
+        imageKey: podData.photoKey,
         imageUrl: podData.photoUrl,
+        signatureKey: podData.signatureKey,
         signatureUrl: podData.signatureUrl,
         receiverName: podData.receiverName,
         receiverPhone: podData.receiverPhone,

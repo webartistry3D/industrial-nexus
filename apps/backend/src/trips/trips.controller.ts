@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TripsService } from './trips.service';
@@ -111,10 +112,34 @@ export class TripsController {
   @HttpCode(HttpStatus.OK)
   submitPOD(
     @Param('id') id: string,
-    @Body() podData: { photoUrl?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number; damageReported?: boolean; damageDescription?: string },
+    @Body() podData: { photoKey?: string; photoUrl?: string; signatureKey?: string; signatureUrl?: string; receiverName?: string; receiverPhone?: string; notes?: string; lat?: number; lng?: number; damageReported?: boolean; damageDescription?: string },
     @CurrentUser() user: { userId: string },
   ) {
     return this.tripsService.submitPOD(id, podData, user.userId);
+  }
+
+  @Get(':id/pod/photo-url')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER, UserRole.CLIENT)
+  @HttpCode(HttpStatus.OK)
+  async getPODPhotoUrl(@Param('id') id: string) {
+    const trip = await this.tripsService.findOne(id);
+    const key = trip.pod?.imageKey;
+    const legacy = trip.pod?.imageUrl;
+    if (key) return this.storageService.getReadSignedUrl(key);
+    if (legacy) return { url: legacy, expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
+    throw new NotFoundException('POD photo not found');
+  }
+
+  @Get(':id/pod/signature-url')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.DRIVER, UserRole.CLIENT)
+  @HttpCode(HttpStatus.OK)
+  async getPODSignatureUrl(@Param('id') id: string) {
+    const trip = await this.tripsService.findOne(id);
+    const key = trip.pod?.signatureKey;
+    const legacy = trip.pod?.signatureUrl;
+    if (key) return this.storageService.getReadSignedUrl(key);
+    if (legacy) return { url: legacy, expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
+    throw new NotFoundException('POD signature not found');
   }
 
   @Post(':id/checklist')

@@ -122,6 +122,21 @@ class ApiClient {
     return response.data;
   }
 
+  async getAvatarUrl() {
+    const response = await this.client.get('/users/me/avatar-url');
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getPODPhotoUrl(tripId: string) {
+    const response = await this.client.get(`/trips/${tripId}/pod/photo-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
+  async getPODSignatureUrl(tripId: string) {
+    const response = await this.client.get(`/trips/${tripId}/pod/signature-url`);
+    return response.data as { url: string; expiresAt: string };
+  }
+
   // Orders
   async getMyOrders(params?: { page?: number; limit?: number }) {
     const response = await this.client.get('/orders', { params });

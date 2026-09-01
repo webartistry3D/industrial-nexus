@@ -5,8 +5,13 @@ export class CreateKycDocumentDto {
   @IsEnum(KycDocumentType)
   documentType: KycDocumentType;
 
+  @IsOptional()
   @IsString()
-  fileUrl: string;
+  fileUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  fileKey?: string;
 
   @IsString()
   fileName: string;

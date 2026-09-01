@@ -205,6 +205,7 @@ export class UsersService {
     if (dto.lastName !== undefined) updateData.lastName = dto.lastName;
     if (dto.phoneNumber !== undefined) updateData.phoneNumber = dto.phoneNumber;
     if (dto.profileImageUrl !== undefined) updateData.profileImageUrl = dto.profileImageUrl;
+    if (dto.profileImageKey !== undefined) updateData.profileImageKey = dto.profileImageKey;
 
     const user = await (this.prisma.user as any).update({
       where: { id: userId },
@@ -216,6 +217,7 @@ export class UsersService {
         lastName: true,
         phoneNumber: true,
         profileImageUrl: true,
+        profileImageKey: true,
         role: true,
         status: true,
         createdAt: true,

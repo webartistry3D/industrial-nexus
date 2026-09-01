@@ -89,7 +89,7 @@ async function bootstrap() {
     return timingSafeEqual(bufA, bufB);
   }
 
-  // Serve static uploads only in local dev (production uses S3 URLs directly)
+  // Serve static uploads only in local dev (production uses signed GCS URLs)
   if (configService.get<string>('NODE_ENV') !== 'production') {
     app.useStaticAssets(join(process.cwd(), 'uploads'), {
       prefix: '/uploads/',

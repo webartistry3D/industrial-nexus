@@ -18,7 +18,9 @@ const sopChecklist = [
 
 interface PODForm {
   photoUrl: string;
+  photoKey: string;
   signatureUrl: string;
+  signatureKey: string;
   receiverName: string;
   receiverPhone: string;
   notes: string;
@@ -46,7 +48,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
   // POD state
   const [showPODForm, setShowPODForm] = useState(false);
-  const [podForm, setPodForm] = useState<PODForm>({ photoUrl: '', signatureUrl: '', receiverName: '', receiverPhone: '', notes: '', damageReported: false, damageDescription: '' });
+  const [podForm, setPodForm] = useState<PODForm>({ photoUrl: '', photoKey: '', signatureUrl: '', signatureKey: '', receiverName: '', receiverPhone: '', notes: '', damageReported: false, damageDescription: '' });
   const [podSubmitting, setPodSubmitting] = useState(false);
   const [podError, setPodError] = useState<string | null>(null);
   const [podSuccess, setPodSuccess] = useState(false);
@@ -54,6 +56,8 @@ export default function TripDetail({ params }: { params: { id: string } }) {
   const [hasSignature, setHasSignature] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [podImageUrl, setPodImageUrl] = useState<string | null>(null);
+  const [podSignatureUrl, setPodSignatureUrl] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
@@ -67,6 +71,38 @@ export default function TripDetail({ params }: { params: { id: string } }) {
       fetchTrip();
     }
   }, [user, params.id]);
+
+  useEffect(() => {
+    if (!trip?.pod) {
+      setPodImageUrl(null);
+      setPodSignatureUrl(null);
+      return;
+    }
+    const loadUrls = async () => {
+      try {
+        if (trip.pod.photoKey) {
+          const { url } = await api.getPODPhotoUrl(params.id);
+          setPodImageUrl(url);
+        } else if (trip.pod.photoUrl) {
+          setPodImageUrl(trip.pod.photoUrl);
+        } else {
+          setPodImageUrl(null);
+        }
+
+        if (trip.pod.signatureKey) {
+          const { url } = await api.getPODSignatureUrl(params.id);
+          setPodSignatureUrl(url);
+        } else if (trip.pod.signatureUrl) {
+          setPodSignatureUrl(trip.pod.signatureUrl);
+        } else {
+          setPodSignatureUrl(null);
+        }
+      } catch (error) {
+        console.error('Failed to load POD display URLs:', error);
+      }
+    };
+    loadUrls();
+  }, [trip, params.id]);
 
   const fetchTrip = async () => {
     try {
@@ -169,7 +205,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasSignature(false);
-    setPodForm(f => ({ ...f, signatureUrl: '' }));
+    setPodForm(f => ({ ...f, signatureUrl: '', signatureKey: '' }));
   };
 
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,17 +218,17 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
     try {
       setPhotoUploading(true);
-      const { uploadUrl, finalUrl } = await api.getPodUploadUrl(
+      const { uploadUrl, key } = await api.getPodUploadUrl(
         params.id,
         file.name,
         file.type,
       );
       await api.uploadFileToPresignedUrl(uploadUrl, file);
-      setPodForm(f => ({ ...f, photoUrl: finalUrl }));
+      setPodForm(f => ({ ...f, photoKey: key }));
     } catch (err: any) {
       setPodError('Failed to upload photo. Please try again.');
       setPhotoPreview(null);
-      setPodForm(f => ({ ...f, photoUrl: '' }));
+      setPodForm(f => ({ ...f, photoKey: '' }));
     } finally {
       setPhotoUploading(false);
     }
@@ -233,23 +269,28 @@ export default function TripDetail({ params }: { params: { id: string } }) {
       }
 
       // Upload signature to storage if present
+      let signatureKey: string | undefined;
       let signatureUrl: string | undefined;
       if (podForm.signatureUrl && podForm.signatureUrl.startsWith('data:')) {
         const signatureBlob = dataUriToBlob(podForm.signatureUrl);
-        const { uploadUrl, finalUrl } = await api.getPodUploadUrl(
+        const { uploadUrl, key } = await api.getPodUploadUrl(
           params.id,
           'signature.png',
           'image/png',
           'signature',
         );
         await api.uploadFileToPresignedUrl(uploadUrl, signatureBlob, 'image/png');
-        signatureUrl = finalUrl;
-      } else if (podForm.signatureUrl) {
+        signatureKey = key;
+        signatureUrl = podForm.signatureUrl;
+      } else if (podForm.signatureKey) {
+        signatureKey = podForm.signatureKey;
         signatureUrl = podForm.signatureUrl;
       }
 
       await api.submitPOD(params.id, {
+        photoKey: podForm.photoKey || undefined,
         photoUrl: podForm.photoUrl || undefined,
+        signatureKey,
         signatureUrl,
         receiverName: podForm.receiverName || undefined,
         receiverPhone: podForm.receiverPhone || undefined,
@@ -555,16 +596,16 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                   </span>
                 </div>
               )}
-              {(trip as any).pod.imageUrl && (
+              {podImageUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Delivery Photo</p>
-                  <img src={(trip as any).pod.imageUrl} alt="POD" className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700" />
+                  <img src={podImageUrl} alt="POD" className="w-full max-h-48 object-contain rounded-xl border border-gray-200 dark:border-slate-700" />
                 </div>
               )}
-              {(trip as any).pod.signatureUrl && (
+              {podSignatureUrl && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 mt-3">Receiver Signature</p>
-                  <img src={(trip as any).pod.signatureUrl} alt="Signature" className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white" />
+                  <img src={podSignatureUrl} alt="Signature" className="w-full max-h-32 object-contain rounded-xl border border-gray-200 dark:border-slate-700 bg-white" />
                 </div>
               )}
               {(trip as any).pod.notes && (
@@ -751,7 +792,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
                             )}
                             {!photoUploading && (
                               <button
-                                onClick={() => { setPhotoPreview(null); setPodForm(f => ({ ...f, photoUrl: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                                onClick={() => { setPhotoPreview(null); setPodForm(f => ({ ...f, photoUrl: '', photoKey: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                                 className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg"
                               >
                                 <X className="w-4 h-4" />
@@ -859,7 +900,7 @@ export default function TripDetail({ params }: { params: { id: string } }) {
 
                       <button
                         onClick={handleSubmitPOD}
-                        disabled={podSubmitting || photoUploading || (!podForm.photoUrl && !hasSignature) || (podForm.damageReported && !podForm.damageDescription.trim())}
+                        disabled={podSubmitting || photoUploading || (!podForm.photoKey && !podForm.signatureUrl) || (podForm.damageReported && !podForm.damageDescription.trim())}
                         className="w-full bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 active:opacity-80 transition-opacity duration-150"
                       >
                         <Send className="w-4 h-4" />

@@ -1,63 +1,83 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Storage, Bucket } from '@google-cloud/storage';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 
 export interface UploadResult {
-  url: string;
+  /** GCS / local object key (source of truth). */
   key: string;
+  /** Public/accessible URL. Only set for local development; GCS uses signed URLs. */
+  url?: string;
+  /** Bucket name (production only). */
   bucket?: string;
 }
 
 export interface PresignedUploadResult {
+  /** Presigned URL the client uses to PUT the file. */
   uploadUrl: string;
-  finalUrl: string;
+  /** Object key the client must return to the backend after uploading. */
   key: string;
+}
+
+export interface SignedUrlResult {
+  /** Temporary URL for reading the object. */
+  url: string;
+  /** ISO timestamp of expiration. */
+  expiresAt: string;
 }
 
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly isS3: boolean;
-  private s3Client?: S3Client;
-  private readonly bucket?: string;
-  private readonly region?: string;
+  private readonly isGcs: boolean;
+  private readonly gcsClient?: Storage;
+  private readonly gcsBucket?: Bucket;
+  private readonly bucketName?: string;
   private readonly localBase: string;
 
-  constructor(private config: ConfigService) {
-    this.isS3 = config.get<string>('NODE_ENV') === 'production';
+  constructor(private readonly config: ConfigService) {
+    this.isGcs = this.config.get<string>('NODE_ENV') === 'production';
     this.localBase = path.join(process.cwd(), 'uploads');
 
-    if (this.isS3) {
-      this.region  = config.get<string>('AWS_REGION', 'us-east-1');
-      this.bucket  = config.get<string>('AWS_S3_BUCKET');
-      this.s3Client = new S3Client({
-        region: this.region,
+    if (this.isGcs) {
+      this.bucketName = this.config.get<string>('GCS_BUCKET_NAME');
+      const projectId = this.config.get<string>('GCS_PROJECT_ID');
+      const clientEmail = this.config.get<string>('GCS_CLIENT_EMAIL');
+      let privateKey = this.config.get<string>('GCS_PRIVATE_KEY') ?? '';
+
+      if (!this.bucketName || !clientEmail || !privateKey) {
+        throw new Error(
+          'Missing required GCS configuration. Set GCS_BUCKET_NAME, GCS_CLIENT_EMAIL, and GCS_PRIVATE_KEY for production.',
+        );
+      }
+
+      // Allow env files that escape newlines as literal \n
+      privateKey = privateKey.replace(/\\n/g, '\n');
+
+      this.gcsClient = new Storage({
+        projectId,
         credentials: {
-          accessKeyId:     config.get<string>('AWS_ACCESS_KEY_ID', ''),
-          secretAccessKey: config.get<string>('AWS_SECRET_ACCESS_KEY', ''),
+          client_email: clientEmail,
+          private_key: privateKey,
         },
       });
-      this.logger.log(`[Storage] S3 mode — bucket: ${this.bucket} (${this.region})`);
+
+      this.gcsBucket = this.gcsClient.bucket(this.bucketName);
+      this.logger.log(`[Storage] GCS mode — bucket: ${this.bucketName}`);
     } else {
       this.logger.log('[Storage] Local disk mode');
     }
   }
 
-  async upload(
-    file: Express.Multer.File,
-    folder: string,
-  ): Promise<UploadResult> {
-    const ext      = extname(file.originalname).toLowerCase();
-    const key      = `${folder}/${uuidv4()}${ext}`;
+  async upload(file: Express.Multer.File, folder: string): Promise<UploadResult> {
+    const ext = extname(file.originalname).toLowerCase();
+    const key = `${folder}/${uuidv4()}${ext}`;
 
-    if (this.isS3) {
-      return this.uploadToS3(file, key);
+    if (this.isGcs) {
+      return this.uploadToGcs(file, key);
     }
     return this.uploadToLocal(file, key);
   }
@@ -71,58 +91,80 @@ export class StorageService {
     const ext = extname(originalName).toLowerCase();
     const key = `${folder}/${uuidv4()}${ext}`;
 
-    if (this.isS3) {
-      const command = new PutObjectCommand({
-        Bucket:      this.bucket!,
-        Key:         key,
-        ContentType: mimeType,
+    if (this.isGcs) {
+      const [uploadUrl] = await this.gcsBucket!.file(key).getSignedUrl({
+        version: 'v4',
+        action: 'write',
+        expires: new Date(Date.now() + expiresInSeconds * 1000),
+        contentType: mimeType,
       });
-      const uploadUrl = await getSignedUrl(this.s3Client!, command, { expiresIn: expiresInSeconds });
-      const finalUrl  = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
-      this.logger.debug(`[Storage] Presigned URL generated for key: ${key}`);
-      return { uploadUrl, finalUrl, key };
+
+      this.logger.debug(`[Storage] GCS presigned upload URL generated for key: ${key}`);
+      return { uploadUrl, key };
     }
 
-    // Local dev: return a sentinel upload URL pointing to the local upload endpoint
+    // Local dev: return the existing local-upload endpoint
     const appUrl = this.config.get<string>('APP_URL', 'http://localhost:3001');
     const uploadUrl = `${appUrl}/storage/local-upload/${encodeURIComponent(key)}`;
-    const finalUrl  = `${appUrl}/uploads/${key}`;
-    return { uploadUrl, finalUrl, key };
+    return { uploadUrl, key };
+  }
+
+  async getReadSignedUrl(key: string, expiresInSeconds?: number): Promise<SignedUrlResult> {
+    const expirationMinutes = this.config.get<number>('GCS_SIGNED_URL_EXPIRATION_MINUTES', 15);
+    const effectiveSeconds = expiresInSeconds ?? expirationMinutes * 60;
+
+    if (this.isGcs) {
+      const [url] = await this.gcsBucket!.file(key).getSignedUrl({
+        version: 'v4',
+        action: 'read',
+        expires: new Date(Date.now() + effectiveSeconds * 1000),
+      });
+
+      const expiresAt = new Date(Date.now() + effectiveSeconds * 1000).toISOString();
+      return { url, expiresAt };
+    }
+
+    const appUrl = this.config.get<string>('APP_URL', 'http://localhost:3001');
+    const url = `${appUrl}/uploads/${key}`;
+    const expiresAt = new Date(Date.now() + effectiveSeconds * 1000).toISOString();
+    return { url, expiresAt };
   }
 
   async delete(key: string): Promise<void> {
-    if (this.isS3) {
-      await this.deleteFromS3(key);
-    } else {
-      this.deleteFromLocal(key);
+    if (this.isGcs) {
+      return this.deleteFromGcs(key);
     }
+    return this.deleteFromLocal(key);
   }
 
-  private async uploadToS3(
-    file: Express.Multer.File,
-    key: string,
-  ): Promise<UploadResult> {
-    const upload = new Upload({
-      client: this.s3Client!,
-      params: {
-        Bucket:      this.bucket!,
-        Key:         key,
-        Body:        file.buffer,
-        ContentType: file.mimetype,
-      },
+  async exists(key: string): Promise<boolean> {
+    if (this.isGcs) {
+      try {
+        const [result] = await this.gcsBucket!.file(key).exists();
+        return result;
+      } catch (err) {
+        this.logger.warn(`[Storage] Failed to check GCS existence for ${key}: ${err}`);
+        return false;
+      }
+    }
+
+    return fs.promises
+      .access(path.join(this.localBase, key))
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  private async uploadToGcs(file: Express.Multer.File, key: string): Promise<UploadResult> {
+    await this.gcsBucket!.file(key).save(file.buffer, {
+      contentType: file.mimetype,
+      resumable: false,
     });
 
-    await upload.done();
-
-    const url = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
-    this.logger.debug(`[Storage] Uploaded to S3: ${url}`);
-    return { url, key, bucket: this.bucket };
+    this.logger.debug(`[Storage] Uploaded to GCS: ${this.bucketName}/${key}`);
+    return { key, bucket: this.bucketName };
   }
 
-  private async uploadToLocal(
-    file: Express.Multer.File,
-    key: string,
-  ): Promise<UploadResult> {
+  private async uploadToLocal(file: Express.Multer.File, key: string): Promise<UploadResult> {
     const dest = path.join(this.localBase, path.dirname(key));
     await fs.promises.mkdir(dest, { recursive: true });
 
@@ -131,25 +173,26 @@ export class StorageService {
 
     const url = `/uploads/${key}`;
     this.logger.debug(`[Storage] Saved locally: ${url}`);
-    return { url, key };
+    return { key, url };
   }
 
-  private async deleteFromS3(key: string): Promise<void> {
+  private async deleteFromGcs(key: string): Promise<void> {
     try {
-      await this.s3Client!.send(new DeleteObjectCommand({
-        Bucket: this.bucket!,
-        Key:    key,
-      }));
-      this.logger.debug(`[Storage] Deleted from S3: ${key}`);
+      await this.gcsBucket!.file(key).delete({ ignoreNotFound: true });
+      this.logger.debug(`[Storage] Deleted from GCS: ${key}`);
     } catch (err) {
-      this.logger.warn(`[Storage] Failed to delete S3 key ${key}: ${err}`);
+      this.logger.warn(`[Storage] Failed to delete GCS object ${key}: ${err}`);
+      throw err;
     }
   }
 
-  private deleteFromLocal(key: string): void {
+  private async deleteFromLocal(key: string): Promise<void> {
     const filePath = path.join(this.localBase, key);
-    fs.unlink(filePath, (err) => {
-      if (err) this.logger.warn(`[Storage] Failed to delete local file ${filePath}: ${err}`);
-    });
+    try {
+      await fs.promises.unlink(filePath);
+      this.logger.debug(`[Storage] Deleted local file: ${filePath}`);
+    } catch (err) {
+      this.logger.warn(`[Storage] Failed to delete local file ${filePath}: ${err}`);
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleFilterDto } from './dto/vehicle-filter.dto';
@@ -12,6 +13,7 @@ export class VehiclesService {
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
+    private storageService: StorageService,
   ) {}
 
   async create(createVehicleDto: CreateVehicleDto, userId: string) {
@@ -203,6 +205,7 @@ export class VehiclesService {
         vehicleId,
         documentType: createVehicleDocumentDto.documentType,
         fileUrl: createVehicleDocumentDto.fileUrl,
+        fileKey: createVehicleDocumentDto.fileKey,
         fileName: createVehicleDocumentDto.fileName,
         fileSize: createVehicleDocumentDto.fileSize,
         mimeType: createVehicleDocumentDto.mimeType,
@@ -298,6 +301,18 @@ export class VehiclesService {
     return updatedDocument;
   }
 
+  async findOneVehicleDocument(documentId: string) {
+    const document = await this.prisma.vehicleDocument.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Vehicle document not found');
+    }
+
+    return document;
+  }
+
   async deleteVehicleDocument(documentId: string, userId: string) {
     const document = await this.prisma.vehicleDocument.findUnique({
       where: { id: documentId },
@@ -311,6 +326,10 @@ export class VehiclesService {
       throw new BadRequestException('Cannot delete verified documents');
     }
 
+    if (document.fileKey) {
+      await this.storageService.delete(document.fileKey);
+    }
+
     await this.prisma.vehicleDocument.delete({
       where: { id: documentId },
     });
@@ -320,7 +339,7 @@ export class VehiclesService {
       action: 'DELETE',
       entityType: 'VEHICLE_DOCUMENT',
       entityId: documentId,
-      oldValue: { documentType: document.documentType, vehicleId: document.vehicleId },
+      oldValue: { documentType: document.documentType, vehicleId: document.vehicleId, fileKey: document.fileKey },
     });
 
     return { message: 'Vehicle document deleted successfully' };
