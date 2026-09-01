@@ -16,7 +16,7 @@ function HistoryPageInner() {
   const { user, isLoading: authLoading } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled'>('all');
+  const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled' | 'damaged'>('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
@@ -33,7 +33,7 @@ function HistoryPageInner() {
 
   useEffect(() => {
     const filterParam = searchParams.get('filter');
-    if (filterParam === 'all' || filterParam === 'completed' || filterParam === 'cancelled') {
+    if (filterParam === 'all' || filterParam === 'completed' || filterParam === 'cancelled' || filterParam === 'damaged') {
       setFilter(filterParam);
     }
   }, [searchParams]);
@@ -152,6 +152,7 @@ function HistoryPageInner() {
     if (filter === 'all') return true;
     if (filter === 'completed') return trip.status === 'DELIVERED';
     if (filter === 'cancelled') return trip.status === 'CANCELLED';
+    if (filter === 'damaged') return trip.pod?.damageReported === true;
     return true;
   });
 
@@ -309,6 +310,16 @@ function HistoryPageInner() {
               }`}
             >
               Cancelled
+            </button>
+            <button
+              onClick={() => setFilter('damaged')}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                filter === 'damaged'
+                  ? 'bg-gradient-to-r from-blue-900 to-blue-900 dark:from-lime-500 dark:to-lime-500 text-white dark:text-black shadow-md shadow-blue-500/20'
+                  : 'bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200/50 dark:border-slate-700/50'
+              }`}
+            >
+              Damaged
             </button>
           </div>
           <div className="flex gap-2 justify-center md:hidden">

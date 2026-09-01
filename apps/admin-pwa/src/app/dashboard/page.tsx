@@ -170,22 +170,22 @@ export default function Dashboard() {
             <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">Company-wide</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+            <div onClick={() => router.push('/trips?filter=delivered')} className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <Clock className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.onTimeDeliveryRate ?? 0}%`}</div>
               <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">On-Time Delivery</div>
             </div>
-            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+            <div onClick={() => router.push('/trips?filter=damaged')} className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <ShieldAlert className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.transitDamageRate ?? 0}%`}</div>
               <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Transit Damage Rate</div>
             </div>
-            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+            <div onClick={() => router.push('/trips?filter=dispatch-errors')} className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <ClipboardX className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.dispatchErrorRate ?? 0}%`}</div>
               <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Dispatch Errors</div>
             </div>
-            <div className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4">
+            <div onClick={() => router.push('/trips?filter=delivered')} className="bg-gray-100 dark:bg-blue-900 rounded-xl p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
               <TrendingDown className="w-5 h-5 text-gray-900 dark:text-white mx-auto mb-1" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{loading ? '...' : `${smartKpis?.leadTimeReductionRate ?? 0}%`}</div>
               <div className="text-xs font-medium text-gray-900 dark:text-white mt-1">Lead Time Reduction</div>

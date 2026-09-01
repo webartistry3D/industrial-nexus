@@ -272,6 +272,14 @@ function TripsPageContent() {
       // Get trip IDs that have weight alerts
       const alertTripIds = new Set(weightAlerts.map(alert => alert.tripId));
       result = result.filter(trip => alertTripIds.has(trip.id));
+    } else if (filterParam === 'delivered') {
+      result = result.filter(trip => trip.status === 'DELIVERED');
+    } else if (filterParam === 'damaged') {
+      result = result.filter(trip => trip.pod?.damageReported === true);
+    } else if (filterParam === 'dispatch-errors') {
+      result = result.filter(trip =>
+        (trip as any).assignments?.some((a: any) => a.isDispatchError === true),
+      );
     }
     
     // Apply search filter

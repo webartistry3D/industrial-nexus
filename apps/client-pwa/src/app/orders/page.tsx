@@ -20,6 +20,7 @@ interface Order {
     id: string;
     status: string;
     eta?: string;
+    pod?: { damageReported?: boolean };
   };
   createdAt: string;
 }
@@ -36,9 +37,13 @@ function OrdersContent() {
   const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
+  const [filterParam, setFilterParam] = useState<string | null>(null);
+
   useEffect(() => {
     const status = searchParams.get('status');
+    const filter = searchParams.get('filter');
     if (status) setStatusFilter(status);
+    setFilterParam(filter);
   }, [searchParams]);
 
   useEffect(() => {
@@ -62,10 +67,12 @@ function OrdersContent() {
 
   const filteredOrders = orders.filter(order => {
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesFilter = !filterParam ||
+      (filterParam === 'damaged' && order.trip?.pod?.damageReported === true);
     const matchesSearch = !searchQuery || 
       order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.deliveryLocation.address.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesFilter && matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
