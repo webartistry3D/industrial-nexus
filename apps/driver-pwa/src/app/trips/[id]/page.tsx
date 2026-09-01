@@ -80,11 +80,11 @@ export default function TripDetail({ params }: { params: { id: string } }) {
     }
     const loadUrls = async () => {
       try {
-        if (trip.pod.photoKey) {
+        if (trip.pod.imageKey) {
           const { url } = await api.getPODPhotoUrl(params.id);
           setPodImageUrl(url);
-        } else if (trip.pod.photoUrl) {
-          setPodImageUrl(trip.pod.photoUrl);
+        } else if (trip.pod.imageUrl) {
+          setPodImageUrl(trip.pod.imageUrl);
         } else {
           setPodImageUrl(null);
         }

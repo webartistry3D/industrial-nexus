@@ -146,18 +146,18 @@ export interface SOPChecklist {
 export interface POD {
   id: string;
   tripId: string;
-  photoUrl?: string;
-  photoKey?: string;
+  imageUrl?: string;
+  imageKey?: string;
   signatureUrl?: string;
   signatureKey?: string;
+  receiverName?: string;
+  receiverPhone?: string;
   notes?: string;
   damageReported?: boolean;
   damageDescription?: string;
   capturedAt: string;
-  gpsLocation: {
-    lat: number;
-    lng: number;
-  };
+  lat?: number;
+  lng?: number;
 }
 
 export interface TrackingPoint {

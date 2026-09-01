@@ -39,18 +39,23 @@ export class StorageService {
   private readonly localBase: string;
 
   constructor(private readonly config: ConfigService) {
-    this.isGcs = this.config.get<string>('NODE_ENV') === 'production';
+    // STORAGE_PROVIDER=gcs opts into GCS explicitly; otherwise fall back to
+    // production-only GCS when NODE_ENV=production. Local disk is used otherwise.
+    const explicitProvider = this.config.get<string>('STORAGE_PROVIDER')?.toLowerCase();
+    this.isGcs =
+      explicitProvider === 'gcs' ||
+      (!explicitProvider && this.config.get<string>('NODE_ENV') === 'production');
     this.localBase = path.join(process.cwd(), 'uploads');
 
     if (this.isGcs) {
       this.bucketName = this.config.get<string>('GCS_BUCKET_NAME');
-      const projectId = this.config.get<string>('GCS_PROJECT_ID');
+      const projectId = this.config.get<string>('GCP_PROJECT_ID');
       const clientEmail = this.config.get<string>('GCS_CLIENT_EMAIL');
       let privateKey = this.config.get<string>('GCS_PRIVATE_KEY') ?? '';
 
       if (!this.bucketName || !clientEmail || !privateKey) {
         throw new Error(
-          'Missing required GCS configuration. Set GCS_BUCKET_NAME, GCS_CLIENT_EMAIL, and GCS_PRIVATE_KEY for production.',
+          'Missing required GCS configuration. Set GCS_BUCKET_NAME, GCP_PROJECT_ID, GCS_CLIENT_EMAIL, and GCS_PRIVATE_KEY.',
         );
       }
 
@@ -66,7 +71,7 @@ export class StorageService {
       });
 
       this.gcsBucket = this.gcsClient.bucket(this.bucketName);
-      this.logger.log(`[Storage] GCS mode — bucket: ${this.bucketName}`);
+      this.logger.log(`[Storage] GCS mode — project: ${projectId}, bucket: ${this.bucketName}`);
     } else {
       this.logger.log('[Storage] Local disk mode');
     }
