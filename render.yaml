@@ -27,7 +27,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGIN
-        value: https://industrial-nexus-admin.onrender.com,https://industrial-nexus-client.onrender.com,https://industrial-nexus-driver.onrender.com
+        value: https://industrial-nexus-app.onrender.com
       - key: AWS_REGION
         sync: false
       - key: AWS_S3_BUCKET
@@ -40,34 +40,14 @@ services:
         value: https://industrial-nexus-api.onrender.com
 
   - type: web
-    name: industrial-nexus-admin
+    name: industrial-nexus-app
     env: node
-    buildCommand: npm install && cd apps/admin-pwa && npm install && rm -rf .next && npm run build
-    startCommand: cd apps/admin-pwa && npm run start
+    buildCommand: npm install && cd apps/frontend && npm install && rm -rf .next && npm run build
+    startCommand: cd apps/frontend && npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://industrial-nexus-api.onrender.com
       - key: NEXT_PUBLIC_WS_URL
         value: https://industrial-nexus-api.onrender.com
-
-  - type: web
-    name: industrial-nexus-client
-    env: node
-    buildCommand: npm install && cd apps/client-pwa && npm install && rm -rf .next && npm run build
-    startCommand: cd apps/client-pwa && npm run start
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        value: https://industrial-nexus-api.onrender.com
-      - key: NEXT_PUBLIC_WS_URL
-        value: https://industrial-nexus-api.onrender.com
-
-  - type: web
-    name: industrial-nexus-driver
-    env: node
-    buildCommand: npm install && cd apps/driver-pwa && npm install && rm -rf .next && npm run build
-    startCommand: cd apps/driver-pwa && npm run start
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        value: https://industrial-nexus-api.onrender.com
-      - key: NEXT_PUBLIC_WS_URL
-        value: https://industrial-nexus-api.onrender.com
+      - key: NEXT_IGNORE_INCORRECT_LOCKFILE
+        value: "true"
