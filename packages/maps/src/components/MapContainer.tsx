@@ -1,12 +1,13 @@
 'use client';
 
 import { useRef, useEffect, createContext, useContext, useState, ReactNode } from 'react';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../lib/constants';
 import type { LatLng } from '../types';
 
-const OSM_RASTER_STYLE: maplibregl.StyleSpecification = {
+// Fallback OSM raster style (used when no Mapbox token is configured)
+const OSM_RASTER_STYLE: mapboxgl.StyleSpecification = {
   version: 8,
   sources: {
     osm: {
@@ -20,9 +21,17 @@ const OSM_RASTER_STYLE: maplibregl.StyleSpecification = {
   layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
 };
 
-export const MapContext = createContext<maplibregl.Map | null>(null);
+// Mapbox public token (pk.*)
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
-export function useMap(): maplibregl.Map | null {
+// Set the access token once at module load
+if (MAPBOX_TOKEN) {
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+}
+
+export const MapContext = createContext<mapboxgl.Map | null>(null);
+
+export function useMap(): mapboxgl.Map | null {
   return useContext(MapContext);
 }
 
@@ -31,7 +40,7 @@ export interface MapContainerProps {
   zoom?: number;
   styleUrl?: string;
   children?: ReactNode;
-  onLoad?: (map: maplibregl.Map) => void;
+  onLoad?: (map: mapboxgl.Map) => void;
   className?: string;
 }
 
@@ -44,11 +53,11 @@ export function MapContainer({
   className = 'w-full h-full',
 }: MapContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapReadyRef = useRef(false);
   const centerRef = useRef(center);
   const onLoadRef = useRef(onLoad);
-  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
+  const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
 
   // Keep refs in sync without causing map rebuild
   useEffect(() => { centerRef.current = center; }, [center]);
@@ -58,23 +67,28 @@ export function MapContainer({
     if (!containerRef.current) return;
 
     const envStyleUrl = process.env.NEXT_PUBLIC_MAP_TILE_STYLE_URL || undefined;
-    const resolvedStyle: maplibregl.StyleSpecification | string =
-      styleUrl ?? envStyleUrl ?? OSM_RASTER_STYLE;
+    const rawStyleUrl = styleUrl ?? envStyleUrl ?? undefined;
 
-    const map = new maplibregl.Map({
+    // If we have a Mapbox token and a mapbox:// style URL, use it directly.
+    // mapbox-gl handles mapbox:// URLs natively.
+    // Otherwise fall back to OSM raster tiles.
+    const style: mapboxgl.StyleSpecification | string =
+      rawStyleUrl && MAPBOX_TOKEN ? rawStyleUrl : OSM_RASTER_STYLE;
+
+    const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: resolvedStyle,
+      style,
       center: [centerRef.current.lng, centerRef.current.lat],
       zoom,
       attributionControl: false,
     });
 
     map.addControl(
-      new maplibregl.NavigationControl({ showCompass: false }),
+      new mapboxgl.NavigationControl({ showCompass: false }),
       'top-right',
     );
     map.addControl(
-      new maplibregl.AttributionControl({ compact: true }),
+      new mapboxgl.AttributionControl({ compact: true }),
       'bottom-right',
     );
 

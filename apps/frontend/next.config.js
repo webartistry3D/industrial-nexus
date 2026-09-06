@@ -11,7 +11,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@industrial-nexus/maps', 'maplibre-gl'],
+  transpilePackages: ['@industrial-nexus/maps', 'mapbox-gl'],
   images: {
     unoptimized: true,
   },

@@ -9,7 +9,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "maplibre-gl": "^4.7.0"
+    "mapbox-gl": "^3.5.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

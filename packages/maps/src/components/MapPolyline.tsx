@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 import type { LatLng } from '../types';
 
 export interface MapPolylineProps {
-  map: maplibregl.Map;
+  map: mapboxgl.Map;
   id: string;
   path: LatLng[];
   color?: string;
@@ -23,7 +23,7 @@ export function MapPolyline({
   dashed = false,
   opacity = 1,
 }: MapPolylineProps) {
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   useEffect(() => { mapRef.current = map; }, [map]);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function MapPolyline({
     };
 
     if (map.getSource(sourceId)) {
-      (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson);
+      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
       return;
     }
 
@@ -87,7 +87,7 @@ export function MapPolyline({
           coordinates: path.map(p => [p.lng, p.lat]),
         },
       };
-      (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson);
+      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
     } catch {
       // map was already destroyed
     }

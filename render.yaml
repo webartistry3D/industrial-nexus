@@ -27,7 +27,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_ORIGIN
-        value: https://industrial-nexus-app.onrender.com
+        value: https://www.industrialnexus.com.ng,https://industrial-nexus-app.onrender.com
       - key: AWS_REGION
         sync: false
       - key: AWS_S3_BUCKET
@@ -37,7 +37,9 @@ services:
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
       - key: APP_URL
-        value: https://industrial-nexus-api.onrender.com
+        value: https://www.industrialnexus.com.ng
+      - key: MAPBOX_TOKEN
+        sync: false
 
   - type: web
     name: industrial-nexus-app
@@ -51,3 +53,7 @@ services:
         value: https://industrial-nexus-api.onrender.com
       - key: NEXT_IGNORE_INCORRECT_LOCKFILE
         value: "true"
+      - key: NEXT_PUBLIC_MAPBOX_TOKEN
+        sync: false
+      - key: NEXT_PUBLIC_MAP_TILE_STYLE_URL
+        value: "mapbox://styles/mapbox/streets-v12"

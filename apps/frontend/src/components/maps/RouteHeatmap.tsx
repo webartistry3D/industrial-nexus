@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 
 interface TrackingPoint {
   lat: number;
@@ -11,7 +11,7 @@ interface TrackingPoint {
 }
 
 interface RouteHeatmapProps {
-  map: maplibregl.Map;
+  map: mapboxgl.Map;
   points: TrackingPoint[];
   sourceId?: string;
 }
@@ -48,14 +48,14 @@ export function RouteHeatmap({ map, points, sourceId = SOURCE_ID }: RouteHeatmap
     const addLayers = () => {
       try {
         if (map.getSource(sourceId)) {
-          (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson);
+          (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
         } else {
           map.addSource(sourceId, { type: 'geojson', data: geojson });
         }
 
         const lineSourceId = `${sourceId}-line`;
         if (map.getSource(lineSourceId)) {
-          (map.getSource(lineSourceId) as maplibregl.GeoJSONSource).setData(lineGeojson);
+          (map.getSource(lineSourceId) as mapboxgl.GeoJSONSource).setData(lineGeojson);
         } else {
           map.addSource(lineSourceId, { type: 'geojson', data: lineGeojson });
         }
@@ -105,7 +105,7 @@ export function RouteHeatmap({ map, points, sourceId = SOURCE_ID }: RouteHeatmap
         if (points.length > 1) {
           const lngs = points.map(p => p.lng);
           const lats = points.map(p => p.lat);
-          const bounds = new maplibregl.LngLatBounds(
+          const bounds = new mapboxgl.LngLatBounds(
             [Math.min(...lngs), Math.min(...lats)],
             [Math.max(...lngs), Math.max(...lats)],
           );

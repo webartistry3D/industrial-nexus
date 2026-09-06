@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 import type { LatLng } from '../types';
 
 const AUTO_COLOR_MAP: [number, string][] = [
@@ -38,7 +38,7 @@ function circleGeoJSON(
 }
 
 export interface GeofenceCircleProps {
-  map: maplibregl.Map;
+  map: mapboxgl.Map;
   id: string;
   center: LatLng;
   radiusMeters: number;
@@ -58,7 +58,7 @@ export function GeofenceCircle({
   strokeOpacity = 0.8,
   strokeWeight = 2,
 }: GeofenceCircleProps) {
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   useEffect(() => {
     mapRef.current = map;
   }, [map]);
@@ -74,7 +74,7 @@ export function GeofenceCircle({
     const geojson = circleGeoJSON(center, radiusMeters);
 
     if (map.getSource(sourceId)) {
-      (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson);
+      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
       return;
     }
 

@@ -13,56 +13,76 @@ export interface GeocodingResult {
 @Injectable()
 export class GeocodingService {
   private readonly logger = new Logger(GeocodingService.name);
-  private readonly nominatimUrl: string;
+  private readonly mapboxToken: string;
+  private readonly baseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
   constructor(private readonly config: ConfigService) {
-    this.nominatimUrl = this.config.get<string>('NOMINATIM_URL', 'https://nominatim.openstreetmap.org');
+    this.mapboxToken = this.config.get<string>('MAPBOX_TOKEN', '');
   }
 
   async search(query: string, countryCode = 'ng', limit = 5): Promise<GeocodingResult[]> {
-    try {
-      const { data } = await axios.get(`${this.nominatimUrl}/search`, {
-        params: {
-          q: query,
-          format: 'jsonv2',
-          addressdetails: 1,
-          limit,
-          countrycodes: countryCode,
-        },
-        headers: { 'User-Agent': 'IndustrialNexus/1.0' },
-        timeout: 8000,
-      });
+    if (!this.mapboxToken) {
+      this.logger.warn('MAPBOX_TOKEN not set — geocoding disabled');
+      return [];
+    }
 
-      return (data as any[]).map((item) => ({
-        placeId: String(item.place_id),
-        displayName: item.display_name,
-        address: item.display_name,
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
+    try {
+      const { data } = await axios.get(
+        `${this.baseUrl}/${encodeURIComponent(query)}.json`,
+        {
+          params: {
+            access_token: this.mapboxToken,
+            limit,
+            country: countryCode,
+            autocomplete: true,
+          },
+          timeout: 8000,
+        },
+      );
+
+      return (data.features as any[]).map((feature) => ({
+        placeId: feature.id,
+        displayName: feature.place_name,
+        address: feature.place_name,
+        lat: feature.center[1],
+        lng: feature.center[0],
       }));
     } catch (err: any) {
-      this.logger.warn(`Nominatim search failed: ${err.message}`);
+      this.logger.warn(`Mapbox geocoding failed: ${err.message}`);
       return [];
     }
   }
 
   async reverse(lat: number, lng: number): Promise<GeocodingResult | null> {
+    if (!this.mapboxToken) {
+      this.logger.warn('MAPBOX_TOKEN not set — reverse geocoding disabled');
+      return null;
+    }
+
     try {
-      const { data } = await axios.get(`${this.nominatimUrl}/reverse`, {
-        params: { lat, lon: lng, format: 'jsonv2' },
-        headers: { 'User-Agent': 'IndustrialNexus/1.0' },
-        timeout: 8000,
-      });
+      const { data } = await axios.get(
+        `${this.baseUrl}/${lng},${lat}.json`,
+        {
+          params: {
+            access_token: this.mapboxToken,
+            limit: 1,
+          },
+          timeout: 8000,
+        },
+      );
+
+      const feature = data.features?.[0];
+      if (!feature) return null;
 
       return {
-        placeId: String(data.place_id),
-        displayName: data.display_name,
-        address: data.display_name,
-        lat: parseFloat(data.lat),
-        lng: parseFloat(data.lon),
+        placeId: feature.id,
+        displayName: feature.place_name,
+        address: feature.place_name,
+        lat: feature.center[1],
+        lng: feature.center[0],
       };
     } catch (err: any) {
-      this.logger.warn(`Nominatim reverse failed: ${err.message}`);
+      this.logger.warn(`Mapbox reverse geocoding failed: ${err.message}`);
       return null;
     }
   }

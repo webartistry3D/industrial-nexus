@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 import { MARKER_COLORS, MARKER_EMOJIS } from '../lib/constants';
 import type { LatLng, MarkerType } from '../types';
 
 export interface MapMarkerProps {
-  map: maplibregl.Map;
+  map: mapboxgl.Map;
   position: LatLng;
   type?: MarkerType;
   label?: string;
@@ -24,8 +24,8 @@ export function MapMarker({
   popup,
   onClick,
 }: MapMarkerProps) {
-  const markerRef = useRef<maplibregl.Marker | null>(null);
-  const popupRef = useRef<maplibregl.Popup | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const popupRef = useRef<mapboxgl.Popup | null>(null);
 
   useEffect(() => {
     const color = MARKER_COLORS[type] ?? MARKER_COLORS.default;
@@ -57,11 +57,11 @@ export function MapMarker({
       el.classList.add('map-marker-pulse');
     }
 
-    const marker = new maplibregl.Marker({ element: el })
+    const marker = new mapboxgl.Marker({ element: el })
       .setLngLat([position.lng, position.lat]);
 
     if (popup) {
-      const p = new maplibregl.Popup({ offset: 20, closeButton: false })
+      const p = new mapboxgl.Popup({ offset: 20, closeButton: false })
         .setHTML(popup);
       marker.setPopup(p);
       popupRef.current = p;

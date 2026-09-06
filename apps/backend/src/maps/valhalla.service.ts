@@ -16,39 +16,46 @@ export interface ValhallaRoute {
 @Injectable()
 export class ValhallaService {
   private readonly logger = new Logger(ValhallaService.name);
-  private readonly baseUrl: string;
+  private readonly mapboxToken: string;
+  private readonly baseUrl = 'https://api.mapbox.com/directions/v5/mapbox';
 
   constructor(private readonly config: ConfigService) {
-    this.baseUrl = this.config.get<string>('VALHALLA_URL', 'http://localhost:8002');
+    this.mapboxToken = this.config.get<string>('MAPBOX_TOKEN', '');
   }
 
   async getRoute(origin: LatLng, destination: LatLng): Promise<ValhallaRoute | null> {
+    if (!this.mapboxToken) {
+      this.logger.warn('MAPBOX_TOKEN not set — routing disabled');
+      return null;
+    }
+
     try {
-      const body = {
-        locations: [
-          { lon: origin.lng, lat: origin.lat, type: 'break' },
-          { lon: destination.lng, lat: destination.lat, type: 'break' },
-        ],
-        costing: 'auto',
-        directions_options: { units: 'kilometers' },
-        shape_format: 'geojson',
-      };
+      const coords = `${origin.lng},${origin.lat};${destination.lng},${destination.lat}`;
+      const { data } = await axios.get(
+        `${this.baseUrl}/driving/${coords}`,
+        {
+          params: {
+            access_token: this.mapboxToken,
+            geometries: 'geojson',
+            overview: 'full',
+          },
+          timeout: 10000,
+        },
+      );
 
-      const { data } = await axios.post(`${this.baseUrl}/route`, body, { timeout: 10000 });
+      const route = data.routes?.[0];
+      if (!route) return null;
 
-      const leg = data?.trip?.legs?.[0];
-      if (!leg) return null;
+      const coordsArray = route.geometry.coordinates as [number, number][];
+      const polyline: LatLng[] = coordsArray.map(([lng, lat]) => ({ lat, lng }));
 
-      const coords: LatLng[] = (leg.shape as [number, number][]).map(([lng, lat]) => ({ lat, lng }));
-
-      const summary = data.trip.summary;
       return {
-        polyline: coords,
-        distanceMeters: Math.round((summary.length ?? 0) * 1000),
-        durationSeconds: Math.round(summary.time ?? 0),
+        polyline,
+        distanceMeters: Math.round(route.distance),
+        durationSeconds: Math.round(route.duration),
       };
     } catch (err: any) {
-      this.logger.warn(`Valhalla route failed: ${err.message}`);
+      this.logger.warn(`Mapbox directions failed: ${err.message}`);
       return null;
     }
   }

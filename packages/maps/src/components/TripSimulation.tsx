@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 import { MapMarker } from './MapMarker';
 import { MapPolyline } from './MapPolyline';
 import { GeofenceCircle } from './GeofenceCircle';
@@ -11,7 +11,7 @@ import { GEOFENCE_ZONES } from '../lib/constants';
 import type { LatLngAddress, LatLng } from '../types';
 
 export interface TripSimulationProps {
-  map: maplibregl.Map;
+  map: mapboxgl.Map;
   pickupLocation: LatLngAddress;
   deliveryLocation: LatLngAddress;
   isSimulating: boolean;

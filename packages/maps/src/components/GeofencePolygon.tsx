@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 import type { LatLng } from '../types';
 
 export interface GeofencePolygonProps {
-  map: maplibregl.Map;
+  map: mapboxgl.Map;
   id: string;
   path: LatLng[];
   color?: string;
@@ -21,7 +21,7 @@ export function GeofencePolygon({
   fillOpacity = 0.1,
   strokeOpacity = 0.8,
 }: GeofencePolygonProps) {
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   useEffect(() => { mapRef.current = map; }, [map]);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function GeofencePolygon({
     };
 
     if (map.getSource(sourceId)) {
-      (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson);
+      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
       return;
     }
 
