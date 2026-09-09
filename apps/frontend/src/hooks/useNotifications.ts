@@ -16,13 +16,16 @@ export interface Notification {
   createdAt: string;
 }
 
+// Persists across component remounts (page navigations) within a session.
+// Ensures the notification sound only plays on first load (login), not on every page change.
+let initialFetchDone = false;
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const socketRef = useRef<Socket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const initialFetchDone = useRef(false);
   const mountedRef = useRef(false);
   const { user, isLoading: authLoading } = useAuth();
 
@@ -52,8 +55,8 @@ export function useNotifications() {
       const unread = list.filter((n: Notification) => !n.isRead).length;
       setNotifications(list);
       setUnreadCount(unread);
-      if (!initialFetchDone.current) {
-        initialFetchDone.current = true;
+      if (!initialFetchDone) {
+        initialFetchDone = true;
         if (unread > 0) {
           playNotificationSoundRef.current();
         }
@@ -107,7 +110,7 @@ export function useNotifications() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      initialFetchDone.current = false;
+      initialFetchDone = false;
       setLoading(false);
       return;
     }

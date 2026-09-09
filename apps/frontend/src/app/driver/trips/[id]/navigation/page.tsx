@@ -109,7 +109,22 @@ export default function NavigationPage() {
             <p className="text-red-500 font-medium">{error}</p>
           </div>
         ) : routeData ? (
-          <GoogleMapWrapper center={mapCenter} zoom={14}>
+          <GoogleMapWrapper
+            center={mapCenter}
+            zoom={14}
+            config={{
+              lightPreset: (() => {
+                const h = new Date().getHours();
+                if (h >= 6 && h < 18) return 'day' as const;
+                if (h >= 18 && h < 20) return 'dusk' as const;
+                if (h >= 5 && h < 6) return 'dawn' as const;
+                return 'night' as const;
+              })(),
+              show3dBuildings: true,
+              showRoadLabels: true,
+              showPointOfInterestLabels: true,
+            }}
+          >
             <NavMapOverlays currentLocation={currentLocation} routeData={routeData} />
           </GoogleMapWrapper>
         ) : null}

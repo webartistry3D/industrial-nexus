@@ -181,7 +181,7 @@ export default function PackageTrackingPage() {
 
       <main className="px-4 py-4 pb-24">
         {/* Map */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
+        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6 lg:w-1/2">
           <div className="h-[400px] sm:h-[500px] relative overflow-hidden rounded-2xl">
             <GoogleMapWrapper center={mapCenter} zoom={14}>
               {!loading && !error && trackerData?.location && (

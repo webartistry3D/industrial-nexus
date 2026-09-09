@@ -56,4 +56,4 @@ services:
       - key: NEXT_PUBLIC_MAPBOX_TOKEN
         sync: false
       - key: NEXT_PUBLIC_MAP_TILE_STYLE_URL
-        value: "mapbox://styles/mapbox/streets-v12"
+        value: "mapbox://styles/mapbox/standard"

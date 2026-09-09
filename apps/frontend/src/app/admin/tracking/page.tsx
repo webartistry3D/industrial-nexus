@@ -342,7 +342,7 @@ function TrackingPageContent() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {packageTrackerId
                   ? `Tracking ${packageTrackerData?.packageTracker?.deviceId || packageTrackerId}${packageTrackerData?.packageTracker?.name ? `: ${packageTrackerData.packageTracker.name}` : ''}`
-                  : 'Real-time fleet location monitoring'}
+                  : null /* 'Real-time fleet location monitoring' */}
               </p>
             </div>
           </div>
@@ -375,28 +375,139 @@ function TrackingPageContent() {
       </div>
 
       <main className="px-4 py-4 pb-24">
-        {/* Map */}
-        <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 mb-6">
-          <div className="h-[400px] relative overflow-hidden rounded-2xl">
-            <GoogleMapWrapper center={mapCenter} zoom={13}>
-              {!loading && !error && (fleetLocation || packageTrackerData) && (
-                <TrackingMapOverlays
-                  fleetLocation={fleetLocation}
-                  packageLiveLocation={packageLiveLocation}
-                  showHeatmap={showHeatmap}
-                  heatmapPoints={heatmapPoints}
-                />
-              )}
-            </GoogleMapWrapper>
-            {(loading || error || (!fleetLocation && !packageTrackerData)) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
-                {loading ? (
-                  <p className="text-gray-600 dark:text-gray-400">Loading map...</p>
-                ) : error ? (
-                  <p className="text-red-500">{error}</p>
-                ) : (
-                  <p className="text-gray-600 dark:text-gray-400">No active vehicle or package tracking</p>
+        {/* Map + side panels (geofence events, trip details) */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          {/* Map */}
+          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 lg:w-1/2">
+            <div className="h-[400px] relative overflow-hidden rounded-2xl">
+              <GoogleMapWrapper center={mapCenter} zoom={13}>
+                {!loading && !error && (fleetLocation || packageTrackerData) && (
+                  <TrackingMapOverlays
+                    fleetLocation={fleetLocation}
+                    packageLiveLocation={packageLiveLocation}
+                    showHeatmap={showHeatmap}
+                    heatmapPoints={heatmapPoints}
+                  />
                 )}
+              </GoogleMapWrapper>
+              {(loading || error || (!fleetLocation && !packageTrackerData)) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+                  {loading ? (
+                    <p className="text-gray-600 dark:text-gray-400">Loading map...</p>
+                  ) : error ? (
+                    <p className="text-red-500">{error}</p>
+                  ) : (
+                    <p className="text-gray-600 dark:text-gray-400">No active vehicle or package tracking</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right side: Geofence Events + Trip Details */}
+          <div className="lg:w-1/2 space-y-6">
+            {/* Geofence Events Timeline */}
+            {fleetLocation && (
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Geofence Events Timeline</h2>
+                {geofenceEvents.length === 0 ? (
+                  <p className="text-gray-600 dark:text-gray-400">No geofence events recorded yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {geofenceEvents.map((event, index) => (
+                      <div key={event.id} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 mt-1">
+                          {getEventIcon(event.eventType)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {getEventLabel(event.eventType)}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              {new Date(event.timestamp).toLocaleString()}
+                            </p>
+                          </div>
+                          {event.data && Object.keys(event.data).length > 0 && (
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {JSON.stringify(event.data)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Trip Details */}
+            {fleetLocation && (
+              <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trip Details</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                      <Truck className="w-5 h-5 text-white dark:text-black" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Driver</p>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {fleetLocation?.trip.driver?.user?.firstName} {fleetLocation?.trip.driver?.user?.lastName || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                      <Navigation className="w-5 h-5 text-white dark:text-black" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Vehicle</p>
+                      <p className="font-medium text-gray-900 dark:text-white font-mono">
+                        {fleetLocation?.trip.vehicle?.plateNumber || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                      <MapPin className="w-5 h-5 text-white dark:text-black" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {formatStatus(fleetLocation?.trip.status)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
+                      <Activity className="w-5 h-5 text-white dark:text-black" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Last Event</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-sm font-mono">
+                        {geofenceEvents.length > 0 ? new Date(geofenceEvents[0].timestamp).toLocaleTimeString() : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Pickup</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">
+                        {fleetLocation?.trip.order?.pickupLocation?.address || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Delivery</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">
+                        {fleetLocation?.trip.order?.deliveryLocation?.address || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -477,110 +588,6 @@ function TrackingPageContent() {
           </div>
         )}
 
-        {/* Geofence Events Timeline */}
-        {fleetLocation && (
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Geofence Events Timeline</h2>
-            {geofenceEvents.length === 0 ? (
-              <p className="text-gray-600 dark:text-gray-400">No geofence events recorded yet</p>
-            ) : (
-              <div className="space-y-4">
-                {geofenceEvents.map((event, index) => (
-                  <div key={event.id} className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-1">
-                      {getEventIcon(event.eventType)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {getEventLabel(event.eventType)}
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {new Date(event.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                      {event.data && Object.keys(event.data).length > 0 && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          {JSON.stringify(event.data)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Trip Details */}
-        {fleetLocation && (
-          <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trip Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
-                  <Truck className="w-5 h-5 text-white dark:text-black" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Driver</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {fleetLocation?.trip.driver?.user?.firstName} {fleetLocation?.trip.driver?.user?.lastName || 'N/A'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
-                  <Navigation className="w-5 h-5 text-white dark:text-black" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Vehicle</p>
-                  <p className="font-medium text-gray-900 dark:text-white font-mono">
-                    {fleetLocation?.trip.vehicle?.plateNumber || 'N/A'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
-                  <MapPin className="w-5 h-5 text-white dark:text-black" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {formatStatus(fleetLocation?.trip.status)}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-900 dark:bg-lime-500 shadow-md">
-                  <Activity className="w-5 h-5 text-white dark:text-black" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Last Event</p>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm font-mono">
-                    {geofenceEvents.length > 0 ? new Date(geofenceEvents[0].timestamp).toLocaleTimeString() : 'N/A'}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Pickup</p>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {fleetLocation?.trip.order?.pickupLocation?.address || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Delivery</p>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {fleetLocation?.trip.order?.deliveryLocation?.address || 'N/A'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );

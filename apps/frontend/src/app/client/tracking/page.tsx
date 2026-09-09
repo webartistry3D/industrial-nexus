@@ -289,7 +289,7 @@ export default function TrackingPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Shipments List */}
           <div className="order-2 lg:order-1 bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-4 border-b border-gray-200/50 dark:border-slate-700/50 flex items-center justify-between">
@@ -451,7 +451,7 @@ export default function TrackingPage() {
           </div>
 
           {/* Map and Details */}
-          <div className="order-1 lg:order-2 lg:col-span-2 space-y-6">
+          <div className="order-1 lg:order-2 lg:col-span-1 space-y-6">
             {/* Map */}
             <div className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-700/50">
               <div className="h-[400px] relative overflow-hidden rounded-2xl">

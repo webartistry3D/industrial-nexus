@@ -24,4 +24,4 @@ export { searchAddress, reverseGeocode } from './lib/geocoding';
 export { getRoute, getETA } from './lib/routing';
 export { DEFAULT_CENTER, DEFAULT_ZOOM, GEOFENCE_ZONES, MARKER_COLORS, MARKER_EMOJIS } from './lib/constants';
 
-export type { LatLng, LatLngAddress, MarkerType, GeocodingResult, Route, ValhallaCosting, GeofenceZone } from './types';
+export type { LatLng, LatLngAddress, MarkerType, GeocodingResult, Route, ValhallaCosting, GeofenceZone, LightPreset, StandardConfig, BuildingHighlight } from './types';

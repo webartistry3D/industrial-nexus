@@ -50,3 +50,7 @@ apps/backend/uploads/
 # GCS service account key (do not commit)
 industrial-nexus-gcs.json
 *-gcs.json
+
+# Database backups
+*.sql
+backup_*.sql

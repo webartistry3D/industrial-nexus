@@ -226,8 +226,22 @@ export default function TrackingPage() {
         </button> */}
 
         {/* Map */}
-        <div className="h-[50vh] bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 relative overflow-hidden">
-          <GoogleMapWrapper center={mapCenter} zoom={14}>
+        <div className="h-[50vh] lg:w-1/2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 relative overflow-hidden">
+          <GoogleMapWrapper
+            center={mapCenter}
+            zoom={14}
+            config={{
+              lightPreset: (() => {
+                const h = new Date().getHours();
+                if (h >= 6 && h < 18) return 'day' as const;
+                if (h >= 18 && h < 20) return 'dusk' as const;
+                if (h >= 5 && h < 6) return 'dawn' as const;
+                return 'night' as const;
+              })(),
+              show3dBuildings: true,
+              showRoadLabels: true,
+            }}
+          >
             {!loading && !error && currentTrip && (
               <TrackingMapOverlays
                 currentLocation={currentLocation}
