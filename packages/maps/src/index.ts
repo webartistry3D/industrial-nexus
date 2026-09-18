@@ -19,6 +19,12 @@ export type { TripSimulationProps } from './components/TripSimulation';
 export { AddressSearch } from './components/AddressSearch';
 export type { AddressSearchProps } from './components/AddressSearch';
 
+export { SimpleMap } from './components/SimpleMap';
+export type { SimpleMapProps } from './components/SimpleMap';
+
+export { SimpleMarker } from './components/SimpleMarker';
+export type { SimpleMarkerProps } from './components/SimpleMarker';
+
 export { haversineDistance } from './lib/haversine';
 export { searchAddress, reverseGeocode } from './lib/geocoding';
 export { getRoute, getETA } from './lib/routing';

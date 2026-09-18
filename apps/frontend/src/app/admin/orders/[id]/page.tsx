@@ -1244,7 +1244,7 @@ export default function OrderDetailPage() {
       {/* Kitting Process Modal */}
       {showKittingModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200/50 dark:border-slate-700/50">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-2xl max-h-[68vh] overflow-y-auto border border-gray-200/50 dark:border-slate-700/50">
             <div className="p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Kitting Process</h3>
               

@@ -8,8 +8,7 @@ import { formatStatus } from '@/lib/formatting';
 import { geocodeAddress } from '@/lib/geocoding';
 import { Package, ArrowLeft, MapPin, Check, User } from 'lucide-react';
 import { PlacesAutocomplete } from '@/components/maps/PlacesAutocomplete';
-import { GoogleMapWrapper, useMap } from '@/components/maps/GoogleMap';
-import { MapMarker } from '@/components/maps/MapMarker';
+import { SimpleMap } from '@industrial-nexus/maps';
 import { SuccessModal } from '@/components/shared/success-modal';
 
 interface Client {
@@ -20,22 +19,7 @@ interface Client {
   lastName: string;
 }
 
-function OrderMapOverlays({
-  pickupLat, pickupLng, deliveryLat, deliveryLng,
-}: { pickupLat: number; pickupLng: number; deliveryLat: number; deliveryLng: number }) {
-  const map = useMap();
-  if (!map) return null;
-  return (
-    <>
-      {pickupLat !== 0 && pickupLng !== 0 && (
-        <MapMarker map={map} position={{ lat: pickupLat, lng: pickupLng }} type="pickup" label="📦" />
-      )}
-      {deliveryLat !== 0 && deliveryLng !== 0 && (
-        <MapMarker map={map} position={{ lat: deliveryLat, lng: deliveryLng }} type="delivery" label="🏠" />
-      )}
-    </>
-  );
-}
+
 
 export default function NewOrderPage() {
   const router = useRouter();
@@ -65,6 +49,11 @@ export default function NewOrderPage() {
     priority: 'NORMAL' as 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
     declaredCargoValue: undefined as number | undefined,
   });
+
+  // Display strings for inputs that show formatted numbers with thousand separators
+  const [weightDisplay, setWeightDisplay] = useState('');
+  const [declaredValueDisplay, setDeclaredValueDisplay] = useState('');
+  const [selectMode, setSelectMode] = useState<null | 'pickup' | 'delivery'>(null);
 
   const [handlingTagOptions, setHandlingTagOptions] = useState<string[]>([]);
   const [tagsLoading, setTagsLoading] = useState(false);
@@ -111,6 +100,28 @@ export default function NewOrderPage() {
       }));
     }
   }, [handlingTagOptions]);
+
+  // Initialize display values from numeric state
+  useEffect(() => {
+    setWeightDisplay(formData.totalWeight ? Number(formData.totalWeight).toLocaleString(undefined, { maximumFractionDigits: 3 }) : '');
+    setDeclaredValueDisplay(formData.declaredCargoValue ? Number(formData.declaredCargoValue).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '');
+  }, []);
+
+  const formatWeightInput = (raw: string) => {
+    const cleaned = raw.replace(/,/g, '').replace(/[^^0-9.]/g, '');
+    if (cleaned === '' || cleaned === '.' ) return '';
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return '';
+    return num.toLocaleString(undefined, { maximumFractionDigits: 3 });
+  };
+
+  const formatCurrencyInput = (raw: string) => {
+    const cleaned = raw.replace(/,/g, '').replace(/[^0-9]/g, '');
+    if (cleaned === '') return '';
+    const num = parseInt(cleaned, 10);
+    if (isNaN(num)) return '';
+    return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  };
 
   const getHandlingTagColor = (tag: string, isSelected: boolean) => {
     const upperTag = tag.toUpperCase();
@@ -326,6 +337,42 @@ export default function NewOrderPage() {
 
   const mapCenter = getMapCenter();
 
+  // Handle clicks coming from the map when user is in select mode
+  const handleMapClick = async ({ lat, lng }: { lat: number; lng: number }) => {
+    if (!selectMode) return;
+
+    try {
+      if (selectMode === 'pickup') {
+        setFormData(prev => ({ ...prev, pickupLat: lat, pickupLng: lng }));
+      } else if (selectMode === 'delivery') {
+        setFormData(prev => ({ ...prev, deliveryLat: lat, deliveryLng: lng }));
+      }
+
+      // Reverse geocode using Nominatim to get a human readable address
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+          headers: {
+            'User-Agent': 'Industrial-Nexus-Admin-Portal',
+            'Accept': 'application/json',
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const addr = data?.display_name || '';
+          if (selectMode === 'pickup') {
+            setFormData(prev => ({ ...prev, pickupAddress: addr }));
+          } else {
+            setFormData(prev => ({ ...prev, deliveryAddress: addr }));
+          }
+        }
+      } catch (err) {
+        console.error('Reverse geocode failed:', err);
+      }
+    } finally {
+      setSelectMode(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 pb-24">
       {/* Header */}
@@ -418,11 +465,16 @@ export default function NewOrderPage() {
                 Total Weight (kg)
               </label>
               <input
-                type="number"
-                step="0.1"
-                min="0"
-                value={formData.totalWeight || ''}
-                onChange={(e) => setFormData({ ...formData, totalWeight: parseFloat(e.target.value) || 0 })}
+                type="text"
+                inputMode="decimal"
+                value={weightDisplay}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  const formatted = formatWeightInput(raw);
+                  setWeightDisplay(formatted);
+                  const numeric = parseFloat(raw.replace(/,/g, ''));
+                  setFormData({ ...formData, totalWeight: isNaN(numeric) ? 0 : numeric });
+                }}
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
                 required
               />
@@ -490,11 +542,16 @@ export default function NewOrderPage() {
                 Declared Cargo Value (₦)
               </label>
               <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.declaredCargoValue || ''}
-                onChange={(e) => setFormData({ ...formData, declaredCargoValue: e.target.value ? parseFloat(e.target.value) : undefined })}
+                type="text"
+                inputMode="numeric"
+                value={declaredValueDisplay}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  const formatted = formatCurrencyInput(raw);
+                  setDeclaredValueDisplay(formatted);
+                  const numeric = parseInt(raw.replace(/,/g, ''), 10);
+                  setFormData({ ...formData, declaredCargoValue: isNaN(numeric) ? undefined : numeric });
+                }}
                 placeholder="Optional — used to calculate insurance premium"
                 className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
               />
@@ -542,24 +599,7 @@ export default function NewOrderPage() {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Locations
               </h3>
-              <div className="flex gap-2">
-                {!useManualCoords && (
-                  <button
-                    type="button"
-                    onClick={() => setUseManualEntry(!useManualEntry)}
-                    className="text-sm px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all duration-300"
-                  >
-                    {useManualEntry ? 'Use Autocomplete' : 'Manual Entry'}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setUseManualCoords(!useManualCoords)}
-                  className="text-sm px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all duration-300"
-                >
-                  {useManualCoords ? 'Hide Coordinates' : 'Manual Coords'}
-                </button>
-              </div>
+              
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -573,56 +613,27 @@ export default function NewOrderPage() {
                     </div>
                     Pickup Location
                   </h4>
-                  {useManualCoords ? (
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        value={formData.pickupAddress}
-                        onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
-                        placeholder="Enter pickup address"
-                        required
-                      />
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="number"
-                          step="any"
-                          value={formData.pickupLat || ''}
-                          onChange={(e) => setFormData({ ...formData, pickupLat: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
-                          placeholder="Latitude"
-                          required
-                        />
-                        <input
-                          type="number"
-                          step="any"
-                          value={formData.pickupLng || ''}
-                          onChange={(e) => setFormData({ ...formData, pickupLng: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
-                          placeholder="Longitude"
-                          required
-                        />
-                      </div>
-                    </div>
-                  ) : useManualEntry ? (
-                    <input
-                      type="text"
-                      value={formData.pickupAddress}
-                      onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
-                      placeholder="Enter pickup address"
-                      required
-                    />
-                  ) : (
-                    <PlacesAutocomplete
-                      value={formData.pickupAddress}
-                      onChange={(address: string, lat: number, lng: number) => setFormData({ ...formData, pickupAddress: address, pickupLat: lat, pickupLng: lng })}
-                      placeholder="Enter pickup address"
-                      label="Pickup Address"
-                      iconColor="text-orange-600 dark:text-orange-400"
-                      token={accessToken}
-                    />
-                  )}
+                  <PlacesAutocomplete
+                    value={formData.pickupAddress}
+                    onChange={(address: string, lat: number, lng: number) => setFormData({ ...formData, pickupAddress: address, pickupLat: lat, pickupLng: lng })}
+                    placeholder="Enter pickup address"
+                    label="Pickup Address"
+                    iconColor="text-orange-600 dark:text-orange-400"
+                    token={accessToken ?? (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null)}
+                    disabled={selectMode !== null}
+                  />
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectMode('pickup')}
+                      className="px-3 py-1 rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 text-sm"
+                    >
+                      Select on map
+                    </button>
+                    {selectMode === 'pickup' && (
+                      <button type="button" onClick={() => setSelectMode(null)} className="text-sm text-gray-500">Cancel</button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Delivery Location */}
@@ -633,80 +644,47 @@ export default function NewOrderPage() {
                     </div>
                     Delivery Location
                   </h4>
-                  {useManualCoords ? (
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        value={formData.deliveryAddress}
-                        onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
-                        placeholder="Enter delivery address"
-                        required
-                      />
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="number"
-                          step="any"
-                          value={formData.deliveryLat || ''}
-                          onChange={(e) => setFormData({ ...formData, deliveryLat: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
-                          placeholder="Latitude"
-                          required
-                        />
-                        <input
-                          type="number"
-                          step="any"
-                          value={formData.deliveryLng || ''}
-                          onChange={(e) => setFormData({ ...formData, deliveryLng: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
-                          placeholder="Longitude"
-                          required
-                        />
-                      </div>
-                    </div>
-                  ) : useManualEntry ? (
-                    <input
-                      type="text"
-                      value={formData.deliveryAddress}
-                      onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-lg focus:shadow-blue-500/10 transition-all duration-300 text-sm"
-                      placeholder="Enter delivery address"
-                      required
-                    />
-                  ) : (
-                    <PlacesAutocomplete
-                      value={formData.deliveryAddress}
-                      onChange={(address: string, lat: number, lng: number) => setFormData({ ...formData, deliveryAddress: address, deliveryLat: lat, deliveryLng: lng })}
-                      placeholder="Enter delivery address"
-                      label="Delivery Address"
-                      iconColor="text-green-600 dark:text-green-400"
-                      token={accessToken}
-                    />
-                  )}
+                  <PlacesAutocomplete
+                    value={formData.deliveryAddress}
+                    onChange={(address: string, lat: number, lng: number) => setFormData({ ...formData, deliveryAddress: address, deliveryLat: lat, deliveryLng: lng })}
+                    placeholder="Enter delivery address"
+                    label="Delivery Address"
+                    iconColor="text-green-600 dark:text-green-400"
+                    token={accessToken ?? (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null)}
+                    disabled={selectMode !== null}
+                  />
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectMode('delivery')}
+                      className="px-3 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 text-sm"
+                    >
+                      Select on map
+                    </button>
+                    {selectMode === 'delivery' && (
+                      <button type="button" onClick={() => setSelectMode(null)} className="text-sm text-gray-500">Cancel</button>
+                    )}
+                  </div>
                 </div>
 
-                {useManualCoords && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Enter coordinates manually if geocoding fails
-                  </p>
-                )}
-                {useManualEntry && !useManualCoords && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Addresses will be automatically geocoded using OpenStreetMap
-                  </p>
-                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Addresses will be automatically geocoded using {accessToken ? 'Mapbox' : 'OpenStreetMap (Nominatim)'}
+                </p>
               </div>
 
               {/* Right: Map */}
               <div className="h-[400px] bg-gray-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-gray-200/50 dark:border-slate-700/50">
-                <GoogleMapWrapper center={mapCenter} zoom={12}>
-                  <OrderMapOverlays
-                    pickupLat={formData.pickupLat}
-                    pickupLng={formData.pickupLng}
-                    deliveryLat={formData.deliveryLat}
-                    deliveryLng={formData.deliveryLng}
-                  />
-                </GoogleMapWrapper>
+                <SimpleMap
+                  center={mapCenter}
+                  zoom={12}
+                  className="w-full h-full"
+                  markers={[
+                    ...(formData.pickupLat && formData.pickupLng ? [{ id: 'pickup', lat: formData.pickupLat, lng: formData.pickupLng, label: '📦' }] : []),
+                    ...(formData.deliveryLat && formData.deliveryLng ? [{ id: 'delivery', lat: formData.deliveryLat, lng: formData.deliveryLng, label: '🏠' }] : []),
+                  ]}
+                  onMapClick={(pos) => handleMapClick(pos)}
+                  isSelecting={selectMode !== null}
+                />
               </div>
             </div>
           </div>

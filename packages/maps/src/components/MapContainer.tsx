@@ -49,6 +49,8 @@ export interface MapContainerProps {
   config?: StandardConfig;
   /** Buildings to highlight using Standard featuresets */
   highlightBuildings?: BuildingHighlight[];
+  /** When true, disable advanced features (DEM, settings panel, building highlights) */
+  minimal?: boolean;
   children?: ReactNode;
   onLoad?: (map: mapboxgl.Map) => void;
   className?: string;
@@ -119,14 +121,17 @@ function MapSettingsPanel({
   state,
   onChange,
   hasToken,
+  minimal,
 }: {
   state: SettingsState;
   onChange: (patch: Partial<SettingsState>) => void;
   hasToken: boolean;
+  minimal?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
-  if (!hasToken) return null; // no settings for OSM fallback
+  // Hide settings when no token or when in minimal mode
+  if (!hasToken || minimal) return null; // no settings for OSM fallback or minimal usage
 
   const Toggle = ({ label, checked, onToggle }: { label: string; checked: boolean; onToggle: () => void }) => (
     <button
@@ -228,6 +233,7 @@ export function MapContainer({
   satellite: satelliteProp = false,
   config,
   highlightBuildings,
+  minimal = false,
   children,
   onLoad,
   className = 'w-full h-full',
@@ -288,31 +294,39 @@ export function MapContainer({
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right');
 
-    map.once('load', () => {
+      map.once('load', () => {
       mapReadyRef.current = true;
       map.resize();
       setMapInstance(map);
-      // Apply 3D terrain + pitch if enabled
-      if (settings.show3dView) {
-        try { map.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.terrain-dem', tileSize: 512, maxzoom: 14 }); } catch { /* */ }
+      // Disable Mapbox telemetry/perf metrics where APIs exist, then add DEM safely
+      try {
+        if ((mapboxgl as any).setTelemetryEnabled) (mapboxgl as any).setTelemetryEnabled(false);
+        if ((mapboxgl as any).setPerformanceMetricsEnabled) (mapboxgl as any).setPerformanceMetricsEnabled(false);
+      } catch {}
+
+      // Apply 3D terrain + pitch only when a Mapbox token is configured and not in minimal mode
+      if (!minimal && settings.show3dView && MAPBOX_TOKEN) {
+        try { map.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 }); } catch { /* */ }
         try { (map as any).setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 }); } catch { /* */ }
         try { map.easeTo({ pitch: 45 }); } catch { /* */ }
       }
-      // Apply initial settings as Standard config
-      applyStandardConfig(map, {
-        show3dBuildings: settings.show3dBuildings,
-        show3dTrees: settings.show3dTrees,
-        show3dLandmarks: settings.show3dLandmarks,
-        showRoadLabels: settings.roadLabels,
-        showPointOfInterestLabels: settings.poiLabels,
-        showPlaceLabels: settings.placeLabels,
-        showTransitLabels: settings.transitLabels,
-        showPedestrianRoads: settings.pedestrianRoads,
-        lightPreset: settings.lightPreset,
-      });
-      // Apply initial building highlights
-      if (highlightBuildings && highlightBuildings.length > 0) {
-        highlightedRef.current = highlightBuildingsOnMap(map, highlightBuildings, []);
+      // Apply initial settings as Standard config when not in minimal mode
+      if (!minimal) {
+        applyStandardConfig(map, {
+          show3dBuildings: settings.show3dBuildings,
+          show3dTrees: settings.show3dTrees,
+          show3dLandmarks: settings.show3dLandmarks,
+          showRoadLabels: settings.roadLabels,
+          showPointOfInterestLabels: settings.poiLabels,
+          showPlaceLabels: settings.placeLabels,
+          showTransitLabels: settings.transitLabels,
+          showPedestrianRoads: settings.pedestrianRoads,
+          lightPreset: settings.lightPreset,
+        });
+        // Apply initial building highlights
+        if (highlightBuildings && highlightBuildings.length > 0) {
+          highlightedRef.current = highlightBuildingsOnMap(map, highlightBuildings, []);
+        }
       }
       onLoadRef.current?.(map);
     });
@@ -337,33 +351,35 @@ export function MapContainer({
     if (!mapRef.current || !mapReadyRef.current) return;
     const map = mapRef.current;
 
-    // Toggle 3D terrain + pitch
-    if (settings.show3dView) {
-      try {
-        if (!map.getSource('mapbox-dem')) {
-          map.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.terrain-dem', tileSize: 512, maxzoom: 14 });
-        }
-        (map as any).setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
-        if (map.getPitch() < 1) map.easeTo({ pitch: 45 });
-      } catch { /* */ }
-    } else {
-      try {
-        (map as any).setTerrain(null);
-        if (map.getPitch() > 1) map.easeTo({ pitch: 0 });
-      } catch { /* */ }
-    }
+    // Toggle 3D terrain + pitch when not in minimal mode
+    if (!minimal) {
+      if (settings.show3dView) {
+        try {
+          if (!map.getSource('mapbox-dem')) {
+            map.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.terrain-dem', tileSize: 512, maxzoom: 14 });
+          }
+          (map as any).setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+          if (map.getPitch() < 1) map.easeTo({ pitch: 45 });
+        } catch { /* */ }
+      } else {
+        try {
+          (map as any).setTerrain(null);
+          if (map.getPitch() > 1) map.easeTo({ pitch: 0 });
+        } catch { /* */ }
+      }
 
-    applyStandardConfig(map, {
-      show3dBuildings: settings.show3dBuildings,
-      show3dTrees: settings.show3dTrees,
-      show3dLandmarks: settings.show3dLandmarks,
-      showRoadLabels: settings.roadLabels,
-      showPointOfInterestLabels: settings.poiLabels,
-      showPlaceLabels: settings.placeLabels,
-      showTransitLabels: settings.transitLabels,
-      showPedestrianRoads: settings.pedestrianRoads,
-      lightPreset: settings.lightPreset,
-    });
+      applyStandardConfig(map, {
+        show3dBuildings: settings.show3dBuildings,
+        show3dTrees: settings.show3dTrees,
+        show3dLandmarks: settings.show3dLandmarks,
+        showRoadLabels: settings.roadLabels,
+        showPointOfInterestLabels: settings.poiLabels,
+        showPlaceLabels: settings.placeLabels,
+        showTransitLabels: settings.transitLabels,
+        showPedestrianRoads: settings.pedestrianRoads,
+        lightPreset: settings.lightPreset,
+      });
+    }
   }, [settings.show3dView, settings.show3dBuildings, settings.show3dTrees,
       settings.show3dLandmarks, settings.roadLabels, settings.poiLabels,
       settings.placeLabels, settings.transitLabels, settings.pedestrianRoads,
@@ -371,6 +387,7 @@ export function MapContainer({
 
   // Update building highlights when the prop changes
   useEffect(() => {
+    if (minimal) return;
     if (!mapRef.current || !mapReadyRef.current) return;
     const buildings = highlightBuildings ?? [];
     highlightedRef.current = highlightBuildingsOnMap(mapRef.current, buildings, highlightedRef.current);
@@ -389,6 +406,7 @@ export function MapContainer({
           state={settings}
           onChange={updateSettings}
           hasToken={!!MAPBOX_TOKEN}
+          minimal={minimal}
         />
         {children}
       </div>

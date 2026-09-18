@@ -12,6 +12,7 @@ export interface AddressSearchProps {
   iconColor?: string;
   country?: string;
   token?: string | null;
+  disabled?: boolean;
 }
 
 export function AddressSearch({
@@ -22,6 +23,7 @@ export function AddressSearch({
   iconColor = 'text-gray-400',
   country,
   token,
+  disabled = false,
 }: AddressSearchProps) {
   const [inputValue, setInputValue] = useState(value);
   const [predictions, setPredictions] = useState<GeocodingResult[]>([]);
@@ -31,6 +33,8 @@ export function AddressSearch({
   useEffect(() => { setInputValue(value); }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+
     const v = e.target.value;
     setInputValue(v);
 
@@ -38,9 +42,18 @@ export function AddressSearch({
 
     if (v.length > 2) {
       debounceRef.current = setTimeout(async () => {
-        const results = await searchAddress(v, country, token);
-        setPredictions(results);
-        setShowPredictions(results.length > 0);
+        try {
+          const resolvedToken = (typeof window !== 'undefined') ? (token ?? localStorage.getItem('accessToken')) : null;
+          console.debug('AddressSearch: querying geocoder', { query: v, country, tokenPresent: !!resolvedToken });
+          const results = await searchAddress(v, country, token);
+          console.debug('AddressSearch: geocoder results', { count: results?.length ?? 0, sample: results?.[0] ?? null });
+          setPredictions(results);
+          setShowPredictions(results.length > 0);
+        } catch (err) {
+          console.warn('AddressSearch: geocoding failed', err);
+          setPredictions([]);
+          setShowPredictions(false);
+        }
       }, 300);
     } else {
       setPredictions([]);
@@ -79,10 +92,11 @@ export function AddressSearch({
           value={inputValue}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          onFocus={() => inputValue.length > 2 && setShowPredictions(predictions.length > 0)}
-          className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          onFocus={() => !disabled && inputValue.length > 2 && setShowPredictions(predictions.length > 0)}
+          className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-60"
           placeholder={placeholder}
           required
+          disabled={disabled}
         />
         {showPredictions && predictions.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">

@@ -8,6 +8,12 @@ let refreshPromise: Promise<string | null> | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  try {
+    if (typeof window !== 'undefined') {
+      if (token) localStorage.setItem('accessToken', token);
+      else localStorage.removeItem('accessToken');
+    }
+  } catch {}
 }
 
 export function setRefreshToken(token: string | null) {
@@ -17,6 +23,12 @@ export function setRefreshToken(token: string | null) {
 export function clearTokens() {
   accessToken = null;
   refreshToken = null;
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
+  } catch {}
 }
 
 export function getAccessToken() {
