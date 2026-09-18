@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { WeightWatchService } from '../weight-watch/weight-watch.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ValhallaService } from '../maps/valhalla.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { TripFilterDto } from './dto/trip-filter.dto';
 import { AssignDriverDto } from './dto/assign-driver.dto';
@@ -15,6 +16,7 @@ export class TripsService {
     private auditService: AuditService,
     private weightWatchService: WeightWatchService,
     private notificationsService: NotificationsService,
+    private valhallaService: ValhallaService,
   ) {}
 
   async create(createTripDto: CreateTripDto, userId: string) {
@@ -70,12 +72,28 @@ export class TripsService {
     }
 
     // Create trip
+    // Compute ETA from order pickup/delivery if available
+    let etaDate: Date | undefined;
+    try {
+      const pickup = order.pickupLocation as any;
+      const delivery = order.deliveryLocation as any;
+      if (pickup && delivery && typeof pickup.lat === 'number' && typeof delivery.lat === 'number') {
+        const seconds = await this.valhallaService.getEta({ lat: pickup.lat, lng: pickup.lng }, { lat: delivery.lat, lng: delivery.lng });
+        if (seconds && typeof seconds === 'number') {
+          etaDate = new Date(Date.now() + seconds * 1000);
+        }
+      }
+    } catch (e) {
+      console.warn('[TripsService] Failed to compute ETA on create:', e);
+    }
+
     const trip = await this.prisma.trip.create({
       data: {
         orderId: createTripDto.orderId,
         driverId: createTripDto.driverId,
         vehicleId: createTripDto.vehicleId,
         status: TripStatus.ASSIGNED,
+        ...(etaDate ? { eta: etaDate } : {}),
       },
       include: {
         order: {
@@ -337,11 +355,27 @@ export class TripsService {
       throw new BadRequestException(`Cannot start trip in ${trip.status} status`);
     }
 
+    // Compute ETA based on pickup/delivery if available
+    let etaDate: Date | undefined;
+    try {
+      const pickup = trip.order?.pickupLocation as any;
+      const delivery = trip.order?.deliveryLocation as any;
+      if (pickup && delivery && typeof pickup.lat === 'number' && typeof delivery.lat === 'number') {
+        const seconds = await this.valhallaService.getEta({ lat: pickup.lat, lng: pickup.lng }, { lat: delivery.lat, lng: delivery.lng });
+        if (seconds && typeof seconds === 'number') {
+          etaDate = new Date(Date.now() + seconds * 1000);
+        }
+      }
+    } catch (e) {
+      console.warn('[TripsService] Failed to compute ETA:', e);
+    }
+
     const updatedTrip = await this.prisma.trip.update({
       where: { id },
       data: {
         status: TripStatus.IN_TRANSIT,
         startedAt: new Date(),
+        ...(etaDate ? { eta: etaDate } : {}),
       },
     });
 

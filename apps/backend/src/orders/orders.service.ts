@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { BillingService } from '../billing/billing.service';
+import { ValhallaService } from '../maps/valhalla.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderFilterDto } from './dto/order-filter.dto';
@@ -28,6 +29,7 @@ export class OrdersService {
     private auditService: AuditService,
     private notificationsService: NotificationsService,
     private billingService: BillingService,
+    private valhallaService: ValhallaService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string, userRole: UserRole) {
@@ -377,6 +379,21 @@ export class OrdersService {
 
       const resolvedVehicleId = vehicleId || driver.vehicleId || null;
 
+      // Compute ETA from pickup/delivery if available
+      let etaDate: Date | undefined;
+      try {
+        const pickup = order.pickupLocation as any;
+        const delivery = order.deliveryLocation as any;
+        if (pickup && delivery && typeof pickup.lat === 'number' && typeof delivery.lat === 'number') {
+          const seconds = await this.valhallaService.getEta({ lat: pickup.lat, lng: pickup.lng }, { lat: delivery.lat, lng: delivery.lng });
+          if (seconds && typeof seconds === 'number') {
+            etaDate = new Date(Date.now() + seconds * 1000);
+          }
+        }
+      } catch (e) {
+        console.warn('[OrdersService] Failed to compute ETA on assign:', e);
+      }
+
       // Create trip when assigning driver
       const trip = await this.prisma.trip.create({
         data: {
@@ -384,6 +401,7 @@ export class OrdersService {
           driverId: driver.id,
           vehicleId: resolvedVehicleId,
           status: 'ASSIGNED',
+          ...(etaDate ? { eta: etaDate } : {}),
         },
       });
       assignedTripId = trip.id;
@@ -463,12 +481,28 @@ export class OrdersService {
     let assignedTripId: string | undefined;
     const existingTrip = await this.prisma.trip.findFirst({ where: { orderId: id } });
     if (!existingTrip) {
+      // Compute ETA from pickup/delivery if available
+      let etaDate: Date | undefined;
+      try {
+        const pickup = order.pickupLocation as any;
+        const delivery = order.deliveryLocation as any;
+        if (pickup && delivery && typeof pickup.lat === 'number' && typeof delivery.lat === 'number') {
+          const seconds = await this.valhallaService.getEta({ lat: pickup.lat, lng: pickup.lng }, { lat: delivery.lat, lng: delivery.lng });
+          if (seconds && typeof seconds === 'number') {
+            etaDate = new Date(Date.now() + seconds * 1000);
+          }
+        }
+      } catch (e) {
+        console.warn('[OrdersService] Failed to compute ETA on assignDriver:', e);
+      }
+
       const trip = await this.prisma.trip.create({
         data: {
           orderId: id,
           driverId: driver.id,
           vehicleId: resolvedVehicleId,
           status: 'ASSIGNED',
+          ...(etaDate ? { eta: etaDate } : {}),
         },
       });
       assignedTripId = trip.id;

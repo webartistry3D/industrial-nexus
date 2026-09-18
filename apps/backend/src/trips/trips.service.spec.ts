@@ -5,11 +5,14 @@ import { AuditService } from '../audit/audit.service';
 import { WeightWatchService } from '../weight-watch/weight-watch.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { TripStatus, OrderStatus, DriverAvailability, DriverStatus, VehicleStatus } from '@prisma/client';
+import { ValhallaService } from '../maps/valhalla.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('TripsService', () => {
   let service: TripsService;
   let prisma: PrismaService;
   let weightWatchService: WeightWatchService;
+  let mockValhalla: any;
 
   const mockPrisma = {
     order: {
@@ -39,6 +42,13 @@ describe('TripsService', () => {
     log: jest.fn(),
   };
 
+  const mockNotificationsService = {
+    notifyTripAssigned: jest.fn(),
+    notifyTripStarted: jest.fn(),
+    notifyTripCompleted: jest.fn(),
+    notifyDriverAssigned: jest.fn(),
+  };
+
   const mockWeightWatchService = {
     validateTripWeight: jest.fn(),
     createWeightRecord: jest.fn(),
@@ -51,12 +61,16 @@ describe('TripsService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAuditService },
         { provide: WeightWatchService, useValue: mockWeightWatchService },
+        { provide: ValhallaService, useValue: { getEta: jest.fn() } },
+        { provide: NotificationsService, useValue: mockNotificationsService },
       ],
     }).compile();
 
     service = module.get<TripsService>(TripsService);
     prisma = module.get<PrismaService>(PrismaService);
     weightWatchService = module.get<WeightWatchService>(WeightWatchService);
+    // retrieve mock valhalla service
+    mockValhalla = module.get<ValhallaService>(ValhallaService);
 
     jest.clearAllMocks();
   });
@@ -103,11 +117,9 @@ describe('TripsService', () => {
 
       expect(result.driverId).toBe('driver-1');
       expect(result.vehicleId).toBe('vehicle-1');
-      expect(mockPrisma.driver.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: { availability: DriverAvailability.ON_TRIP },
-        }),
-      );
+      expect(mockPrisma.driver.update).toHaveBeenCalled();
+      const calledArg = mockPrisma.driver.update.mock.calls[0][0];
+      expect(calledArg.data.availability).toBe(DriverAvailability.ON_TRIP);
       expect(mockPrisma.driverAssignment.create).toHaveBeenCalled();
       expect(mockAuditService.log).toHaveBeenCalled();
     });
@@ -241,14 +253,28 @@ describe('TripsService', () => {
       const mockTrip = {
         id: 'trip-1',
         status: TripStatus.ASSIGNED,
+        order: {
+          id: 'order-1',
+          pickupLocation: { lat: 1, lng: 1 },
+          deliveryLocation: { lat: 2, lng: 2 },
+          clientId: 'client-1',
+          orderNumber: 'ORD-1',
+        },
+        driver: { user: { id: 'driver-user-1' } },
+        orderId: 'order-1',
       };
 
       mockPrisma.trip.findUnique.mockResolvedValue(mockTrip);
-      mockPrisma.trip.update.mockResolvedValue({ ...mockTrip, status: TripStatus.IN_TRANSIT });
+      // Mock valhalla to return 3600 seconds
+      mockValhalla.getEta.mockResolvedValue(3600);
+      // Expect prisma.update to return trip with eta
+      const returned = { ...mockTrip, status: TripStatus.IN_TRANSIT, eta: new Date(Date.now() + 3600 * 1000) };
+      mockPrisma.trip.update.mockResolvedValue(returned);
 
       const result = await service.startTrip('trip-1', 'driver-id');
 
       expect(result.status).toBe(TripStatus.IN_TRANSIT);
+      expect(result.eta).toBeDefined();
       expect(mockAuditService.log).toHaveBeenCalled();
     });
 

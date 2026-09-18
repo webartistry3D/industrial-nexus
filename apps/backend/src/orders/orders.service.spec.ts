@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { OrderStatus, UserRole, Priority, KittingStatus } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ValhallaService } from '../maps/valhalla.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -31,12 +33,20 @@ describe('OrdersService', () => {
     log: jest.fn(),
   };
 
+  const mockNotificationsService = {
+    notifyOrderCreated: jest.fn(),
+    notifyDriverAssigned: jest.fn(),
+    notifyOrderStatusChanged: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAuditService },
+        { provide: NotificationsService, useValue: mockNotificationsService },
+        { provide: ValhallaService, useValue: { getEta: jest.fn() } },
       ],
     }).compile();
 

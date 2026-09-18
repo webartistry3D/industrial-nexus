@@ -721,6 +721,7 @@ function TripsPageContent() {
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Weight</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">ETA</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Completed</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200/50 dark:divide-slate-700/50">
@@ -755,6 +756,11 @@ function TripsPageContent() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                           {trip.eta ? new Date(trip.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                          {trip.completedAt ? new Date(trip.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                         </p>
                       </td>
                     </tr>
@@ -801,6 +807,12 @@ function TripsPageContent() {
                       <span className="flex items-center gap-1 text-blue-600 font-mono">
                         <Clock className="w-3 h-3" />
                         ETA: {new Date(trip.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                    {trip.completedAt && (
+                      <span className="flex items-center gap-1 text-green-600 font-mono">
+                        <CheckCircle className="w-3 h-3" />
+                        {new Date(trip.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     )}
                   </div>
