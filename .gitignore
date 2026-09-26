@@ -54,3 +54,10 @@ industrial-nexus-gcs.json
 # Database backups
 *.sql
 backup_*.sql
+
+docs
+apps/admin-pwa
+apps/client-pwa
+apps/driver-pwa
+
+apps/backend/delete-order.sql
