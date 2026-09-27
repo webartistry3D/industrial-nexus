@@ -61,3 +61,5 @@ apps/client-pwa
 apps/driver-pwa
 
 apps/backend/delete-order.sql
+
+API-REFERENCE.md app-refactor.md backend-tsc.log backup.sql client-tsc.log driver-tsc.log maps.md R2-MIGRATION_not-needed-for-now.md test-websocket.js resize-icons.ps1 admin-tsc.log
